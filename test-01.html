@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sidekick Digital Planner v3.2</title>
+    <title>Sidekick Digital Planner v3.3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -11,24 +11,39 @@
         input:focus, textarea:focus { outline: none; background-color: rgba(243, 244, 246, 0.5); }
         .scroller::-webkit-scrollbar { width: 6px; }
         .scroller::-webkit-scrollbar-thumb { background-color: #d1d5db; border-radius: 4px; }
-        .dragging { opacity: 0.5; background-color: #e5e7eb; border: 2px dashed #9ca3af; }
-        .drag-handle { cursor: grab; }
-        .drag-handle:active { cursor: grabbing; }
+        
+        /* Mobile Modal Improvements */
+        #lightbox-modal {
+            -webkit-tap-highlight-color: transparent;
+        }
+        .modal-content {
+            max-height: 90vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4 sm:p-8">
+<body class="flex items-start lg:items-center justify-center min-h-screen p-2 sm:p-8">
 
-    <div id="lightbox-modal" class="fixed inset-0 bg-black/90 z-50 hidden flex-col items-center justify-center p-4">
-        <div class="relative max-w-4xl w-full flex flex-col items-center">
-            <button onclick="closeLightbox()" class="absolute -top-12 right-0 text-white text-sm font-bold tracking-widest uppercase hover:text-gray-400">Close [Esc]</button>
-            <img id="modal-img" src="" class="max-h-[80vh] w-auto border-4 border-white shadow-2xl rounded-sm">
-            <button onclick="deleteFromLightbox()" class="mt-8 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all uppercase tracking-tighter text-sm">
-                🗑️ Delete Photo
+    <div id="lightbox-modal" class="fixed inset-0 bg-black/95 z-50 hidden flex-col items-center justify-between p-4 pb-12">
+        <div class="w-full flex justify-end p-2">
+            <button onclick="closeLightbox()" class="text-white bg-gray-800 rounded-full w-12 h-12 flex items-center justify-center text-2xl font-bold shadow-lg">
+                ✕
             </button>
         </div>
+
+        <div class="modal-content">
+            <img id="modal-img" src="" class="max-h-[60vh] sm:max-h-[75vh] w-auto border-2 border-white/20 shadow-2xl rounded-lg">
+        </div>
+
+        <button onclick="deleteFromLightbox()" class="w-full max-w-xs bg-red-600 active:bg-red-700 text-white font-bold py-4 rounded-xl shadow-xl transition-all uppercase tracking-widest text-sm mb-4">
+            🗑️ Delete This Photo
+        </button>
     </div>
 
-    <div class="bg-white w-full max-w-[1400px] border-4 border-gray-900 rounded-lg shadow-2xl overflow-hidden flex flex-col">
+    <div class="bg-white w-full max-w-[1500px] border-4 border-gray-900 rounded-lg shadow-2xl overflow-hidden flex flex-col">
         
         <div class="bg-gray-800 border-b-4 border-gray-900 p-4 flex justify-between items-center">
             <div class="text-gray-500 font-bold tracking-[0.2em] text-xl">SIDEKICK</div>
@@ -37,62 +52,54 @@
             </button>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-0 divide-y-4 lg:divide-y-0 lg:divide-x-4 divide-gray-900 h-full">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-0 divide-y-4 lg:divide-y-0 lg:divide-x-4 divide-gray-900 h-full">
 
-            <div class="lg:col-span-3 flex flex-col p-4 h-full min-h-[600px]">
+            <div class="flex flex-col p-4 h-full min-h-[500px]">
                 <h2 class="font-bold text-xs uppercase tracking-wider mb-2 border-b-2 border-gray-900 pb-1">Schedule</h2>
                 <div class="flex-grow border-2 border-gray-900 rounded-sm p-2 relative">
                     <div id="schedule-container" class="flex flex-col gap-1 h-full overflow-y-auto scroller"></div>
                 </div>
             </div>
 
-            <div class="lg:col-span-5 flex flex-col">
+            <div class="flex flex-col">
                 <div class="p-4 flex-grow-0">
-                    <h2 class="font-bold text-xs uppercase tracking-wider mb-2 border-b-2 border-gray-900 pb-1">Daily Priorities</h2>
-                    <div class="flex flex-col gap-4 mt-2">
-                        <div class="flex items-center gap-3">
-                            <div class="flex-shrink-0 w-8 h-8 rounded-full border-2 border-gray-900 flex items-center justify-center font-bold text-sm">1</div>
-                            <input type="text" id="prio-1" class="w-full border-b-2 border-gray-200 focus:border-gray-900 p-2 font-medium h-10 text-lg text-gray-800 transition-colors" placeholder="Priority One...">
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div class="flex-shrink-0 w-8 h-8 rounded-full border-2 border-gray-900 flex items-center justify-center font-bold text-sm">2</div>
-                            <input type="text" id="prio-2" class="w-full border-b-2 border-gray-200 focus:border-gray-900 p-2 font-medium h-10 text-lg text-gray-800 transition-colors" placeholder="Priority Two...">
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div class="flex-shrink-0 w-8 h-8 rounded-full border-2 border-gray-900 flex items-center justify-center font-bold text-sm">3</div>
-                            <input type="text" id="prio-3" class="w-full border-b-2 border-gray-200 focus:border-gray-900 p-2 font-medium h-10 text-lg text-gray-800 transition-colors" placeholder="Priority Three...">
-                        </div>
+                    <h2 class="font-bold text-xs uppercase tracking-wider mb-2 border-b-2 border-gray-900 pb-1">Priorities</h2>
+                    <div class="flex flex-col gap-2 mt-2">
+                        <input type="text" id="prio-1" class="w-full border-b-2 border-gray-100 focus:border-gray-900 p-1 font-medium text-gray-800" placeholder="P1">
+                        <input type="text" id="prio-2" class="w-full border-b-2 border-gray-100 focus:border-gray-900 p-1 font-medium text-gray-800" placeholder="P2">
+                        <input type="text" id="prio-3" class="w-full border-b-2 border-gray-100 focus:border-gray-900 p-1 font-medium text-gray-800" placeholder="P3">
                     </div>
                 </div>
-
-                <div class="border-t-4 border-gray-900"></div>
-
-                <div class="p-4 flex-grow flex flex-col h-full min-h-[400px]">
-                    <div class="flex justify-between items-center mb-2 border-b-2 border-gray-900 pb-1">
-                        <h2 class="font-bold text-xs uppercase tracking-wider">Notes & Visuals</h2>
-                        <button onclick="toggleCamera()" id="cam-btn" class="text-[10px] font-bold bg-gray-900 text-white px-3 py-1 rounded hover:bg-gray-700 transition-colors">📸 OPEN CAMERA</button>
-                    </div>
-
-                    <div id="camera-container" class="hidden mb-4 border-2 border-gray-900 overflow-hidden rounded relative bg-black">
-                        <video id="video" autoplay playsinline class="w-full max-h-[300px] object-cover"></video>
-                        <div class="absolute bottom-2 left-0 right-0 flex justify-center gap-4 p-2">
-                            <button onclick="takePicture()" class="bg-white text-gray-900 font-bold px-4 py-2 rounded-full shadow-lg text-xs uppercase">Capture</button>
-                            <button onclick="stopCamera()" class="bg-red-500 text-white font-bold px-4 py-2 rounded-full shadow-lg text-xs uppercase">Cancel</button>
-                        </div>
-                    </div>
-
-                    <div id="image-gallery" class="flex flex-wrap gap-2 mb-4"></div>
-
-                    <textarea id="notes-area" class="w-full h-full p-4 border-none resize-none text-gray-800 leading-6 text-lg" placeholder="Brain dump here..."></textarea>
-                    <canvas id="canvas" class="hidden"></canvas>
+                <div class="border-t-4 border-gray-900 p-4 flex-grow flex flex-col min-h-[300px]">
+                    <h2 class="font-bold text-xs uppercase tracking-wider mb-2 border-b-2 border-gray-900 pb-1">Notes</h2>
+                    <textarea id="notes-area" class="w-full h-full p-2 border-none resize-none text-gray-800 leading-6 text-base" placeholder="Brain dump..."></textarea>
                 </div>
             </div>
 
-            <div class="lg:col-span-4 flex flex-col p-4 h-full min-h-[600px]">
-                <h2 class="font-bold text-xs uppercase tracking-wider mb-2 border-b-2 border-gray-900 pb-1">Tasks</h2>
+            <div class="flex flex-col p-4 h-full bg-gray-50 min-h-[500px]">
+                <div class="flex justify-between items-center mb-2 border-b-2 border-gray-900 pb-1">
+                    <h2 class="font-bold text-xs uppercase tracking-wider text-gray-900">Visual Sidekick</h2>
+                    <button onclick="toggleCamera()" id="cam-btn" class="text-[10px] font-bold bg-blue-600 text-white px-3 py-1 rounded shadow-md hover:bg-blue-700">📸 START CAM</button>
+                </div>
+
+                <div id="camera-container" class="hidden mb-4 border-2 border-gray-900 overflow-hidden rounded-lg relative bg-black shadow-inner">
+                    <video id="video" autoplay playsinline class="w-full aspect-video object-cover"></video>
+                    <div class="flex justify-around p-3 bg-gray-900/50">
+                        <button onclick="takePicture()" class="bg-white text-gray-900 font-bold px-6 py-2 rounded-full text-xs uppercase shadow-xl">Snap</button>
+                        <button onclick="stopCamera()" class="bg-gray-700 text-white px-6 py-2 rounded-full text-xs uppercase">Off</button>
+                    </div>
+                </div>
+
+                <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Captured Visuals</h3>
+                <div id="image-gallery" class="grid grid-cols-2 gap-2 overflow-y-auto max-h-[400px] p-1"></div>
+                <canvas id="canvas" class="hidden"></canvas>
+            </div>
+
+            <div class="flex flex-col p-4 h-full min-h-[500px]">
+                <h2 class="font-bold text-xs uppercase tracking-wider mb-2 border-b-2 border-gray-900 pb-1">Task List</h2>
                 <div id="tasks-container" class="flex flex-col gap-3 h-full overflow-y-auto scroller pb-2"></div>
                 <button onclick="addNewTask()" class="mt-4 text-xs font-bold text-gray-400 hover:text-gray-900 uppercase tracking-wide text-center w-full py-3 border-2 border-dashed border-gray-200 hover:border-gray-900 transition-colors">
-                    + Add Task Row
+                    + Add Task
                 </button>
             </div>
 
@@ -100,22 +107,14 @@
     </div>
 
     <script>
-        const DB_KEY = 'sidekickDataV3_Visual'; 
+        const DB_KEY = 'sidekickDataV3_Visual_v3';
         const storedData = JSON.parse(localStorage.getItem(DB_KEY)) || {};
         let stream = null;
-        let activePhotoWrapper = null; // Track which wrapper is in the lightbox
+        let activePhotoWrapper = null;
 
         document.addEventListener('DOMContentLoaded', () => {
-            renderSchedule();
-            renderPriorities();
-            renderNotes();
-            renderTasks();
-            renderImages();
-
-            // Keyboard listener for Lightbox
-            window.addEventListener('keydown', (e) => {
-                if (e.key === "Escape") closeLightbox();
-            });
+            renderSchedule(); renderPriorities(); renderNotes(); renderTasks(); renderImages();
+            window.addEventListener('keydown', (e) => { if (e.key === "Escape") closeLightbox(); });
         });
 
         function saveData() {
@@ -129,54 +128,44 @@
             localStorage.setItem(DB_KEY, JSON.stringify(data));
         }
 
-        function resetDay() {
-            if (confirm("Are you sure you want to clear the entire planner?")) {
-                localStorage.removeItem(DB_KEY);
-                location.reload();
-            }
-        }
+        function resetDay() { if (confirm("Wipe everything?")) { localStorage.removeItem(DB_KEY); location.reload(); } }
 
-        // --- CAMERA & LIGHTBOX LOGIC ---
+        // --- CAMERA & GALLERY LOGIC ---
         async function toggleCamera() {
             const container = document.getElementById('camera-container');
-            const btn = document.getElementById('cam-btn');
             if (container.classList.contains('hidden')) {
                 try {
                     stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
                     document.getElementById('video').srcObject = stream;
                     container.classList.remove('hidden');
-                    btn.innerText = "❌ CLOSE CAMERA";
-                } catch (err) { alert("Camera error."); }
+                    document.getElementById('cam-btn').innerText = "❌ CLOSE";
+                } catch (err) { alert("Camera access required."); }
             } else { stopCamera(); }
         }
 
         function stopCamera() {
             if (stream) stream.getTracks().forEach(t => t.stop());
             document.getElementById('camera-container').classList.add('hidden');
-            document.getElementById('cam-btn').innerText = "📸 OPEN CAMERA";
+            document.getElementById('cam-btn').innerText = "📸 START CAM";
         }
 
         function takePicture() {
             const video = document.getElementById('video');
             const canvas = document.getElementById('canvas');
-            if (document.querySelectorAll('#image-gallery img').length >= 5) {
-                alert("Limit: 5 photos."); return;
-            }
+            if (document.querySelectorAll('#image-gallery img').length >= 8) { alert("Limit: 8 photos."); return; }
             canvas.width = video.videoWidth; canvas.height = video.videoHeight;
             canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
             addImageToGallery(canvas.toDataURL('image/jpeg', 0.5));
-            saveData(); stopCamera();
+            saveData();
         }
 
         function addImageToGallery(src) {
             const gallery = document.getElementById('image-gallery');
             const wrapper = document.createElement('div');
-            wrapper.className = 'relative w-20 h-20 border-2 border-gray-900 rounded overflow-hidden bg-gray-100 cursor-pointer hover:opacity-80 transition-opacity';
+            wrapper.className = 'relative aspect-square border-2 border-gray-900 rounded-md overflow-hidden bg-gray-200 cursor-pointer shadow-sm active:scale-95 transition-transform';
             wrapper.innerHTML = `<img src="${src}" class="w-full h-full object-cover">`;
-            
-            // Clicking thumbnail opens lightbox
             wrapper.onclick = () => openLightbox(src, wrapper);
-            gallery.appendChild(wrapper);
+            gallery.prepend(wrapper); // Newest photos first
         }
 
         function openLightbox(src, wrapper) {
@@ -184,74 +173,38 @@
             document.getElementById('modal-img').src = src;
             document.getElementById('lightbox-modal').classList.remove('hidden');
             document.getElementById('lightbox-modal').classList.add('flex');
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
         }
 
         function closeLightbox() {
             document.getElementById('lightbox-modal').classList.add('hidden');
             document.getElementById('lightbox-modal').classList.remove('flex');
+            document.body.style.overflow = 'auto';
             activePhotoWrapper = null;
         }
 
         function deleteFromLightbox() {
-            if (activePhotoWrapper && confirm("Delete this photo?")) {
+            if (activePhotoWrapper && confirm("Delete permanently?")) {
                 activePhotoWrapper.remove();
                 saveData();
                 closeLightbox();
             }
         }
 
-        function renderImages() { if (storedData.images) storedData.images.forEach(src => addImageToGallery(src)); }
         function getImagesData() { return Array.from(document.querySelectorAll('#image-gallery img')).map(img => img.src); }
+        function renderImages() { if (storedData.images) storedData.images.forEach(src => addImageToGallery(src)); }
 
-        // --- PREVIOUS COMPONENTS (Schedule, Priorities, Tasks) ---
+        // --- COMPONENTS ---
         function renderSchedule() {
             const container = document.getElementById('schedule-container');
-            const savedSchedule = storedData.schedule || Array(18).fill({ time: '', text: '' });
+            const saved = storedData.schedule || Array(18).fill({ time: '', text: '' });
             container.innerHTML = '';
-            savedSchedule.forEach((item) => createScheduleRow(container, item.time, item.text));
-        }
-
-        function createScheduleRow(container, timeVal, textVal) {
-            const row = document.createElement('div');
-            row.className = 'flex items-center gap-2 text-sm p-1 hover:bg-gray-50 transition-colors draggable-item';
-            row.setAttribute('draggable', 'true');
-            row.innerHTML = `
-                <div class="drag-handle text-gray-300 hover:text-gray-600 p-1">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                        <circle cx="8" cy="4" r="2" /><circle cx="8" cy="12" r="2" /><circle cx="8" cy="20" r="2" />
-                        <circle cx="16" cy="4" r="2" /><circle cx="16" cy="12" r="2" /><circle cx="16" cy="20" r="2" />
-                    </svg>
-                </div>
-                <input type="text" class="w-12 text-right bg-transparent text-gray-500 font-mono" placeholder="00:00" value="${timeVal}" oninput="saveData()">
-                <span class="text-gray-300">|</span>
-                <input type="text" class="flex-grow bg-transparent border-b border-gray-100 focus:border-gray-900 transition-colors" value="${textVal}" oninput="saveData()">
-            `;
-            row.addEventListener('dragstart', handleDragStart);
-            row.addEventListener('dragover', handleDragOver);
-            row.addEventListener('drop', handleDrop);
-            row.addEventListener('dragend', handleDragEnd);
-            container.appendChild(row);
-        }
-
-        let dragSrcEl = null;
-        function handleDragStart(e) { dragSrcEl = this; e.dataTransfer.effectAllowed = 'move'; this.classList.add('dragging'); }
-        function handleDragOver(e) { if (e.preventDefault) e.preventDefault(); return false; }
-        function handleDrop(e) {
-            if (dragSrcEl !== this) {
-                const container = document.getElementById('schedule-container');
-                const items = [...container.children];
-                const srcIndex = items.indexOf(dragSrcEl);
-                const targetIndex = items.indexOf(this);
-                srcIndex < targetIndex ? this.after(dragSrcEl) : this.before(dragSrcEl);
-                saveData();
-            } return false;
-        }
-        function handleDragEnd() { this.classList.remove('dragging'); saveData(); }
-
-        function getScheduleData() {
-            return Array.from(document.getElementById('schedule-container').children).map(row => {
-                const inputs = row.querySelectorAll('input');
-                return { time: inputs[0].value, text: inputs[1].value };
+            saved.forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'flex items-center gap-1 text-xs py-1 border-b border-gray-50';
+                row.innerHTML = `<input type="text" class="w-10 text-gray-400 font-mono text-[10px]" placeholder="00:00" value="${item.time}" oninput="saveData()">
+                                <input type="text" class="flex-grow bg-transparent border-b border-transparent focus:border-gray-900" value="${item.text}" oninput="saveData()">`;
+                container.appendChild(row);
             });
         }
 
@@ -262,41 +215,43 @@
                 el.addEventListener('input', saveData);
             });
         }
-        function getPrioritiesData() { return [document.getElementById('prio-1').value, document.getElementById('prio-2').value, document.getElementById('prio-3').value]; }
+
         function renderNotes() { const n = document.getElementById('notes-area'); n.value = storedData.notes || ''; n.addEventListener('input', saveData); }
 
         function renderTasks() {
             const container = document.getElementById('tasks-container');
-            const savedTasks = storedData.tasks || Array(12).fill({ state: 0, text: '' });
+            const saved = storedData.tasks || Array(10).fill({ state: 0, text: '' });
             container.innerHTML = '';
-            savedTasks.forEach(task => createTaskRow(container, task.text, task.state));
+            saved.forEach(task => createTaskRow(container, task.text, task.state));
         }
 
         function createTaskRow(container, text = '', state = 0) {
             const row = document.createElement('div');
-            row.className = 'flex items-center gap-3 group';
+            row.className = 'flex items-center gap-2';
             row.innerHTML = getTaskHTML(state, text);
             container.appendChild(row);
         }
 
         function getTaskHTML(state, text) {
-            let iconSvg = ''; let textClass = 'text-gray-800';
-            if (state === 0) iconSvg = `<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" class="fill-none"/>`;
-            else if (state === 1) iconSvg = `<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" class="fill-none"/><path d="M12 2 A10 10 0 0 1 12 22 Z" fill="currentColor"/>`;
-            else { iconSvg = `<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" class="fill-gray-900"/><path d="M7 12L10 15L17 8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`; textClass = 'line-through text-gray-400 bg-gray-50'; }
-            return `<button onclick="cycleTaskState(this)" data-state="${state}" class="flex-shrink-0 focus:outline-none transition-transform hover:scale-110 text-gray-900 w-6 h-6"><svg width="24" height="24" viewBox="0 0 24 24" fill="none">${iconSvg}</svg></button>
-                    <input type="text" class="w-full border-b border-gray-200 focus:border-gray-900 p-1 px-2 text-sm transition-all ${textClass}" value="${text}" oninput="saveData()">`;
+            let iconSvg = (state === 0) ? `<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" class="fill-none"/>` : 
+                          (state === 1) ? `<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" class="fill-none"/><path d="M12 2 A10 10 0 0 1 12 22 Z" fill="currentColor"/>` :
+                          `<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" class="fill-gray-900"/><path d="M7 12L10 15L17 8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+            let textClass = (state === 2) ? 'line-through text-gray-400' : 'text-gray-800';
+            return `<button onclick="cycleTaskState(this)" data-state="${state}" class="w-5 h-5 flex-shrink-0 text-gray-900"><svg viewBox="0 0 24 24" fill="none">${iconSvg}</svg></button>
+                    <input type="text" class="w-full border-b border-gray-100 text-sm p-1 ${textClass}" value="${text}" oninput="saveData()">`;
         }
 
         function cycleTaskState(btn) {
             const newState = (parseInt(btn.getAttribute('data-state')) + 1) % 3;
-            const input = btn.parentElement.querySelector('input');
-            btn.parentElement.innerHTML = getTaskHTML(newState, input.value);
+            const val = btn.parentElement.querySelector('input').value;
+            btn.parentElement.innerHTML = getTaskHTML(newState, val);
             saveData();
         }
 
         function addNewTask() { createTaskRow(document.getElementById('tasks-container')); saveData(); }
         function getTasksData() { return Array.from(document.getElementById('tasks-container').children).map(row => ({ text: row.querySelector('input').value, state: parseInt(row.querySelector('button').getAttribute('data-state')) })); }
+        function getPrioritiesData() { return [document.getElementById('prio-1').value, document.getElementById('prio-2').value, document.getElementById('prio-3').value]; }
+        function getScheduleData() { return Array.from(document.getElementById('schedule-container').children).map(r => ({ time: r.querySelectorAll('input')[0].value, text: r.querySelectorAll('input')[1].value })); }
     </script>
 </body>
 </html>
