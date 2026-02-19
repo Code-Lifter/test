@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sidekick Digital Planner v3.1</title>
+    <title>Sidekick Digital Planner v3.2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -17,6 +17,16 @@
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4 sm:p-8">
+
+    <div id="lightbox-modal" class="fixed inset-0 bg-black/90 z-50 hidden flex-col items-center justify-center p-4">
+        <div class="relative max-w-4xl w-full flex flex-col items-center">
+            <button onclick="closeLightbox()" class="absolute -top-12 right-0 text-white text-sm font-bold tracking-widest uppercase hover:text-gray-400">Close [Esc]</button>
+            <img id="modal-img" src="" class="max-h-[80vh] w-auto border-4 border-white shadow-2xl rounded-sm">
+            <button onclick="deleteFromLightbox()" class="mt-8 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all uppercase tracking-tighter text-sm">
+                🗑️ Delete Photo
+            </button>
+        </div>
+    </div>
 
     <div class="bg-white w-full max-w-[1400px] border-4 border-gray-900 rounded-lg shadow-2xl overflow-hidden flex flex-col">
         
@@ -93,6 +103,7 @@
         const DB_KEY = 'sidekickDataV3_Visual'; 
         const storedData = JSON.parse(localStorage.getItem(DB_KEY)) || {};
         let stream = null;
+        let activePhotoWrapper = null; // Track which wrapper is in the lightbox
 
         document.addEventListener('DOMContentLoaded', () => {
             renderSchedule();
@@ -100,6 +111,11 @@
             renderNotes();
             renderTasks();
             renderImages();
+
+            // Keyboard listener for Lightbox
+            window.addEventListener('keydown', (e) => {
+                if (e.key === "Escape") closeLightbox();
+            });
         });
 
         function saveData() {
@@ -120,29 +136,22 @@
             }
         }
 
-        // --- CAMERA LOGIC ---
+        // --- CAMERA & LIGHTBOX LOGIC ---
         async function toggleCamera() {
             const container = document.getElementById('camera-container');
             const btn = document.getElementById('cam-btn');
-            
             if (container.classList.contains('hidden')) {
                 try {
                     stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
                     document.getElementById('video').srcObject = stream;
                     container.classList.remove('hidden');
                     btn.innerText = "❌ CLOSE CAMERA";
-                } catch (err) {
-                    alert("Camera access denied. Ensure you are on HTTPS or localhost.");
-                }
-            } else {
-                stopCamera();
-            }
+                } catch (err) { alert("Camera error."); }
+            } else { stopCamera(); }
         }
 
         function stopCamera() {
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-            }
+            if (stream) stream.getTracks().forEach(t => t.stop());
             document.getElementById('camera-container').classList.add('hidden');
             document.getElementById('cam-btn').innerText = "📸 OPEN CAMERA";
         }
@@ -150,49 +159,51 @@
         function takePicture() {
             const video = document.getElementById('video');
             const canvas = document.getElementById('canvas');
-            const context = canvas.getContext('2d');
-            
-            // Check limit
             if (document.querySelectorAll('#image-gallery img').length >= 5) {
-                alert("Limit reached: 5 photos per day to save memory.");
-                return;
+                alert("Limit: 5 photos."); return;
             }
-
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            // Compress to JPEG 0.5 to stay under LocalStorage 5MB limit
-            const imageData = canvas.toDataURL('image/jpeg', 0.5); 
-            
-            addImageToGallery(imageData);
-            saveData();
-            stopCamera();
+            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            addImageToGallery(canvas.toDataURL('image/jpeg', 0.5));
+            saveData(); stopCamera();
         }
 
         function addImageToGallery(src) {
             const gallery = document.getElementById('image-gallery');
             const wrapper = document.createElement('div');
-            wrapper.className = 'relative w-20 h-20 border-2 border-gray-900 rounded overflow-hidden group bg-gray-100';
-            wrapper.innerHTML = `
-                <img src="${src}" class="w-full h-full object-cover">
-                <button onclick="this.parentElement.remove(); saveData();" class="absolute top-0 right-0 bg-red-600 text-white text-[8px] p-1 opacity-0 group-hover:opacity-100 transition-opacity font-bold">DEL</button>
-            `;
+            wrapper.className = 'relative w-20 h-20 border-2 border-gray-900 rounded overflow-hidden bg-gray-100 cursor-pointer hover:opacity-80 transition-opacity';
+            wrapper.innerHTML = `<img src="${src}" class="w-full h-full object-cover">`;
+            
+            // Clicking thumbnail opens lightbox
+            wrapper.onclick = () => openLightbox(src, wrapper);
             gallery.appendChild(wrapper);
         }
 
-        function renderImages() {
-            if (storedData.images) {
-                storedData.images.forEach(src => addImageToGallery(src));
+        function openLightbox(src, wrapper) {
+            activePhotoWrapper = wrapper;
+            document.getElementById('modal-img').src = src;
+            document.getElementById('lightbox-modal').classList.remove('hidden');
+            document.getElementById('lightbox-modal').classList.add('flex');
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox-modal').classList.add('hidden');
+            document.getElementById('lightbox-modal').classList.remove('flex');
+            activePhotoWrapper = null;
+        }
+
+        function deleteFromLightbox() {
+            if (activePhotoWrapper && confirm("Delete this photo?")) {
+                activePhotoWrapper.remove();
+                saveData();
+                closeLightbox();
             }
         }
 
-        function getImagesData() {
-            const images = document.querySelectorAll('#image-gallery img');
-            return Array.from(images).map(img => img.src);
-        }
+        function renderImages() { if (storedData.images) storedData.images.forEach(src => addImageToGallery(src)); }
+        function getImagesData() { return Array.from(document.querySelectorAll('#image-gallery img')).map(img => img.src); }
 
-        // --- SCHEDULE ---
+        // --- PREVIOUS COMPONENTS (Schedule, Priorities, Tasks) ---
         function renderSchedule() {
             const container = document.getElementById('schedule-container');
             const savedSchedule = storedData.schedule || Array(18).fill({ time: '', text: '' });
@@ -211,7 +222,7 @@
                         <circle cx="16" cy="4" r="2" /><circle cx="16" cy="12" r="2" /><circle cx="16" cy="20" r="2" />
                     </svg>
                 </div>
-                <input type="text" class="w-12 text-right bg-transparent text-gray-500 font-mono placeholder-gray-300 focus:text-black border-b border-transparent" placeholder="00:00" value="${timeVal}" oninput="saveData()">
+                <input type="text" class="w-12 text-right bg-transparent text-gray-500 font-mono" placeholder="00:00" value="${timeVal}" oninput="saveData()">
                 <span class="text-gray-300">|</span>
                 <input type="text" class="flex-grow bg-transparent border-b border-gray-100 focus:border-gray-900 transition-colors" value="${textVal}" oninput="saveData()">
             `;
@@ -233,8 +244,7 @@
                 const targetIndex = items.indexOf(this);
                 srcIndex < targetIndex ? this.after(dragSrcEl) : this.before(dragSrcEl);
                 saveData();
-            }
-            return false;
+            } return false;
         }
         function handleDragEnd() { this.classList.remove('dragging'); saveData(); }
 
@@ -245,28 +255,16 @@
             });
         }
 
-        // --- PRIORITIES ---
         function renderPriorities() {
-            const ids = ['prio-1', 'prio-2', 'prio-3'];
-            ids.forEach((id, i) => {
+            ['prio-1', 'prio-2', 'prio-3'].forEach((id, i) => {
                 const el = document.getElementById(id);
                 el.value = (storedData.priorities && storedData.priorities[i]) ? storedData.priorities[i] : '';
                 el.addEventListener('input', saveData);
             });
         }
+        function getPrioritiesData() { return [document.getElementById('prio-1').value, document.getElementById('prio-2').value, document.getElementById('prio-3').value]; }
+        function renderNotes() { const n = document.getElementById('notes-area'); n.value = storedData.notes || ''; n.addEventListener('input', saveData); }
 
-        function getPrioritiesData() {
-            return [document.getElementById('prio-1').value, document.getElementById('prio-2').value, document.getElementById('prio-3').value];
-        }
-
-        // --- NOTES ---
-        function renderNotes() {
-            const notes = document.getElementById('notes-area');
-            notes.value = storedData.notes || '';
-            notes.addEventListener('input', saveData);
-        }
-
-        // --- TASKS ---
         function renderTasks() {
             const container = document.getElementById('tasks-container');
             const savedTasks = storedData.tasks || Array(12).fill({ state: 0, text: '' });
@@ -282,39 +280,23 @@
         }
 
         function getTaskHTML(state, text) {
-            let iconSvg = '';
-            let textClass = 'text-gray-800';
+            let iconSvg = ''; let textClass = 'text-gray-800';
             if (state === 0) iconSvg = `<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" class="fill-none"/>`;
             else if (state === 1) iconSvg = `<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" class="fill-none"/><path d="M12 2 A10 10 0 0 1 12 22 Z" fill="currentColor"/>`;
-            else { 
-                iconSvg = `<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" class="fill-gray-900"/><path d="M7 12L10 15L17 8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
-                textClass = 'line-through text-gray-400 bg-gray-50';
-            }
-            return `
-                <button onclick="cycleTaskState(this)" data-state="${state}" class="flex-shrink-0 focus:outline-none transition-transform hover:scale-110 text-gray-900 w-6 h-6">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">${iconSvg}</svg>
-                </button>
-                <input type="text" class="w-full border-b border-gray-200 focus:border-gray-900 p-1 px-2 text-sm transition-all ${textClass}" value="${text}" oninput="saveData()">
-            `;
+            else { iconSvg = `<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" class="fill-gray-900"/><path d="M7 12L10 15L17 8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`; textClass = 'line-through text-gray-400 bg-gray-50'; }
+            return `<button onclick="cycleTaskState(this)" data-state="${state}" class="flex-shrink-0 focus:outline-none transition-transform hover:scale-110 text-gray-900 w-6 h-6"><svg width="24" height="24" viewBox="0 0 24 24" fill="none">${iconSvg}</svg></button>
+                    <input type="text" class="w-full border-b border-gray-200 focus:border-gray-900 p-1 px-2 text-sm transition-all ${textClass}" value="${text}" oninput="saveData()">`;
         }
 
         function cycleTaskState(btn) {
-            const currentState = parseInt(btn.getAttribute('data-state'));
-            const newState = (currentState + 1) % 3;
+            const newState = (parseInt(btn.getAttribute('data-state')) + 1) % 3;
             const input = btn.parentElement.querySelector('input');
             btn.parentElement.innerHTML = getTaskHTML(newState, input.value);
             saveData();
         }
 
         function addNewTask() { createTaskRow(document.getElementById('tasks-container')); saveData(); }
-
-        function getTasksData() {
-            return Array.from(document.getElementById('tasks-container').children).map(row => {
-                const btn = row.querySelector('button');
-                const input = row.querySelector('input');
-                return { text: input.value, state: parseInt(btn.getAttribute('data-state')) };
-            });
-        }
+        function getTasksData() { return Array.from(document.getElementById('tasks-container').children).map(row => ({ text: row.querySelector('input').value, state: parseInt(row.querySelector('button').getAttribute('data-state')) })); }
     </script>
 </body>
 </html>
