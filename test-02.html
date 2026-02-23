@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Performance Audit</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-neutral-900 text-neutral-100 min-h-screen flex items-center justify-center p-6">
+
+  <div class="w-full max-w-2xl bg-neutral-800 rounded-2xl shadow-xl p-8">
+
+    <h1 class="text-2xl font-bold mb-6 text-center">Daily Performance Audit</h1>
+
+    <div id="questionContainer">
+      <h2 id="questionTitle" class="text-lg font-semibold mb-4"></h2>
+      <textarea id="answerInput"
+        class="w-full h-40 p-4 rounded-xl bg-neutral-900 border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+        placeholder="Type your answer..."></textarea>
+    </div>
+
+    <div class="flex justify-between mt-6">
+      <button id="prevBtn"
+        class="px-4 py-2 rounded-xl bg-neutral-700 hover:bg-neutral-600 transition">
+        Previous
+      </button>
+
+      <button id="nextBtn"
+        class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 transition">
+        Next
+      </button>
+    </div>
+
+    <div id="finishSection" class="hidden mt-8">
+      <button id="copyBtn"
+        class="w-full py-3 rounded-xl bg-green-600 hover:bg-green-500 transition font-semibold">
+        Copy to Obsidian
+      </button>
+    </div>
+
+  </div>
+
+<script>
+const questions = [
+  "1. What actually happened today? (Events & memories)",
+  "2. What did I produce today? (Concrete outputs only)",
+  "3. If today repeated for 365 days, where would I end up?",
+  "4. What stressed or irritated me?",
+  "5. Was it within my control?",
+  "6. When was my energy highest?",
+  "7. What triggered energy drops?",
+  "8. What 20% created 80% of results?",
+  "9. What was disguised busywork?",
+  "10. Where did I hesitate or avoid?",
+  "11. Did I seek approval or pursue competence?",
+  "12. Training / movement quality?",
+  "13. Nutrition aligned?",
+  "14. Where did I act below my standard?",
+  "15. One decisive action for tomorrow?"
+];
+
+let currentIndex = 0;
+let answers = new Array(questions.length).fill("");
+
+const questionTitle = document.getElementById("questionTitle");
+const answerInput = document.getElementById("answerInput");
+const prevBtn = document.getElementById("prevBtn");
+const nextBtn = document.getElementById("nextBtn");
+const finishSection = document.getElementById("finishSection");
+const copyBtn = document.getElementById("copyBtn");
+
+function renderQuestion() {
+  questionTitle.textContent = questions[currentIndex];
+  answerInput.value = answers[currentIndex];
+
+  prevBtn.disabled = currentIndex === 0;
+  prevBtn.classList.toggle("opacity-40", currentIndex === 0);
+
+  if (currentIndex === questions.length - 1) {
+    nextBtn.textContent = "Finish";
+  } else {
+    nextBtn.textContent = "Next";
+  }
+}
+
+nextBtn.addEventListener("click", () => {
+  answers[currentIndex] = answerInput.value;
+
+  if (currentIndex < questions.length - 1) {
+    currentIndex++;
+    renderQuestion();
+  } else {
+    finishSection.classList.remove("hidden");
+    nextBtn.disabled = true;
+  }
+});
+
+prevBtn.addEventListener("click", () => {
+  answers[currentIndex] = answerInput.value;
+  currentIndex--;
+  renderQuestion();
+});
+
+copyBtn.addEventListener("click", () => {
+  const today = new Date().toISOString().split("T")[0];
+
+  let output = `# Daily Audit – ${today}\n\n`;
+
+  questions.forEach((q, i) => {
+    output += `## ${q}\n${answers[i] || ""}\n\n`;
+  });
+
+  navigator.clipboard.writeText(output).then(() => {
+    copyBtn.textContent = "Copied ✓";
+    setTimeout(() => {
+      copyBtn.textContent = "Copy to Obsidian";
+    }, 2000);
+  });
+});
+
+renderQuestion();
+</script>
+
+</body>
+</html>
