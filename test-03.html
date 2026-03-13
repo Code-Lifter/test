@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Score Tracker</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 600px; margin: 2rem auto; padding: 0 1rem; background: #f4f4f9; color: #333; }
+        h1, h2 { text-align: center; }
+        .card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 1.5rem; }
+        .flex-row { display: flex; gap: 10px; margin-bottom: 1rem; }
+        input[type="text"], input[type="number"] { flex: 1; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 0.5rem 1rem; border: none; border-radius: 4px; background: #007bff; color: white; cursor: pointer; font-weight: bold; }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #c82333; }
+        .player-row { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid #eee; }
+        .player-row:last-child { border-bottom: none; }
+        .player-name { font-size: 1.2rem; font-weight: bold; flex: 1; }
+        .score-controls { display: flex; align-items: center; gap: 15px; }
+        .score-display { font-size: 1.5rem; font-weight: bold; min-width: 40px; text-align: center; }
+        .score-btn { width: 40px; height: 40px; font-size: 1.2rem; border-radius: 50%; }
+        .history-list { list-style-type: none; padding: 0; }
+        .history-list li { background: #e9ecef; margin-bottom: 0.5rem; padding: 0.5rem; border-radius: 4px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <h1>Score Tracker</h1>
+
+    <div class="card" id="setup-section">
+        <div class="flex-row">
+            <input type="number" id="max-points" placeholder="Set Max Points to Win" min="1">
+        </div>
+        <div class="flex-row">
+            <input type="text" id="player-name" placeholder="Enter player name">
+            <button onclick="addPlayer()">Add Player</button>
+        </div>
+        <small id="player-count">Players: 0/10</small>
+    </div>
+
+    <div class="card" id="game-section">
+        <h2>Round <span id="round-display">1</span></h2>
+        <div id="player-list"></div>
+        <div class="flex-row" style="margin-top: 1.5rem;">
+            <button onclick="endRound()" style="flex: 1;">Save Round</button>
+            <button onclick="resetGame()" class="btn-danger" style="flex: 1;">Reset Game</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>History (Leaders)</h2>
+        <ul class="history-list" id="history-log">
+            <li>No history yet.</li>
+        </ul>
+    </div>
+
+    <script>
+        let players = [];
+        let currentRound = 1;
+        let gameActive = true;
+
+        function addPlayer() {
+            const nameInput = document.getElementById('player-name');
+            const name = nameInput.value.trim();
+            
+            if (!name) return alert("Please enter a name.");
+            if (players.length >= 10) return alert("Maximum of 10 players allowed.");
+            if (players.some(p => p.name.toLowerCase() === name.toLowerCase())) return alert("Player already exists.");
+
+            players.push({ name: name, score: 0 });
+            nameInput.value = '';
+            updateUI();
+        }
+
+        function changeScore(index, delta) {
+            if (!gameActive) return;
+            
+            players[index].score += delta;
+            updateUI();
+            checkWinCondition();
+        }
+
+        function checkWinCondition() {
+            const maxPointsInput = document.getElementById('max-points').value;
+            if (!maxPointsInput) return; // No max points set
+            
+            const maxPoints = parseInt(maxPointsInput);
+            const winner = players.find(p => p.score >= maxPoints);
+
+            if (winner) {
+                alert(`🏆 ${winner.name} has reached ${maxPoints} points and wins the game!`);
+                gameActive = false;
+                updateUI();
+            }
+        }
+
+        function endRound() {
+            if (players.length === 0) return alert("Add players first.");
+            
+            // Find the current leader(s)
+            let maxScore = Math.max(...players.map(p => p.score));
+            let leaders = players.filter(p => p.score === maxScore).map(p => p.name);
+            
+            const historyLog = document.getElementById('history-log');
+            if (currentRound === 1 && historyLog.innerHTML.includes("No history yet")) {
+                historyLog.innerHTML = '';
+            }
+
+            const entry = document.createElement('li');
+            entry.innerHTML = `<strong>Round ${currentRound}:</strong> Leader is ${leaders.join(', ')} with ${maxScore} pts.`;
+            historyLog.prepend(entry); // Add to top of list
+
+            currentRound++;
+            document.getElementById('round-display').innerText = currentRound;
+        }
+
+        function resetGame() {
+            if (!confirm("Are you sure you want to completely reset the game?")) return;
+            players = [];
+            currentRound = 1;
+            gameActive = true;
+            document.getElementById('history-log').innerHTML = '<li>No history yet.</li>';
+            document.getElementById('round-display').innerText = currentRound;
+            document.getElementById('max-points').value = '';
+            updateUI();
+        }
+
+        function updateUI() {
+            const list = document.getElementById('player-list');
+            list.innerHTML = '';
+
+            players.forEach((player, index) => {
+                const row = document.createElement('div');
+                row.className = 'player-row';
+                row.innerHTML = `
+                    <div class="player-name">${player.name}</div>
+                    <div class="score-controls">
+                        <button class="score-btn btn-danger" onclick="changeScore(${index}, -1)" ${!gameActive ? 'disabled' : ''}>-1</button>
+                        <div class="score-display">${player.score}</div>
+                        <button class="score-btn" onclick="changeScore(${index}, 1)" ${!gameActive ? 'disabled' : ''}>+1</button>
+                    </div>
+                `;
+                list.appendChild(row);
+            });
+
+            document.getElementById('player-count').innerText = `Players: ${players.length}/10`;
+            document.getElementById('player-name').disabled = players.length >= 10;
+        }
+    </script>
+</body>
+</html>
