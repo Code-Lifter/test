@@ -14,12 +14,19 @@
 
   <div class="flex-1 flex flex-col items-center justify-center p-4 w-full">
     
-    <div class="bg-slate-800 p-4 rounded-xl shadow-lg w-full max-w-md mb-4 border border-slate-700 flex justify-between items-center">
+    <div class="bg-slate-800 p-4 rounded-xl shadow-lg w-full max-w-md mb-4 border border-slate-700 flex flex-col gap-3">
       <div class="flex justify-between items-center w-full">
         <span class="text-sm font-semibold text-slate-300">Club Rules: No-Ad Scoring</span>
         <label class="relative inline-flex items-center cursor-pointer">
           <input type="checkbox" id="noAdToggle" class="sr-only peer" onchange="toggleSettings()">
           <div class="w-11 h-6 bg-slate-600 rounded-full peer peer-checked:bg-lime-500 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+        </label>
+      </div>
+      <div class="flex justify-between items-center w-full border-t border-slate-700 pt-3">
+        <span class="text-sm font-bold text-yellow-400">👑 King of the Court (3-Player)</span>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" id="kingToggle" class="sr-only peer" onchange="toggleSettings()">
+          <div class="w-11 h-6 bg-slate-600 rounded-full peer peer-checked:bg-yellow-500 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
         </label>
       </div>
     </div>
@@ -30,7 +37,7 @@
         Best of 3 Sets
       </div>
 
-      <div class="flex justify-center gap-2 mb-6 w-full">
+      <div id="macroBoard" class="flex justify-center gap-2 mb-6 w-full">
         <div class="flex-1 bg-slate-900 rounded-lg border border-slate-700 p-2 flex justify-between items-center">
            <span class="text-slate-400 font-bold text-sm">P1</span>
            <div class="flex gap-3 text-lg font-black tabular-nums">
@@ -49,21 +56,26 @@
         </div>
       </div>
 
+      <div id="streakBoard" class="hidden mb-6 w-full bg-slate-900 rounded-lg border border-yellow-500/30 p-3 shadow-inner">
+        <span class="text-slate-400 text-sm font-bold uppercase tracking-widest block mb-1">Current Reigning King</span>
+        <span id="kingStreak" class="text-2xl font-black text-yellow-400">0 Win Streak</span>
+      </div>
+
       <div class="flex justify-between items-stretch mb-6 gap-4 sm:gap-6">
         <div id="p1Card" class="flex-1 bg-slate-700/50 p-4 rounded-xl border border-slate-600 flex flex-col transition-all duration-300 relative overflow-hidden">
-          <h2 class="text-base sm:text-lg font-semibold mb-2 text-slate-300">Player 1</h2>
+          <h2 id="p1Label" class="text-base sm:text-lg font-semibold mb-2 text-slate-300">Player 1</h2>
           <div id="score1" class="text-5xl sm:text-6xl font-black mb-4 tabular-nums text-white">0</div>
           
           <div id="logistics1" class="bg-slate-900/80 border border-slate-600 rounded-lg p-2 mb-4 h-14 flex flex-col justify-center transition-all">
             <span class="text-lime-400 text-xs font-bold uppercase tracking-wider block">Serving</span>
-            <span id="side1" class="text-white text-xs sm:text-sm font-semibold truncate">Deuce Court</span>
+            <span id="side1" class="text-white text-xs sm:text-sm font-semibold truncate">Right Court</span>
           </div>
 
           <button onclick="addPoint(1)" class="w-full bg-blue-500 hover:bg-blue-400 text-white py-3 rounded-lg font-bold text-lg mt-auto transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100" id="btn1">+ Point</button>
         </div>
 
         <div id="p2Card" class="flex-1 bg-slate-700/50 p-4 rounded-xl border border-slate-600 flex flex-col transition-all duration-300 relative overflow-hidden">
-          <h2 class="text-base sm:text-lg font-semibold mb-2 text-slate-300">Player 2</h2>
+          <h2 id="p2Label" class="text-base sm:text-lg font-semibold mb-2 text-slate-300">Player 2</h2>
           <div id="score2" class="text-5xl sm:text-6xl font-black mb-4 tabular-nums text-white">0</div>
           
           <div id="logistics2" class="bg-slate-900/80 border border-slate-600 rounded-lg p-2 mb-4 h-14 flex flex-col justify-center opacity-50 grayscale transition-all">
@@ -75,6 +87,10 @@
         </div>
       </div>
 
+      <button onclick="rotateChallenger()" id="rotateBtn" class="w-full bg-yellow-500 hover:bg-yellow-400 text-slate-900 py-4 rounded-lg font-black text-lg transition-all mb-4 hidden animate-pulse shadow-[0_0_15px_rgba(234,179,8,0.4)]">
+        Winner Stays! Rotate Challenger
+      </button>
+
       <div class="grid grid-cols-2 gap-4 mb-4" id="timeMachine">
         <button onclick="undo()" id="undoBtn" class="bg-slate-700 hover:bg-slate-600 text-slate-300 py-2 rounded-lg font-semibold transition-colors disabled:opacity-30 flex justify-center items-center gap-2">
           &#8617; Undo
@@ -84,43 +100,58 @@
         </button>
       </div>
 
-      <button onclick="resetMatch()" class="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/50 py-3 rounded-lg font-bold transition-colors">Reset Match</button>
+      <button onclick="resetMatch()" class="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/50 py-3 rounded-lg font-bold transition-colors">Reset Match / Streak</button>
     </div>
   </div>
 
   <script>
     const pointMap = [0, 15, 30, 40, 'AD'];
     
-    // Core State 
     let history = [{ 
       p1Points: 0, p2Points: 0, 
       p1Games: 0, p2Games: 0, 
       p1Sets: 0, p2Sets: 0, 
       server: 1, 
-      isTiebreak: false 
+      isTiebreak: false,
+      kingStreak: 0,
+      currentKingId: null 
     }];
     let currentStep = 0;
     let isNoAd = false;
+    let isKingMode = false;
     let isMatchOver = false;
 
     window.onload = () => {
-      const saved = localStorage.getItem('tennisTrackerPro');
+      const saved = localStorage.getItem('tennisTrackerProV4');
       if (saved) {
         const parsed = JSON.parse(saved);
         history = parsed.history || history;
         currentStep = parsed.step || 0;
         isNoAd = parsed.isNoAd || false;
+        isKingMode = parsed.isKingMode || false;
         document.getElementById('noAdToggle').checked = isNoAd;
+        document.getElementById('kingToggle').checked = isKingMode;
       }
       updateUI();
     };
 
     const saveData = () => {
-      localStorage.setItem('tennisTrackerPro', JSON.stringify({ history, step: currentStep, isNoAd }));
+      localStorage.setItem('tennisTrackerProV4', JSON.stringify({ history, step: currentStep, isNoAd, isKingMode }));
     };
 
     const toggleSettings = () => {
       isNoAd = document.getElementById('noAdToggle').checked;
+      const newKingMode = document.getElementById('kingToggle').checked;
+      
+      if (isKingMode !== newKingMode) {
+        if(confirm('Changing game modes will reset the current score. Proceed?')) {
+            isKingMode = newKingMode;
+            history = [{ p1Points: 0, p2Points: 0, p1Games: 0, p2Games: 0, p1Sets: 0, p2Sets: 0, server: 1, isTiebreak: isKingMode, kingStreak: 0, currentKingId: null }];
+            currentStep = 0;
+        } else {
+            document.getElementById('kingToggle').checked = isKingMode;
+        }
+      }
       updateUI();
     };
 
@@ -129,27 +160,29 @@
       history = history.slice(0, currentStep + 1);
       let s = { ...history[currentStep] };
 
-      if (s.isTiebreak) {
+      if (s.isTiebreak || isKingMode) {
         player === 1 ? s.p1Points++ : s.p2Points++;
         
-        // Tiebreak Win Logic (First to 7, win by 2)
         if ((s.p1Points >= 7 || s.p2Points >= 7) && Math.abs(s.p1Points - s.p2Points) >= 2) {
-          player === 1 ? s.p1Games++ : s.p2Games++;
-          s.p1Points = 0; s.p2Points = 0;
-          s.isTiebreak = false;
-          resolveSet(s, player);
+          if (isKingMode) {
+             s.currentKingId = player;
+             s.kingStreak++;
+          } else {
+             player === 1 ? s.p1Games++ : s.p2Games++;
+             s.isTiebreak = false;
+             resolveSet(s, player);
+          }
         } else {
-          // Serve swaps after point 1, 3, 5, 7, etc.
           const totalPts = s.p1Points + s.p2Points;
           if (totalPts % 2 !== 0) s.server = s.server === 1 ? 2 : 1;
         }
       } else {
-        // Standard Scoring Logic
+        // Standard Tennis
         if (player === 1) {
           if (s.p1Points === 3 && s.p2Points < 3) winGame(s, 1);
-          else if (s.p1Points === 3 && s.p2Points === 3) isNoAd ? winGame(s, 1) : s.p1Points++; // 40-40 -> AD or Win
-          else if (s.p1Points === 3 && s.p2Points === 4) s.p2Points--; // P2 had AD, back to Deuce
-          else if (s.p1Points === 4) winGame(s, 1); // Had AD, wins game
+          else if (s.p1Points === 3 && s.p2Points === 3) isNoAd ? winGame(s, 1) : s.p1Points++; 
+          else if (s.p1Points === 3 && s.p2Points === 4) s.p2Points--; 
+          else if (s.p1Points === 4) winGame(s, 1); 
           else s.p1Points++;
         } else {
           if (s.p2Points === 3 && s.p1Points < 3) winGame(s, 2);
@@ -168,7 +201,7 @@
     const winGame = (s, player) => {
       player === 1 ? s.p1Games++ : s.p2Games++;
       s.p1Points = 0; s.p2Points = 0;
-      s.server = s.server === 1 ? 2 : 1; // Swap server every game
+      s.server = s.server === 1 ? 2 : 1; 
       resolveSet(s, player);
     };
 
@@ -179,18 +212,31 @@
       } else if (s.p1Games === 6 && s.p2Games === 6) {
         s.isTiebreak = true;
       } else if (s.p1Games === 7 || s.p2Games === 7) {
-        // Won 7-5
         player === 1 ? s.p1Sets++ : s.p2Sets++;
         s.p1Games = 0; s.p2Games = 0;
       }
+    };
+
+    const rotateChallenger = () => {
+      history = history.slice(0, currentStep + 1);
+      let s = { ...history[currentStep] };
+      
+      // Keep streak, reset points. The King serves first.
+      s.p1Points = 0;
+      s.p2Points = 0;
+      s.server = s.currentKingId || 1; 
+      
+      history.push(s);
+      currentStep++;
+      updateUI();
     };
 
     const undo = () => { if (currentStep > 0) { currentStep--; updateUI(); } };
     const redo = () => { if (currentStep < history.length - 1) { currentStep++; updateUI(); } };
 
     const resetMatch = () => {
-      if(confirm('Wipe the entire match and start fresh?')) {
-        history = [{ p1Points: 0, p2Points: 0, p1Games: 0, p2Games: 0, p1Sets: 0, p2Sets: 0, server: 1, isTiebreak: false }];
+      if(confirm('Wipe the board entirely?')) {
+        history = [{ p1Points: 0, p2Points: 0, p1Games: 0, p2Games: 0, p1Sets: 0, p2Sets: 0, server: 1, isTiebreak: isKingMode, kingStreak: 0, currentKingId: null }];
         currentStep = 0;
         updateUI();
       }
@@ -198,75 +244,108 @@
 
     const updateUI = () => {
       const s = history[currentStep];
-      
-      // Update Macros
-      document.getElementById('p1Sets').textContent = s.p1Sets;
-      document.getElementById('p2Sets').textContent = s.p2Sets;
-      document.getElementById('p1Games').textContent = s.p1Games;
-      document.getElementById('p2Games').textContent = s.p2Games;
-
-      // Update Micros
-      const p1ScoreEl = document.getElementById('score1');
-      const p2ScoreEl = document.getElementById('score2');
-      
-      if (s.isTiebreak) {
-        p1ScoreEl.textContent = s.p1Points;
-        p2ScoreEl.textContent = s.p2Points;
-        p1ScoreEl.className = 'text-5xl sm:text-6xl font-black mb-4 tabular-nums text-rose-400';
-        p2ScoreEl.className = 'text-5xl sm:text-6xl font-black mb-4 tabular-nums text-rose-400';
-      } else {
-        p1ScoreEl.textContent = pointMap[s.p1Points];
-        p2ScoreEl.textContent = pointMap[s.p2Points];
-        p1ScoreEl.className = 'text-5xl sm:text-6xl font-black mb-4 tabular-nums text-white';
-        p2ScoreEl.className = 'text-5xl sm:text-6xl font-black mb-4 tabular-nums text-white';
-      }
-
-      isMatchOver = s.p1Sets === 2 || s.p2Sets === 2;
-      
       const statusEl = document.getElementById('status');
       const log1 = document.getElementById('logistics1');
       const log2 = document.getElementById('logistics2');
       const btn1 = document.getElementById('btn1');
       const btn2 = document.getElementById('btn2');
+      const rotateBtn = document.getElementById('rotateBtn');
+      const timeMachine = document.getElementById('timeMachine');
+      const p1ScoreEl = document.getElementById('score1');
+      const p2ScoreEl = document.getElementById('score2');
+
+      // Mode Toggling UI Elements
+      if (isKingMode) {
+        document.getElementById('noAdToggle').disabled = true;
+        document.getElementById('macroBoard').classList.add('hidden');
+        document.getElementById('streakBoard').classList.remove('hidden');
+        document.getElementById('kingStreak').textContent = `${s.kingStreak} Match Win Streak`;
+        
+        document.getElementById('p1Label').innerHTML = s.currentKingId === 1 ? '👑 Player 1' : 'Player 1';
+        document.getElementById('p2Label').innerHTML = s.currentKingId === 2 ? '👑 Player 2' : 'Player 2';
+        
+        isMatchOver = (s.p1Points >= 7 || s.p2Points >= 7) && Math.abs(s.p1Points - s.p2Points) >= 2;
+        
+        p1ScoreEl.textContent = s.p1Points;
+        p2ScoreEl.textContent = s.p2Points;
+        p1ScoreEl.className = 'text-5xl sm:text-6xl font-black mb-4 tabular-nums text-yellow-400';
+        p2ScoreEl.className = 'text-5xl sm:text-6xl font-black mb-4 tabular-nums text-yellow-400';
+      } else {
+        document.getElementById('noAdToggle').disabled = false;
+        document.getElementById('macroBoard').classList.remove('hidden');
+        document.getElementById('streakBoard').classList.add('hidden');
+        document.getElementById('p1Label').textContent = 'Player 1';
+        document.getElementById('p2Label').textContent = 'Player 2';
+        
+        document.getElementById('p1Sets').textContent = s.p1Sets;
+        document.getElementById('p2Sets').textContent = s.p2Sets;
+        document.getElementById('p1Games').textContent = s.p1Games;
+        document.getElementById('p2Games').textContent = s.p2Games;
+        
+        isMatchOver = s.p1Sets === 2 || s.p2Sets === 2;
+
+        if (s.isTiebreak) {
+            p1ScoreEl.textContent = s.p1Points;
+            p2ScoreEl.textContent = s.p2Points;
+            p1ScoreEl.className = 'text-5xl sm:text-6xl font-black mb-4 tabular-nums text-rose-400';
+            p2ScoreEl.className = 'text-5xl sm:text-6xl font-black mb-4 tabular-nums text-rose-400';
+        } else {
+            p1ScoreEl.textContent = pointMap[s.p1Points];
+            p2ScoreEl.textContent = pointMap[s.p2Points];
+            p1ScoreEl.className = 'text-5xl sm:text-6xl font-black mb-4 tabular-nums text-white';
+            p2ScoreEl.className = 'text-5xl sm:text-6xl font-black mb-4 tabular-nums text-white';
+        }
+      }
 
       if (isMatchOver) {
-        const winner = s.p1Sets === 2 ? 'Player 1' : 'Player 2';
-        statusEl.textContent = `🏆 ${winner} WINS THE MATCH 🏆`;
-        statusEl.className = 'text-base font-black text-lime-400 mb-6 h-10 flex items-center justify-center bg-lime-900/30 rounded-lg border border-lime-500/50';
+        if (isKingMode) {
+            const winner = s.currentKingId === 1 ? 'Player 1' : 'Player 2';
+            statusEl.textContent = `👑 ${winner} Defends the Court!`;
+            statusEl.className = 'text-base font-black text-yellow-400 mb-6 h-10 flex items-center justify-center bg-yellow-900/30 rounded-lg border border-yellow-500/50';
+            rotateBtn.classList.remove('hidden');
+            timeMachine.classList.add('hidden');
+        } else {
+            const winner = s.p1Sets === 2 ? 'Player 1' : 'Player 2';
+            statusEl.textContent = `🏆 ${winner} WINS THE MATCH 🏆`;
+            statusEl.className = 'text-base font-black text-lime-400 mb-6 h-10 flex items-center justify-center bg-lime-900/30 rounded-lg border border-lime-500/50';
+            rotateBtn.classList.add('hidden');
+        }
         btn1.disabled = true; btn2.disabled = true;
         log1.classList.add('invisible'); log2.classList.add('invisible');
       } else {
         btn1.disabled = false; btn2.disabled = false;
+        rotateBtn.classList.add('hidden');
+        timeMachine.classList.remove('hidden');
         
-        // Calculate Court Positioning (Deuce vs Ad)
         let totalPts = s.p1Points + s.p2Points;
-        let side = totalPts % 2 === 0 ? 'Deuce Court (Right)' : 'Ad Court (Left)';
+        let side = totalPts % 2 === 0 ? 'Right Court' : 'Left Court';
         
-        // Calculate Changeovers (Odd games total)
-        let totalGames = s.p1Games + s.p2Games;
         let changeover = false;
-        if (s.isTiebreak) {
+        if (s.isTiebreak || isKingMode) {
             changeover = totalPts > 0 && totalPts % 6 === 0;
         } else {
+            let totalGames = s.p1Games + s.p2Games;
             changeover = s.p1Points === 0 && s.p2Points === 0 && totalGames % 2 !== 0;
         }
 
         if (changeover) {
             statusEl.innerHTML = '<span class="animate-pulse text-rose-400">🔄 CHANGE ENDS 🔄</span>';
-            statusEl.className = 'text-base font-bold mb-6 h-10 flex items-center justify-center bg-rose-900/20 rounded-lg border border-rose-500/30';
+            statusEl.className = 'text-base font-bold mb-6 h-10 flex items-center justify-center bg-rose-900/20 rounded-lg border border-rose-500/30 shadow-inner';
+        } else if (isKingMode) {
+            statusEl.textContent = 'First to 7 (Win by 2)';
+            statusEl.className = 'text-sm sm:text-base font-bold text-yellow-500 mb-6 h-10 flex items-center justify-center bg-yellow-900/10 rounded-lg border border-yellow-500/30';
         } else if (s.isTiebreak) {
             statusEl.innerHTML = '<span class="animate-pulse text-rose-400">🔥 7-POINT TIEBREAK 🔥</span>';
             statusEl.className = 'text-base font-bold mb-6 h-10 flex items-center justify-center bg-rose-900/20 rounded-lg border border-rose-500/30';
         } else if (s.p1Points === 3 && s.p2Points === 3) {
             let msg = isNoAd ? 'SUDDEN DEATH DEUCE' : 'DEUCE';
             statusEl.innerHTML = `<span class="animate-pulse text-yellow-400">${msg}</span>`;
-            statusEl.className = 'text-base font-bold mb-6 h-10 flex items-center justify-center bg-yellow-900/20 rounded-lg border border-yellow-500/30';
+            statusEl.className = 'text-base font-bold mb-6 h-10 flex items-center justify-center bg-yellow-900/20 rounded-lg border border-yellow-500/30 shadow-inner';
         } else {
             statusEl.textContent = 'Best of 3 Sets';
             statusEl.className = 'text-sm sm:text-base font-bold text-slate-400 mb-6 h-10 flex items-center justify-center bg-slate-900 rounded-lg border border-transparent';
         }
 
-        // Apply Server UI
         if (s.server === 1) {
             log1.className = 'bg-slate-900 border border-lime-500/50 rounded-lg p-2 mb-4 h-14 flex flex-col justify-center shadow-[0_0_10px_rgba(132,204,22,0.1)]';
             log1.innerHTML = `<span class="text-lime-400 text-xs font-bold uppercase tracking-wider block">Serving</span><span class="text-white text-xs sm:text-sm font-semibold truncate">${side}</span>`;
