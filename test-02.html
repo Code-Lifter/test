@@ -3,107 +3,195 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pro Ping Pong Tracker</title>
+  <title>Pro Badminton Tracker</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-900 text-white min-h-screen flex items-center justify-center font-sans">
-  
-  <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl max-w-md w-full text-center border border-slate-700">
-    <h1 class="text-3xl font-extrabold mb-8 text-emerald-400 tracking-tight">Match Tracker</h1>
+<body class="bg-slate-900 text-white min-h-screen flex flex-col font-sans selection:bg-teal-500/30 transition-colors duration-500" id="appBody">
 
-    <div class="flex justify-between items-center mb-8 gap-6">
+  <a href="#" class="block w-full text-center py-4 text-slate-400 hover:text-teal-400 font-semibold transition-colors border-b border-slate-800">
+    &larr; Back to Court Select
+  </a>
+
+  <div class="flex-1 flex items-center justify-center p-4">
+    <div class="bg-slate-800 p-6 sm:p-8 rounded-2xl shadow-2xl max-w-md w-full text-center border border-slate-700 transition-all duration-500" id="mainCard">
       
-      <div class="flex-1 bg-slate-700/50 p-4 rounded-xl border border-slate-600">
-        <h2 class="text-lg font-semibold mb-2 text-slate-300">Player 1 
-          <div id="serve1" class="text-yellow-400 text-xs font-bold uppercase mt-1 tracking-wider">🏓 Serving</div>
-        </h2>
-        <div id="score1" class="text-7xl font-black mb-6 tabular-nums">0</div>
-        <button onclick="addPoint(1)" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 py-3 rounded-lg font-bold transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100" id="btn1">+1 Point</button>
+      <div id="status" class="text-lg sm:text-xl font-bold text-slate-400 mb-8 h-10 flex items-center justify-center bg-slate-900 rounded-lg border border-transparent transition-all duration-300">
+        First to 21 (Win by 2)
       </div>
 
-      <div class="text-3xl font-black text-slate-600 pb-12">VS</div>
+      <div class="flex justify-between items-center mb-8 gap-4 sm:gap-6">
+        <div id="p1Card" class="flex-1 bg-slate-700/50 p-4 rounded-xl border border-slate-600 transition-all duration-300">
+          <h2 class="text-base sm:text-lg font-semibold mb-2 text-slate-300">Player 1 
+            <div id="serve1" class="text-yellow-400 text-xs font-bold uppercase mt-1 tracking-wider h-4 transition-opacity">🏸 Serve (Right)</div>
+          </h2>
+          <div id="score1" class="text-6xl sm:text-7xl font-black mb-4 tabular-nums">0</div>
+          <button onclick="addPoint(1)" class="w-full bg-teal-500 hover:bg-teal-400 text-slate-900 py-3 sm:py-4 rounded-lg font-bold text-lg transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100" id="btn1">+1</button>
+        </div>
 
-      <div class="flex-1 bg-slate-700/50 p-4 rounded-xl border border-slate-600">
-        <h2 class="text-lg font-semibold mb-2 text-slate-300">Player 2 
-          <div id="serve2" class="text-yellow-400 text-xs font-bold uppercase mt-1 tracking-wider invisible">🏓 Serving</div>
-        </h2>
-        <div id="score2" class="text-7xl font-black mb-6 tabular-nums">0</div>
-        <button onclick="addPoint(2)" class="w-full bg-blue-500 hover:bg-blue-400 text-slate-900 py-3 rounded-lg font-bold transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100" id="btn2">+1 Point</button>
+        <div id="vsText" class="text-2xl sm:text-3xl font-black text-slate-600 pb-12 transition-colors duration-300">VS</div>
+
+        <div id="p2Card" class="flex-1 bg-slate-700/50 p-4 rounded-xl border border-slate-600 transition-all duration-300">
+          <h2 class="text-base sm:text-lg font-semibold mb-2 text-slate-300">Player 2 
+            <div id="serve2" class="text-yellow-400 text-xs font-bold uppercase mt-1 tracking-wider invisible h-4 transition-opacity">🏸 Serve (Right)</div>
+          </h2>
+          <div id="score2" class="text-6xl sm:text-7xl font-black mb-4 tabular-nums">0</div>
+          <button onclick="addPoint(2)" class="w-full bg-violet-500 hover:bg-violet-400 text-slate-900 py-3 sm:py-4 rounded-lg font-bold text-lg transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100" id="btn2">+1</button>
+        </div>
       </div>
+
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <button onclick="undo()" id="undoBtn" class="bg-slate-700 hover:bg-slate-600 text-slate-300 py-2 rounded-lg font-semibold transition-colors disabled:opacity-30 disabled:hover:bg-slate-700 flex justify-center items-center gap-2">
+          &#8617; Undo
+        </button>
+        <button onclick="redo()" id="redoBtn" class="bg-slate-700 hover:bg-slate-600 text-slate-300 py-2 rounded-lg font-semibold transition-colors disabled:opacity-30 disabled:hover:bg-slate-700 flex justify-center items-center gap-2">
+          Redo &#8618;
+        </button>
+      </div>
+
+      <button onclick="resetGame()" class="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/50 py-3 rounded-lg font-bold transition-colors mt-2">Reset Match</button>
     </div>
-
-    <div id="status" class="text-xl font-bold text-slate-400 mb-8 h-8 flex items-center justify-center bg-slate-900 rounded-lg">First to 11 (Win by 2)</div>
-
-    <button onclick="resetGame()" class="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/50 py-3 rounded-lg font-bold transition-colors">Reset Match</button>
   </div>
 
   <script>
-    let p1Score = 0;
-    let p2Score = 0;
+    // State now includes "server" to track who won the last rally
+    let matchHistory = [{ p1: 0, p2: 0, server: 1 }];
+    let currentStep = 0;
     let isGameOver = false;
-    const WINNING_SCORE = 11;
 
-    const updateUI = () => {
-      document.getElementById('score1').textContent = p1Score;
-      document.getElementById('score2').textContent = p2Score;
+    const STORAGE_KEY = 'badmintonTrackerStatePro';
 
-      // The real logic: Serve tracking
-      const totalPoints = p1Score + p2Score;
-      let p1Serves = true;
-
-      if (p1Score >= 10 && p2Score >= 10) {
-        // Deuce rule: Serve alternates every single point
-        p1Serves = (totalPoints % 2 === 0);
-        if (!isGameOver) document.getElementById('status').textContent = 'Deuce! Alternate serves.';
-      } else {
-        // Standard rule: Serve alternates every 2 points
-        p1Serves = Math.floor(totalPoints / 2) % 2 === 0;
+    window.onload = () => {
+      const savedData = localStorage.getItem(STORAGE_KEY);
+      if (savedData) {
+        const parsed = JSON.parse(savedData);
+        matchHistory = parsed.history || [{ p1: 0, p2: 0, server: 1 }];
+        currentStep = parsed.step || 0;
       }
+      updateUI();
+    };
 
-      if (!isGameOver) {
-        document.getElementById('serve1').classList.toggle('invisible', !p1Serves);
-        document.getElementById('serve2').classList.toggle('invisible', p1Serves);
-      } else {
-        document.getElementById('serve1').classList.add('invisible');
-        document.getElementById('serve2').classList.add('invisible');
-      }
+    const saveData = () => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        history: matchHistory,
+        step: currentStep
+      }));
     };
 
     const addPoint = (player) => {
       if (isGameOver) return;
-      player === 1 ? p1Score++ : p2Score++;
-      checkWin();
+      
+      matchHistory = matchHistory.slice(0, currentStep + 1);
+      const currentState = matchHistory[currentStep];
+      
+      // In rally scoring, whoever scores the point gets the serve
+      const newState = { 
+        p1: currentState.p1 + (player === 1 ? 1 : 0), 
+        p2: currentState.p2 + (player === 2 ? 1 : 0),
+        server: player
+      };
+      
+      matchHistory.push(newState);
+      currentStep++;
       updateUI();
     };
 
-    const checkWin = () => {
-      // The win condition: Reached 11 AND leading by at least 2
-      if ((p1Score >= WINNING_SCORE || p2Score >= WINNING_SCORE) && Math.abs(p1Score - p2Score) >= 2) {
-        isGameOver = true;
-        const winner = p1Score > p2Score ? 'Player 1' : 'Player 2';
-        
-        const statusEl = document.getElementById('status');
-        statusEl.textContent = `🏆 ${winner} Takes the Match!`;
-        statusEl.classList.replace('text-slate-400', 'text-yellow-400');
-        
-        document.getElementById('btn1').disabled = true;
-        document.getElementById('btn2').disabled = true;
+    const undo = () => {
+      if (currentStep > 0) {
+        currentStep--;
+        updateUI();
+      }
+    };
+
+    const redo = () => {
+      if (currentStep < matchHistory.length - 1) {
+        currentStep++;
+        updateUI();
       }
     };
 
     const resetGame = () => {
-      p1Score = 0;
-      p2Score = 0;
-      isGameOver = false;
-      
+      if(confirm('Wipe the board and start fresh?')) {
+        matchHistory = [{ p1: 0, p2: 0, server: 1 }];
+        currentStep = 0;
+        updateUI();
+      }
+    };
+
+    const getServeSide = (score) => {
+      return score % 2 === 0 ? '(Right)' : '(Left)';
+    };
+
+    const updateUI = () => {
+      const state = matchHistory[currentStep];
+      const p1ScoreEl = document.getElementById('score1');
+      const p2ScoreEl = document.getElementById('score2');
       const statusEl = document.getElementById('status');
-      statusEl.textContent = 'First to 11 (Win by 2)';
-      statusEl.classList.replace('text-yellow-400', 'text-slate-400');
       
-      document.getElementById('btn1').disabled = false;
-      document.getElementById('btn2').disabled = false;
+      p1ScoreEl.textContent = state.p1;
+      p2ScoreEl.textContent = state.p2;
+
+      const isDeuce = state.p1 >= 20 && state.p2 >= 20;
+      const isCapped = state.p1 === 29 && state.p2 === 29;
       
-      updateUI();
+      // Win Logic: Win by 2 starting at 21, hard cap win at 30
+      isGameOver = ((state.p1 >= 21 || state.p2 >= 21) && Math.abs(state.p1 - state.p2) >= 2) || state.p1 === 30 || state.p2 === 30;
+
+      const p1Card = document.getElementById('p1Card');
+      const p2Card = document.getElementById('p2Card');
+      const vsText = document.getElementById('vsText');
+      const serve1El = document.getElementById('serve1');
+      const serve2El = document.getElementById('serve2');
+
+      // Reset base styles
+      p1Card.className = 'flex-1 bg-slate-700/50 p-4 rounded-xl border transition-all duration-300 ' + (isDeuce && !isGameOver ? 'border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.15)]' : 'border-slate-600');
+      p2Card.className = 'flex-1 bg-slate-700/50 p-4 rounded-xl border transition-all duration-300 ' + (isDeuce && !isGameOver ? 'border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.15)]' : 'border-slate-600');
+      vsText.className = 'text-2xl sm:text-3xl font-black pb-12 transition-colors duration-300 ' + (isDeuce && !isGameOver ? 'text-yellow-500/80' : 'text-slate-600');
+
+      if (isCapped && !isGameOver) {
+         statusEl.innerHTML = '<span class="animate-pulse text-red-400">🚨 SUDDEN DEATH - FIRST TO 30 WINS 🚨</span>';
+         statusEl.className = 'text-sm sm:text-base font-bold mb-8 h-10 flex items-center justify-center bg-red-900/20 rounded-lg border border-red-500/30 transition-all duration-300 shadow-inner px-2';
+      } else if (isDeuce && !isGameOver) {
+        statusEl.innerHTML = '<span class="animate-pulse text-yellow-400">🔥 HIGH STAKES DUEL (Win by 2) 🔥</span>';
+        statusEl.className = 'text-sm sm:text-lg font-bold mb-8 h-10 flex items-center justify-center bg-yellow-900/20 rounded-lg border border-yellow-500/30 transition-all duration-300 shadow-inner';
+      } else if (!isGameOver) {
+        statusEl.textContent = 'First to 21 (Win by 2)';
+        statusEl.className = 'text-lg sm:text-xl font-bold text-slate-400 mb-8 h-10 flex items-center justify-center bg-slate-900 rounded-lg border border-transparent transition-all duration-300';
+      }
+
+      if (isGameOver) {
+        const winner = state.p1 > state.p2 ? 'Player 1' : 'Player 2';
+        statusEl.textContent = `🏆 ${winner} Takes the Game!`;
+        statusEl.className = 'text-lg sm:text-xl font-bold text-yellow-400 mb-8 h-10 flex items-center justify-center bg-slate-900 rounded-lg border border-transparent';
+        
+        serve1El.classList.add('invisible');
+        serve2El.classList.add('invisible');
+        document.getElementById('btn1').disabled = true;
+        document.getElementById('btn2').disabled = true;
+        
+        // Highlight winner
+        if(state.p1 > state.p2) {
+            p1Card.classList.replace('border-slate-600', 'border-teal-500');
+            p1Card.classList.replace('border-yellow-500/50', 'border-teal-500');
+        } else {
+            p2Card.classList.replace('border-slate-600', 'border-violet-500');
+            p2Card.classList.replace('border-yellow-500/50', 'border-violet-500');
+        }
+      } else {
+        // Update Serve indicators dynamically based on even/odd score
+        serve1El.textContent = `🏸 Serve ${getServeSide(state.p1)}`;
+        serve2El.textContent = `🏸 Serve ${getServeSide(state.p2)}`;
+        
+        serve1El.classList.toggle('invisible', state.server !== 1);
+        serve2El.classList.toggle('invisible', state.server !== 2);
+        
+        document.getElementById('btn1').disabled = false;
+        document.getElementById('btn2').disabled = false;
+      }
+
+      document.getElementById('undoBtn').disabled = currentStep === 0;
+      document.getElementById('redoBtn').disabled = currentStep === matchHistory.length - 1;
+
+      saveData();
     };
   </script>
 </body>
