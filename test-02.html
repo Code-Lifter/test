@@ -1,126 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Daily Performance Audit</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pro Ping Pong Tracker</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<body class="bg-slate-900 text-white min-h-screen flex items-center justify-center font-sans">
+  
+  <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl max-w-md w-full text-center border border-slate-700">
+    <h1 class="text-3xl font-extrabold mb-8 text-emerald-400 tracking-tight">Match Tracker</h1>
 
-<body class="bg-neutral-900 text-neutral-100 min-h-screen flex items-center justify-center p-6">
+    <div class="flex justify-between items-center mb-8 gap-6">
+      
+      <div class="flex-1 bg-slate-700/50 p-4 rounded-xl border border-slate-600">
+        <h2 class="text-lg font-semibold mb-2 text-slate-300">Player 1 
+          <div id="serve1" class="text-yellow-400 text-xs font-bold uppercase mt-1 tracking-wider">🏓 Serving</div>
+        </h2>
+        <div id="score1" class="text-7xl font-black mb-6 tabular-nums">0</div>
+        <button onclick="addPoint(1)" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 py-3 rounded-lg font-bold transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100" id="btn1">+1 Point</button>
+      </div>
 
-  <div class="w-full max-w-2xl bg-neutral-800 rounded-2xl shadow-xl p-8">
+      <div class="text-3xl font-black text-slate-600 pb-12">VS</div>
 
-    <h1 class="text-2xl font-bold mb-6 text-center">Daily Performance Audit</h1>
-
-    <div id="questionContainer">
-      <h2 id="questionTitle" class="text-lg font-semibold mb-4"></h2>
-      <textarea id="answerInput"
-        class="w-full h-40 p-4 rounded-xl bg-neutral-900 border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
-        placeholder="Type your answer..."></textarea>
+      <div class="flex-1 bg-slate-700/50 p-4 rounded-xl border border-slate-600">
+        <h2 class="text-lg font-semibold mb-2 text-slate-300">Player 2 
+          <div id="serve2" class="text-yellow-400 text-xs font-bold uppercase mt-1 tracking-wider invisible">🏓 Serving</div>
+        </h2>
+        <div id="score2" class="text-7xl font-black mb-6 tabular-nums">0</div>
+        <button onclick="addPoint(2)" class="w-full bg-blue-500 hover:bg-blue-400 text-slate-900 py-3 rounded-lg font-bold transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100" id="btn2">+1 Point</button>
+      </div>
     </div>
 
-    <div class="flex justify-between mt-6">
-      <button id="prevBtn"
-        class="px-4 py-2 rounded-xl bg-neutral-700 hover:bg-neutral-600 transition">
-        Previous
-      </button>
+    <div id="status" class="text-xl font-bold text-slate-400 mb-8 h-8 flex items-center justify-center bg-slate-900 rounded-lg">First to 11 (Win by 2)</div>
 
-      <button id="nextBtn"
-        class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 transition">
-        Next
-      </button>
-    </div>
-
-    <div id="finishSection" class="hidden mt-8">
-      <button id="copyBtn"
-        class="w-full py-3 rounded-xl bg-green-600 hover:bg-green-500 transition font-semibold">
-        Copy to Obsidian
-      </button>
-    </div>
-
+    <button onclick="resetGame()" class="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/50 py-3 rounded-lg font-bold transition-colors">Reset Match</button>
   </div>
 
-<script>
-const questions = [
-  "1. What actually happened today? (Events & memories)",
-  "2. What did I produce today? (Concrete outputs only)",
-  "3. If today repeated for 365 days, where would I end up?",
-  "4. What stressed or irritated me?",
-  "5. Was it within my control?",
-  "6. When was my energy highest?",
-  "7. What triggered energy drops?",
-  "8. What 20% created 80% of results?",
-  "9. What was disguised busywork?",
-  "10. Where did I hesitate or avoid?",
-  "11. Did I seek approval or pursue competence?",
-  "12. Training / movement quality?",
-  "13. Nutrition aligned?",
-  "14. Where did I act below my standard?",
-  "15. One decisive action for tomorrow?"
-];
+  <script>
+    let p1Score = 0;
+    let p2Score = 0;
+    let isGameOver = false;
+    const WINNING_SCORE = 11;
 
-let currentIndex = 0;
-let answers = new Array(questions.length).fill("");
+    const updateUI = () => {
+      document.getElementById('score1').textContent = p1Score;
+      document.getElementById('score2').textContent = p2Score;
 
-const questionTitle = document.getElementById("questionTitle");
-const answerInput = document.getElementById("answerInput");
-const prevBtn = document.getElementById("prevBtn");
-const nextBtn = document.getElementById("nextBtn");
-const finishSection = document.getElementById("finishSection");
-const copyBtn = document.getElementById("copyBtn");
+      // The real logic: Serve tracking
+      const totalPoints = p1Score + p2Score;
+      let p1Serves = true;
 
-function renderQuestion() {
-  questionTitle.textContent = questions[currentIndex];
-  answerInput.value = answers[currentIndex];
+      if (p1Score >= 10 && p2Score >= 10) {
+        // Deuce rule: Serve alternates every single point
+        p1Serves = (totalPoints % 2 === 0);
+        if (!isGameOver) document.getElementById('status').textContent = 'Deuce! Alternate serves.';
+      } else {
+        // Standard rule: Serve alternates every 2 points
+        p1Serves = Math.floor(totalPoints / 2) % 2 === 0;
+      }
 
-  prevBtn.disabled = currentIndex === 0;
-  prevBtn.classList.toggle("opacity-40", currentIndex === 0);
+      if (!isGameOver) {
+        document.getElementById('serve1').classList.toggle('invisible', !p1Serves);
+        document.getElementById('serve2').classList.toggle('invisible', p1Serves);
+      } else {
+        document.getElementById('serve1').classList.add('invisible');
+        document.getElementById('serve2').classList.add('invisible');
+      }
+    };
 
-  if (currentIndex === questions.length - 1) {
-    nextBtn.textContent = "Finish";
-  } else {
-    nextBtn.textContent = "Next";
-  }
-}
+    const addPoint = (player) => {
+      if (isGameOver) return;
+      player === 1 ? p1Score++ : p2Score++;
+      checkWin();
+      updateUI();
+    };
 
-nextBtn.addEventListener("click", () => {
-  answers[currentIndex] = answerInput.value;
+    const checkWin = () => {
+      // The win condition: Reached 11 AND leading by at least 2
+      if ((p1Score >= WINNING_SCORE || p2Score >= WINNING_SCORE) && Math.abs(p1Score - p2Score) >= 2) {
+        isGameOver = true;
+        const winner = p1Score > p2Score ? 'Player 1' : 'Player 2';
+        
+        const statusEl = document.getElementById('status');
+        statusEl.textContent = `🏆 ${winner} Takes the Match!`;
+        statusEl.classList.replace('text-slate-400', 'text-yellow-400');
+        
+        document.getElementById('btn1').disabled = true;
+        document.getElementById('btn2').disabled = true;
+      }
+    };
 
-  if (currentIndex < questions.length - 1) {
-    currentIndex++;
-    renderQuestion();
-  } else {
-    finishSection.classList.remove("hidden");
-    nextBtn.disabled = true;
-  }
-});
-
-prevBtn.addEventListener("click", () => {
-  answers[currentIndex] = answerInput.value;
-  currentIndex--;
-  renderQuestion();
-});
-
-copyBtn.addEventListener("click", () => {
-  const today = new Date().toISOString().split("T")[0];
-
-  let output = `# Daily Audit – ${today}\n\n`;
-
-  questions.forEach((q, i) => {
-    output += `## ${q}\n${answers[i] || ""}\n\n`;
-  });
-
-  navigator.clipboard.writeText(output).then(() => {
-    copyBtn.textContent = "Copied ✓";
-    setTimeout(() => {
-      copyBtn.textContent = "Copy to Obsidian";
-    }, 2000);
-  });
-});
-
-renderQuestion();
-</script>
-
+    const resetGame = () => {
+      p1Score = 0;
+      p2Score = 0;
+      isGameOver = false;
+      
+      const statusEl = document.getElementById('status');
+      statusEl.textContent = 'First to 11 (Win by 2)';
+      statusEl.classList.replace('text-yellow-400', 'text-slate-400');
+      
+      document.getElementById('btn1').disabled = false;
+      document.getElementById('btn2').disabled = false;
+      
+      updateUI();
+    };
+  </script>
 </body>
 </html>
