@@ -14,9 +14,14 @@
 
   <div class="flex-1 flex flex-col items-center justify-center p-4 w-full">
     
-    <div class="bg-slate-800 p-4 rounded-xl shadow-lg w-full max-w-md mb-4 border border-slate-700 flex justify-between items-center">
-      <div class="flex justify-between items-center w-full">
-        <span class="text-sm font-semibold text-slate-300">Best of 3 Match</span>
+    <div class="bg-slate-800 p-4 rounded-xl shadow-lg w-full max-w-md mb-4 border border-slate-700 flex justify-between items-center gap-4">
+      
+      <button onclick="toggleSides()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-300 py-2 px-3 rounded-lg text-sm font-semibold transition-colors flex justify-center items-center gap-2 active:scale-95">
+        <span id="swapIcon">↔️</span> Swap Ends
+      </button>
+
+      <div class="flex flex-col items-end justify-center">
+        <span class="text-xs font-semibold text-slate-400 mb-1">Best of 3</span>
         <label class="relative inline-flex items-center cursor-pointer">
           <input type="checkbox" id="bo3Toggle" class="sr-only peer" onchange="toggleSettings()" checked>
           <div class="w-11 h-6 bg-slate-600 rounded-full peer peer-checked:bg-emerald-500 peer-checked:after:translate-x-full after:transition-all after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5"></div>
@@ -30,11 +35,13 @@
         Game 1: First to 11 (Win by 2)
       </div>
 
-      <div class="flex justify-between items-stretch mb-8 gap-4 sm:gap-6">
+      <div id="playerBoard" class="flex justify-between items-stretch mb-8 gap-4 sm:gap-6 transition-all duration-500">
+        
         <div id="p1Card" class="flex-1 bg-slate-700/50 p-4 rounded-xl border border-slate-600 transition-all duration-300 flex flex-col">
-          <h2 class="text-base sm:text-lg font-semibold mb-1 text-slate-300 flex justify-between items-center">
-            P1 <span id="p1Games" class="text-emerald-400 text-sm font-black bg-slate-900 px-2 py-0.5 rounded hidden">0 Wins</span>
-          </h2>
+          <div class="flex justify-between items-center mb-1 gap-2">
+            <input type="text" id="p1Name" value="Player 1" onchange="saveExtraState()" class="bg-transparent border-b border-transparent hover:border-slate-500 focus:border-emerald-500 focus:outline-none w-full text-base sm:text-lg font-semibold text-slate-300 truncate transition-colors">
+            <span id="p1Games" class="text-emerald-400 text-sm font-black bg-slate-900 px-2 py-0.5 rounded hidden whitespace-nowrap">0 Wins</span>
+          </div>
           <div id="serve1" class="text-yellow-400 text-xs font-bold uppercase mt-1 tracking-wider h-4 transition-opacity mb-2">🏓 Serving</div>
           <div id="score1" class="text-6xl sm:text-7xl font-black mb-4 tabular-nums mt-auto">0</div>
           <button onclick="addPoint(1)" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 py-3 sm:py-4 rounded-lg font-bold text-lg transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100" id="btn1">+1</button>
@@ -43,9 +50,10 @@
         <div id="vsText" class="text-2xl sm:text-3xl font-black text-slate-600 pb-16 flex items-center transition-colors duration-300">VS</div>
 
         <div id="p2Card" class="flex-1 bg-slate-700/50 p-4 rounded-xl border border-slate-600 transition-all duration-300 flex flex-col">
-          <h2 class="text-base sm:text-lg font-semibold mb-1 text-slate-300 flex justify-between items-center flex-row-reverse">
-            P2 <span id="p2Games" class="text-blue-400 text-sm font-black bg-slate-900 px-2 py-0.5 rounded hidden">0 Wins</span>
-          </h2>
+          <div class="flex justify-between items-center mb-1 gap-2 flex-row-reverse">
+             <input type="text" id="p2Name" value="Player 2" onchange="saveExtraState()" class="bg-transparent border-b border-transparent hover:border-slate-500 focus:border-blue-500 focus:outline-none w-full text-base sm:text-lg font-semibold text-slate-300 truncate text-right transition-colors">
+             <span id="p2Games" class="text-blue-400 text-sm font-black bg-slate-900 px-2 py-0.5 rounded hidden whitespace-nowrap">0 Wins</span>
+          </div>
           <div id="serve2" class="text-yellow-400 text-xs font-bold uppercase mt-1 tracking-wider h-4 transition-opacity invisible mb-2">🏓 Serving</div>
           <div id="score2" class="text-6xl sm:text-7xl font-black mb-4 tabular-nums mt-auto">0</div>
           <button onclick="addPoint(2)" class="w-full bg-blue-500 hover:bg-blue-400 text-slate-900 py-3 sm:py-4 rounded-lg font-bold text-lg transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100" id="btn2">+1</button>
@@ -78,11 +86,17 @@
         initialServer: 1 
     }];
     let currentStep = 0;
+    
+    // Extra UI State
     let isBo3 = true;
+    let isSwapped = false;
+    let p1NameStr = "Player 1";
+    let p2NameStr = "Player 2";
+
     let isCurrentGameOver = false;
     let isMatchOver = false;
 
-    const STORAGE_KEY = 'pingPongTrackerProV2';
+    const STORAGE_KEY = 'pingPongTrackerProV3';
 
     window.onload = () => {
       const savedData = localStorage.getItem(STORAGE_KEY);
@@ -91,21 +105,38 @@
         matchHistory = parsed.history || matchHistory;
         currentStep = parsed.step || 0;
         isBo3 = parsed.isBo3 !== undefined ? parsed.isBo3 : true;
+        isSwapped = parsed.isSwapped || false;
+        p1NameStr = parsed.p1NameStr || "Player 1";
+        p2NameStr = parsed.p2NameStr || "Player 2";
+        
         document.getElementById('bo3Toggle').checked = isBo3;
+        document.getElementById('p1Name').value = p1NameStr;
+        document.getElementById('p2Name').value = p2NameStr;
       }
       updateUI();
     };
 
     const saveData = () => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        history: matchHistory, step: currentStep, isBo3
+        history: matchHistory, step: currentStep, isBo3, isSwapped, p1NameStr, p2NameStr
       }));
     };
+
+    const saveExtraState = () => {
+        p1NameStr = document.getElementById('p1Name').value;
+        p2NameStr = document.getElementById('p2Name').value;
+        saveData();
+    }
 
     const toggleSettings = () => {
       isBo3 = document.getElementById('bo3Toggle').checked;
       updateUI();
     };
+
+    const toggleSides = () => {
+        isSwapped = !isSwapped;
+        updateUI();
+    }
 
     const addPoint = (player) => {
       if (isCurrentGameOver) return;
@@ -133,9 +164,11 @@
         p1Games: state.p1Games + (p1Won ? 1 : 0),
         p2Games: state.p2Games + (!p1Won ? 1 : 0),
         gameNum: state.gameNum + 1,
-        // The core rule: Initial server alternates every game
         initialServer: state.initialServer === 1 ? 2 : 1
       };
+
+      // Automatically visually swap sides when a new game starts
+      isSwapped = !isSwapped;
 
       matchHistory = matchHistory.slice(0, currentStep + 1);
       matchHistory.push(newState);
@@ -150,6 +183,7 @@
       if(confirm('Wipe the board and start a fresh match?')) {
         matchHistory = [{ p1: 0, p2: 0, p1Games: 0, p2Games: 0, gameNum: 1, initialServer: 1 }];
         currentStep = 0;
+        isSwapped = false;
         updateUI();
       }
     };
@@ -167,6 +201,7 @@
       isMatchOver = isBo3 && (virtualP1Games === 2 || virtualP2Games === 2);
 
       // DOM Elements
+      const playerBoard = document.getElementById('playerBoard');
       const p1Card = document.getElementById('p1Card');
       const p2Card = document.getElementById('p2Card');
       const vsText = document.getElementById('vsText');
@@ -190,6 +225,10 @@
       const isDecider = isBo3 && state.gameNum === 3;
       const swapAt5 = isDecider && (state.p1 === 5 || state.p2 === 5) && !isCurrentGameOver;
 
+      // Handle Visual Swapping
+      playerBoard.style.flexDirection = isSwapped ? 'row-reverse' : 'row';
+      document.getElementById('swapIcon').style.transform = isSwapped ? 'rotateY(180deg)' : 'none';
+
       // Base High-Stakes Styles
       p1Card.className = 'flex-1 bg-slate-700/50 p-4 rounded-xl border transition-all duration-300 flex flex-col ' + (isDeuce && !isCurrentGameOver ? 'border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.15)]' : 'border-slate-600');
       p2Card.className = 'flex-1 bg-slate-700/50 p-4 rounded-xl border transition-all duration-300 flex flex-col ' + (isDeuce && !isCurrentGameOver ? 'border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.15)]' : 'border-slate-600');
@@ -197,12 +236,11 @@
 
       if (isCurrentGameOver) {
         if (isMatchOver) {
-            const winner = virtualP1Games === 2 ? 'Player 1' : 'Player 2';
+            const winner = virtualP1Games === 2 ? p1NameStr : p2NameStr;
             statusEl.textContent = `🏆 ${winner} WINS THE MATCH 🏆`;
             statusEl.className = 'text-lg sm:text-xl font-bold text-yellow-400 mb-6 h-10 flex items-center justify-center bg-slate-900 rounded-lg border border-transparent';
             nextGameBtn.classList.add('hidden');
             
-            // Highlight Match Winner
             if(virtualP1Games === 2) {
                 p1Card.classList.replace('border-slate-600', 'border-emerald-500');
                 p1Card.classList.replace('border-yellow-500/50', 'border-emerald-500');
@@ -216,7 +254,7 @@
             nextGameBtn.classList.remove('hidden');
             timeMachine.classList.add('hidden');
         } else {
-            const winner = state.p1 > state.p2 ? 'Player 1' : 'Player 2';
+            const winner = state.p1 > state.p2 ? p1NameStr : p2NameStr;
             statusEl.textContent = `🏆 ${winner} Takes the Game!`;
             statusEl.className = 'text-lg sm:text-xl font-bold text-yellow-400 mb-6 h-10 flex items-center justify-center bg-slate-900 rounded-lg border border-transparent';
         }
@@ -232,21 +270,18 @@
         btn1.disabled = false;
         btn2.disabled = false;
 
-        // Complex Serve Calculation
         let servesPassed = 0;
         if (isDeuce) {
-            servesPassed = 10 + (state.p1 + state.p2 - 20); // Alternate every 1 point after 10-10
+            servesPassed = 10 + (state.p1 + state.p2 - 20); 
         } else {
-            servesPassed = Math.floor((state.p1 + state.p2) / 2); // Alternate every 2 points
+            servesPassed = Math.floor((state.p1 + state.p2) / 2); 
         }
         
-        // Apply to Initial Server of this specific game
         let p1Serves = (servesPassed % 2 === 0) ? (state.initialServer === 1) : (state.initialServer === 2);
 
         serve1El.classList.toggle('invisible', !p1Serves);
         serve2El.classList.toggle('invisible', p1Serves);
 
-        // Status Bar
         if (swapAt5) {
              statusEl.innerHTML = '<span class="animate-pulse text-rose-400">🔄 SWAP ENDS 🔄</span>';
              statusEl.className = 'text-lg sm:text-xl font-bold mb-6 h-10 flex items-center justify-center bg-rose-900/20 rounded-lg border border-rose-500/30 shadow-inner';
