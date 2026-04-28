@@ -37,11 +37,13 @@
 
       <div id="playerBoard" class="flex justify-between items-stretch mb-8 gap-4 sm:gap-6 transition-all duration-500">
         
-        <div id="p1Card" class="flex-1 bg-slate-700/50 p-4 rounded-xl border border-slate-600 transition-all duration-300 flex flex-col">
-          <div class="flex justify-between items-center mb-1 gap-2">
-            <input type="text" id="p1Name" value="Player 1" onchange="saveExtraState()" class="bg-transparent border-b border-transparent hover:border-slate-500 focus:border-emerald-500 focus:outline-none w-full text-base sm:text-lg font-semibold text-slate-300 truncate transition-colors">
-            <span id="p1Games" class="text-emerald-400 text-sm font-black bg-slate-900 px-2 py-0.5 rounded hidden whitespace-nowrap">0 Wins</span>
+        <div id="p1Card" class="flex-1 bg-slate-700/50 p-4 rounded-xl border border-slate-600 transition-all duration-300 flex flex-col items-center">
+          
+          <div class="flex flex-col items-center w-full mb-1 gap-1">
+            <input type="text" id="p1Name" value="Player 1" onchange="saveExtraState()" class="bg-transparent border-b border-transparent hover:border-slate-500 focus:border-emerald-500 focus:outline-none w-full text-center text-lg sm:text-xl font-bold text-slate-200 truncate transition-colors">
+            <span id="p1Games" class="text-emerald-400 text-xs font-black bg-slate-900 px-2 py-0.5 rounded hidden whitespace-nowrap border border-emerald-500/20">0 Wins</span>
           </div>
+
           <div id="serve1" class="text-yellow-400 text-xs font-bold uppercase mt-1 tracking-wider h-4 transition-opacity mb-2">🏓 Serving</div>
           <div id="score1" class="text-6xl sm:text-7xl font-black mb-4 tabular-nums mt-auto">0</div>
           <button onclick="addPoint(1)" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 py-3 sm:py-4 rounded-lg font-bold text-lg transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100" id="btn1">+1</button>
@@ -49,11 +51,13 @@
 
         <div id="vsText" class="text-2xl sm:text-3xl font-black text-slate-600 pb-16 flex items-center transition-colors duration-300">VS</div>
 
-        <div id="p2Card" class="flex-1 bg-slate-700/50 p-4 rounded-xl border border-slate-600 transition-all duration-300 flex flex-col">
-          <div class="flex justify-between items-center mb-1 gap-2 flex-row-reverse">
-             <input type="text" id="p2Name" value="Player 2" onchange="saveExtraState()" class="bg-transparent border-b border-transparent hover:border-slate-500 focus:border-blue-500 focus:outline-none w-full text-base sm:text-lg font-semibold text-slate-300 truncate text-right transition-colors">
-             <span id="p2Games" class="text-blue-400 text-sm font-black bg-slate-900 px-2 py-0.5 rounded hidden whitespace-nowrap">0 Wins</span>
+        <div id="p2Card" class="flex-1 bg-slate-700/50 p-4 rounded-xl border border-slate-600 transition-all duration-300 flex flex-col items-center">
+          
+          <div class="flex flex-col items-center w-full mb-1 gap-1">
+             <input type="text" id="p2Name" value="Player 2" onchange="saveExtraState()" class="bg-transparent border-b border-transparent hover:border-slate-500 focus:border-blue-500 focus:outline-none w-full text-center text-lg sm:text-xl font-bold text-slate-200 truncate transition-colors">
+             <span id="p2Games" class="text-blue-400 text-xs font-black bg-slate-900 px-2 py-0.5 rounded hidden whitespace-nowrap border border-blue-500/20">0 Wins</span>
           </div>
+
           <div id="serve2" class="text-yellow-400 text-xs font-bold uppercase mt-1 tracking-wider h-4 transition-opacity invisible mb-2">🏓 Serving</div>
           <div id="score2" class="text-6xl sm:text-7xl font-black mb-4 tabular-nums mt-auto">0</div>
           <button onclick="addPoint(2)" class="w-full bg-blue-500 hover:bg-blue-400 text-slate-900 py-3 sm:py-4 rounded-lg font-bold text-lg transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100" id="btn2">+1</button>
@@ -96,7 +100,7 @@
     let isCurrentGameOver = false;
     let isMatchOver = false;
 
-    const STORAGE_KEY = 'pingPongTrackerProV3';
+    const STORAGE_KEY = 'pingPongTrackerProV4'; // Bumped version to ensure clean layout load
 
     window.onload = () => {
       const savedData = localStorage.getItem(STORAGE_KEY);
@@ -230,8 +234,8 @@
       document.getElementById('swapIcon').style.transform = isSwapped ? 'rotateY(180deg)' : 'none';
 
       // Base High-Stakes Styles
-      p1Card.className = 'flex-1 bg-slate-700/50 p-4 rounded-xl border transition-all duration-300 flex flex-col ' + (isDeuce && !isCurrentGameOver ? 'border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.15)]' : 'border-slate-600');
-      p2Card.className = 'flex-1 bg-slate-700/50 p-4 rounded-xl border transition-all duration-300 flex flex-col ' + (isDeuce && !isCurrentGameOver ? 'border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.15)]' : 'border-slate-600');
+      p1Card.className = 'flex-1 bg-slate-700/50 p-4 rounded-xl border transition-all duration-300 flex flex-col items-center ' + (isDeuce && !isCurrentGameOver ? 'border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.15)]' : 'border-slate-600');
+      p2Card.className = 'flex-1 bg-slate-700/50 p-4 rounded-xl border transition-all duration-300 flex flex-col items-center ' + (isDeuce && !isCurrentGameOver ? 'border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.15)]' : 'border-slate-600');
       vsText.className = 'text-2xl sm:text-3xl font-black pb-16 flex items-center transition-colors duration-300 ' + (isDeuce && !isCurrentGameOver ? 'text-yellow-500/80' : 'text-slate-600');
 
       if (isCurrentGameOver) {
