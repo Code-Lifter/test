@@ -108,31 +108,38 @@
 
   <script>
     // State Architecture
-    let matchHistory = [{ p1: 0, p2: 0, server: 1, p1Games: 0, p2Games: 0, gameNum: 1 }];
+    // We now hard-code isSwapped into the timeline so Undo/Redo perfectly mirrors physical reality
+    let matchHistory = [{ 
+        p1: 0, 
+        p2: 0, 
+        server: 1, 
+        p1Games: 0, 
+        p2Games: 0, 
+        gameNum: 1, 
+        isSwapped: false 
+    }];
     let currentStep = 0;
     
-    // Extra UI State
+    // Extra UI State (Not tied to time-machine logic)
     let isBo3 = true;
     let isHardCap = true;
-    let isSwapped = false;
     let p1NameStr = "Player 1";
     let p2NameStr = "Player 2";
 
     let isCurrentGameOver = false;
     let isMatchOver = false;
 
-    const STORAGE_KEY = 'badmintonTrackerStateV4'; // Bumped version
+    const STORAGE_KEY = 'badmintonTrackerStateV5'; // Bumped version to reset clean state
 
     window.onload = () => {
       const savedData = localStorage.getItem(STORAGE_KEY);
       if (savedData) {
         const parsed = JSON.parse(savedData);
-        matchHistory = parsed.history || [{ p1: 0, p2: 0, server: 1, p1Games: 0, p2Games: 0, gameNum: 1 }];
+        matchHistory = parsed.history || matchHistory;
         currentStep = parsed.step || 0;
         
         isBo3 = parsed.isBo3 !== undefined ? parsed.isBo3 : true;
         isHardCap = parsed.isHardCap !== undefined ? parsed.isHardCap : true;
-        isSwapped = parsed.isSwapped || false;
         p1NameStr = parsed.p1NameStr || "Player 1";
         p2NameStr = parsed.p2NameStr || "Player 2";
         
@@ -146,7 +153,7 @@
 
     const saveData = () => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        history: matchHistory, step: currentStep, isBo3, isHardCap, isSwapped, p1NameStr, p2NameStr
+        history: matchHistory, step: currentStep, isBo3, isHardCap, p1NameStr, p2NameStr
       }));
     };
 
@@ -163,7 +170,15 @@
     };
 
     const toggleSides = () => {
-        isSwapped = !isSwapped;
+        // Appends a new point in history just for the visual swap
+        matchHistory = matchHistory.slice(0, currentStep + 1);
+        const state = matchHistory[currentStep];
+        
+        matchHistory.push({
+            ...state,
+            isSwapped: !state.isSwapped
+        });
+        currentStep++;
         updateUI();
     }
 
@@ -176,10 +191,11 @@
       const newState = { 
         p1: state.p1 + (player === 1 ? 1 : 0), 
         p2: state.p2 + (player === 2 ? 1 : 0),
-        server: player,
+        server: player, // Winner of the rally serves
         p1Games: state.p1Games,
         p2Games: state.p2Games,
-        gameNum: state.gameNum
+        gameNum: state.gameNum,
+        isSwapped: state.isSwapped // Carry forward visual layout
       };
       
       matchHistory.push(newState);
@@ -191,19 +207,17 @@
       const state = matchHistory[currentStep];
       const p1Won = state.p1 > state.p2;
       
-      const newState = {
-        p1: 0, p2: 0,
-        server: p1Won ? 1 : 2, // Winner serves first in next game
-        p1Games: state.p1Games + (p1Won ? 1 : 0),
-        p2Games: state.p2Games + (p1Won ? 1 : 0),
-        gameNum: state.gameNum + 1
-      };
-
-      // Automatically visually swap sides when a new game starts
-      isSwapped = !isSwapped;
-
       matchHistory = matchHistory.slice(0, currentStep + 1);
-      matchHistory.push(newState);
+      matchHistory.push({
+        p1: 0, 
+        p2: 0,
+        server: p1Won ? 1 : 2, // Winner of previous game serves first
+        p1Games: state.p1Games + (p1Won ? 1 : 0),
+        p2Games: state.p2Games + (!p1Won ? 1 : 0), // FIXED: Correctly awards P2 games
+        gameNum: state.gameNum + 1,
+        isSwapped: !state.isSwapped // Automatically swap visually on new game
+      });
+      
       currentStep++;
       updateUI();
     };
@@ -213,9 +227,10 @@
 
     const resetMatch = () => {
       if(confirm('Wipe the entire match and start fresh?')) {
-        matchHistory = [{ p1: 0, p2: 0, server: 1, p1Games: 0, p2Games: 0, gameNum: 1 }];
+        matchHistory = [{ 
+            p1: 0, p2: 0, server: 1, p1Games: 0, p2Games: 0, gameNum: 1, isSwapped: false 
+        }];
         currentStep = 0;
-        isSwapped = false;
         updateUI();
       }
     };
@@ -246,6 +261,8 @@
       const statusEl = document.getElementById('status');
       const logistics1 = document.getElementById('logistics1');
       const logistics2 = document.getElementById('logistics2');
+      const side1 = document.getElementById('side1');
+      const side2 = document.getElementById('side2');
       const btn1 = document.getElementById('btn1');
       const btn2 = document.getElementById('btn2');
       const nextGameBtn = document.getElementById('nextGameBtn');
@@ -259,9 +276,9 @@
       p1GamesEl.textContent = `${state.p1Games} Wins`;
       p2GamesEl.textContent = `${state.p2Games} Wins`;
 
-      // Handle Visual Swapping
-      playerBoard.style.flexDirection = isSwapped ? 'row-reverse' : 'row';
-      document.getElementById('swapIcon').style.transform = isSwapped ? 'rotateY(180deg)' : 'none';
+      // Handle Visual Swapping reading directly from the Timeline
+      playerBoard.style.flexDirection = state.isSwapped ? 'row-reverse' : 'row';
+      document.getElementById('swapIcon').style.transform = state.isSwapped ? 'rotateY(180deg)' : 'none';
 
       // BWF Swap Ends Rule at 11 points in a decider
       const isDecider = isBo3 && state.gameNum === 3;
