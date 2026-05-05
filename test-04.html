@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instant Bracket Maker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .bracket-connector {
+            border-right: 2px solid #cbd5e1;
+            border-top: 2px solid #cbd5e1;
+            border-bottom: 2px solid #cbd5e1;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen p-8">
+
+    <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-md">
+        <h1 class="text-2xl font-bold text-slate-800 mb-4 text-center">Tournament Bracket Generator</h1>
+        
+        <!-- Input Section -->
+        <div class="mb-8 flex flex-col gap-4 items-center">
+            <p class="text-slate-600 text-sm">Enter player names (one per line). Works best with 4 or 8 players.</p>
+            <textarea id="playerInput" class="w-full max-w-md p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" rows="5" placeholder="Player A&#10;Player B&#10;Player C&#10;Player D"></textarea>
+            <button onclick="generateBracket()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-all">
+                Generate Bracket
+            </button>
+        </div>
+
+        <hr class="mb-8">
+
+        <!-- Bracket Display -->
+        <div id="bracketContainer" class="flex justify-center gap-12 overflow-x-auto p-4">
+            <!-- JavaScript will inject rounds here -->
+        </div>
+    </div>
+
+    <script>
+        function generateBracket() {
+            const input = document.getElementById('playerInput').value.trim();
+            const players = input.split('\n').filter(name => name.trim() !== "");
+            const container = document.getElementById('bracketContainer');
+            container.innerHTML = '';
+
+            if (players.length < 2) {
+                alert("Please enter at least 2 players!");
+                return;
+            }
+
+            // Calculate rounds needed
+            let currentRoundPlayers = [...players];
+            let roundNumber = 1;
+
+            while (currentRoundPlayers.length >= 1) {
+                const roundDiv = document.createElement('div');
+                roundDiv.className = "flex flex-col justify-around gap-4 min-w-[150px]";
+                
+                const roundTitle = document.createElement('h3');
+                roundTitle.className = "text-center font-bold text-slate-400 uppercase text-xs mb-2";
+                roundTitle.innerText = currentRoundPlayers.length === 1 ? "Champion" : `Round ${roundNumber}`;
+                roundDiv.appendChild(roundTitle);
+
+                const nextRoundPlayers = [];
+
+                for (let i = 0; i < currentRoundPlayers.length; i += 2) {
+                    const p1 = currentRoundPlayers[i];
+                    const p2 = currentRoundPlayers[i + 1];
+
+                    const matchDiv = document.createElement('div');
+                    matchDiv.className = "flex flex-col gap-1";
+
+                    // Player 1 Slot
+                    matchDiv.appendChild(createPlayerSlot(p1, (winner) => {
+                        updateNextRound(roundNumber, i/2, winner);
+                    }));
+
+                    // Player 2 Slot (if exists)
+                    if (p2) {
+                        matchDiv.appendChild(createPlayerSlot(p2, (winner) => {
+                            updateNextRound(roundNumber, i/2, winner);
+                        }));
+                    } else if (currentRoundPlayers.length > 1) {
+                        matchDiv.appendChild(createPlayerSlot("BYE", null, true));
+                    }
+
+                    roundDiv.appendChild(matchDiv);
+                    nextRoundPlayers.push("TBD");
+                }
+
+                container.appendChild(roundDiv);
+                
+                if (currentRoundPlayers.length === 1) break;
+                currentRoundPlayers = nextRoundPlayers;
+                roundNumber++;
+            }
+        }
+
+        function createPlayerSlot(name, onClick, isBye = false) {
+            const slot = document.createElement('div');
+            slot.className = `p-2 border rounded bg-white cursor-pointer hover:bg-blue-50 transition-colors text-sm font-medium shadow-sm ${isBye ? 'text-gray-400 bg-gray-50' : 'text-slate-700'}`;
+            slot.innerText = name;
+            if (onClick && !isBye) {
+                slot.onclick = () => {
+                    // Logic to highlight winner could be added here
+                    alert(name + " advances!");
+                };
+            }
+            return slot;
+        }
+    </script>
+</body>
+</html>
