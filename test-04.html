@@ -3,109 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instant Bracket Maker</title>
+    <title>Interactive Bracket</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .bracket-connector {
-            border-right: 2px solid #cbd5e1;
-            border-top: 2px solid #cbd5e1;
-            border-bottom: 2px solid #cbd5e1;
-        }
-    </style>
 </head>
-<body class="bg-slate-50 min-h-screen p-8">
+<body class="bg-slate-100 min-h-screen p-4 md:p-10 font-sans">
 
-    <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-md">
-        <h1 class="text-2xl font-bold text-slate-800 mb-4 text-center">Tournament Bracket Generator</h1>
-        
-        <!-- Input Section -->
-        <div class="mb-8 flex flex-col gap-4 items-center">
-            <p class="text-slate-600 text-sm">Enter player names (one per line). Works best with 4 or 8 players.</p>
-            <textarea id="playerInput" class="w-full max-w-md p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" rows="5" placeholder="Player A&#10;Player B&#10;Player C&#10;Player D"></textarea>
-            <button onclick="generateBracket()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-all">
-                Generate Bracket
-            </button>
-        </div>
+    <div class="max-w-6xl mx-auto">
+        <div class="bg-white p-8 rounded-2xl shadow-xl border border-slate-200">
+            <h1 class="text-3xl font-black text-slate-800 mb-2 text-center italic tracking-tight">BRACKET MASTER</h1>
+            <p class="text-center text-slate-500 mb-8">Click a player's name to advance them to the next round.</p>
+            
+            <!-- Setup -->
+            <div id="setupArea" class="mb-10 flex flex-col items-center gap-4">
+                <textarea id="playerInput" class="w-full max-w-md p-4 border-2 border-slate-200 rounded-xl focus:border-blue-500 outline-none transition-all" rows="4" placeholder="Enter names (one per line)"></textarea>
+                <button onclick="buildBracket()" class="bg-slate-900 hover:bg-blue-600 text-white font-bold py-3 px-10 rounded-full transition-all transform hover:scale-105">
+                    Start Tournament
+                </button>
+            </div>
 
-        <hr class="mb-8">
-
-        <!-- Bracket Display -->
-        <div id="bracketContainer" class="flex justify-center gap-12 overflow-x-auto p-4">
-            <!-- JavaScript will inject rounds here -->
+            <!-- The Bracket -->
+            <div id="bracketContainer" class="flex justify-start gap-8 overflow-x-auto pb-10">
+                <!-- Rounds appear here -->
+            </div>
         </div>
     </div>
 
     <script>
-        function generateBracket() {
+        function buildBracket() {
             const input = document.getElementById('playerInput').value.trim();
             const players = input.split('\n').filter(name => name.trim() !== "");
             const container = document.getElementById('bracketContainer');
+            
+            if (players.length < 2) return alert("Add at least 2 players!");
+
             container.innerHTML = '';
+            // Hide setup once started to save space
+            document.getElementById('setupArea').classList.add('hidden');
 
-            if (players.length < 2) {
-                alert("Please enter at least 2 players!");
-                return;
-            }
+            let participantCount = players.length;
+            let roundCount = Math.ceil(Math.log2(participantCount));
+            let currentPlayers = [...players];
 
-            // Calculate rounds needed
-            let currentRoundPlayers = [...players];
-            let roundNumber = 1;
-
-            while (currentRoundPlayers.length >= 1) {
+            for (let r = 0; r <= roundCount; r++) {
                 const roundDiv = document.createElement('div');
-                roundDiv.className = "flex flex-col justify-around gap-4 min-w-[150px]";
-                
-                const roundTitle = document.createElement('h3');
-                roundTitle.className = "text-center font-bold text-slate-400 uppercase text-xs mb-2";
-                roundTitle.innerText = currentRoundPlayers.length === 1 ? "Champion" : `Round ${roundNumber}`;
-                roundDiv.appendChild(roundTitle);
+                roundDiv.className = "flex flex-col justify-around gap-8 min-w-[180px]";
+                roundDiv.id = `round-${r}`;
 
-                const nextRoundPlayers = [];
+                // Create matches for this round
+                let matchesInRound = Math.ceil(participantCount / Math.pow(2, r + 1));
+                if (r === roundCount) matchesInRound = 1; // The Champion slot
 
-                for (let i = 0; i < currentRoundPlayers.length; i += 2) {
-                    const p1 = currentRoundPlayers[i];
-                    const p2 = currentRoundPlayers[i + 1];
-
+                for (let m = 0; m < (r === roundCount ? 1 : Math.pow(2, roundCount - r - 1)); m++) {
                     const matchDiv = document.createElement('div');
                     matchDiv.className = "flex flex-col gap-1";
 
-                    // Player 1 Slot
-                    matchDiv.appendChild(createPlayerSlot(p1, (winner) => {
-                        updateNextRound(roundNumber, i/2, winner);
-                    }));
+                    // Create two slots per match (unless it's the final winner slot)
+                    const slotCount = (r === roundCount) ? 1 : 2;
+                    
+                    for (let s = 0; s < slotCount; s++) {
+                        const slot = document.createElement('div');
+                        // Unique ID so we can find this slot later to "fill" it
+                        slot.id = `r${r}-m${m}-s${s}`; 
+                        slot.className = "h-10 px-3 flex items-center bg-slate-50 border-2 border-slate-200 rounded-lg text-sm font-bold text-slate-700 cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-all truncate";
+                        
+                        // Fill initial players in Round 0
+                        if (r === 0 && currentPlayers.length > 0) {
+                            slot.innerText = currentPlayers.shift() || "";
+                        } else {
+                            slot.innerText = "—";
+                        }
 
-                    // Player 2 Slot (if exists)
-                    if (p2) {
-                        matchDiv.appendChild(createPlayerSlot(p2, (winner) => {
-                            updateNextRound(roundNumber, i/2, winner);
-                        }));
-                    } else if (currentRoundPlayers.length > 1) {
-                        matchDiv.appendChild(createPlayerSlot("BYE", null, true));
+                        // Add click event to advance
+                        slot.onclick = () => advancePlayer(r, m, slot.innerText);
+                        
+                        matchDiv.appendChild(slot);
                     }
-
                     roundDiv.appendChild(matchDiv);
-                    nextRoundPlayers.push("TBD");
                 }
-
                 container.appendChild(roundDiv);
-                
-                if (currentRoundPlayers.length === 1) break;
-                currentRoundPlayers = nextRoundPlayers;
-                roundNumber++;
             }
         }
 
-        function createPlayerSlot(name, onClick, isBye = false) {
-            const slot = document.createElement('div');
-            slot.className = `p-2 border rounded bg-white cursor-pointer hover:bg-blue-50 transition-colors text-sm font-medium shadow-sm ${isBye ? 'text-gray-400 bg-gray-50' : 'text-slate-700'}`;
-            slot.innerText = name;
-            if (onClick && !isBye) {
-                slot.onclick = () => {
-                    // Logic to highlight winner could be added here
-                    alert(name + " advances!");
-                };
+        function advancePlayer(currentRound, currentMatch, playerName) {
+            if (playerName === "—" || !playerName) return;
+
+            // Determine the next location
+            const nextRound = currentRound + 1;
+            const nextMatch = Math.floor(currentMatch / 2);
+            const nextSlot = currentMatch % 2;
+
+            const targetSlot = document.getElementById(`r${nextRound}-m${nextMatch}-s${nextSlot}`);
+            
+            if (targetSlot) {
+                targetSlot.innerText = playerName;
+                // Add a little pop animation
+                targetSlot.classList.add('bg-green-100', 'border-green-500');
+                setTimeout(() => {
+                    targetSlot.classList.remove('bg-green-100', 'border-green-500');
+                }, 500);
+            } else {
+                alert("🏆 WE HAVE A WINNER: " + playerName);
             }
-            return slot;
         }
     </script>
 </body>
