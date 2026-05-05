@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Squash Pulse Pro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .squash-gradient {
+      background: radial-gradient(circle at top right, #1e1b4b, #020617);
+    }
+    .amber-glow {
+      text-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+    }
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(245, 158, 11, 0.1);
+    }
+  </style>
+</head>
+<body class="squash-gradient text-slate-100 min-h-screen flex flex-col font-sans selection:bg-amber-500/30">
+
+  <!-- Header -->
+  <div class="w-full py-4 px-6 flex justify-between items-center border-b border-amber-900/30 bg-black/20">
+    <span class="text-amber-500 font-black tracking-tighter text-xl italic">SQUASH<span class="text-white">PULSE</span></span>
+    <button onclick="resetMatch()" class="text-[10px] font-bold text-slate-500 hover:text-rose-400 uppercase tracking-widest transition-colors">Reset Arena</button>
+  </div>
+
+  <div class="flex-1 flex flex-col items-center justify-center p-4 w-full max-w-lg mx-auto">
+    
+    <!-- Match Settings -->
+    <div class="glass-panel w-full p-4 rounded-2xl mb-4 flex justify-between items-center gap-4">
+      <div class="flex flex-col gap-1">
+        <span class="text-[10px] font-black text-amber-600 uppercase tracking-widest">Scoring System</span>
+        <div class="flex bg-black/40 rounded-lg p-1 p-1 border border-amber-900/20">
+          <button id="parsBtn" onclick="setScoring('PARS')" class="px-3 py-1 text-xs font-bold rounded-md transition-all bg-amber-500 text-black">PARS (11)</button>
+          <button id="hihoBtn" onclick="setScoring('HIHO')" class="px-3 py-1 text-xs font-bold rounded-md transition-all text-slate-400">HIHO (9)</button>
+        </div>
+      </div>
+      <div class="text-right">
+        <span class="text-[10px] font-black text-amber-600 uppercase tracking-widest">Format</span>
+        <select id="matchFormat" onchange="updateUI()" class="bg-transparent text-sm font-bold text-white outline-none block">
+          <option value="3" class="bg-slate-900">Best of 3</option>
+          <option value="5" class="bg-slate-900" selected>Best of 5</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Main Scoreboard -->
+    <div class="glass-panel w-full rounded-[2.5rem] p-6 shadow-2xl relative overflow-hidden">
+      
+      <!-- Status/Notification Bar -->
+      <div id="statusBar" class="h-10 mb-6 flex items-center justify-center rounded-xl bg-amber-950/20 border border-amber-500/20">
+        <span id="statusText" class="text-xs font-black uppercase tracking-[0.2em] text-amber-400">Game 1: Active</span>
+      </div>
+
+      <!-- Service Side Selection (Overlay) -->
+      <div id="sidePicker" class="hidden absolute inset-x-6 top-24 z-10 bg-amber-500 p-4 rounded-2xl shadow-2xl animate-bounce">
+        <p class="text-black text-center font-black text-xs uppercase mb-3">New Server: Choose Side</p>
+        <div class="flex gap-2">
+          <button onclick="pickSide('L')" class="flex-1 bg-black text-white py-3 rounded-xl font-bold hover:bg-slate-800">LEFT</button>
+          <button onclick="pickSide('R')" class="flex-1 bg-black text-white py-3 rounded-xl font-bold hover:bg-slate-800">RIGHT</button>
+        </div>
+      </div>
+
+      <div class="flex justify-between items-center mb-8 gap-4">
+        <!-- Player 1 -->
+        <div class="flex-1 text-center">
+          <input type="text" id="p1Name" value="PLAYER 1" class="bg-transparent w-full text-center text-[10px] font-black tracking-[0.2em] text-slate-500 uppercase focus:text-amber-400 outline-none mb-2">
+          <div id="p1Games" class="text-[10px] font-bold text-amber-500/50 mb-1">SETS: 0</div>
+          <div id="score1" class="text-8xl font-black amber-glow tabular-nums">0</div>
+          <div id="serveIndicator1" class="mt-2 h-6 flex flex-col items-center justify-center">
+            <div id="dot1" class="w-1.5 h-1.5 rounded-full bg-transparent"></div>
+            <span id="sideText1" class="text-[10px] font-bold text-amber-600 uppercase mt-1"></span>
+          </div>
+        </div>
+
+        <div class="h-24 w-px bg-amber-900/30"></div>
+
+        <!-- Player 2 -->
+        <div class="flex-1 text-center">
+          <input type="text" id="p2Name" value="PLAYER 2" class="bg-transparent w-full text-center text-[10px] font-black tracking-[0.2em] text-slate-500 uppercase focus:text-amber-400 outline-none mb-2">
+          <div id="p2Games" class="text-[10px] font-bold text-amber-500/50 mb-1">SETS: 0</div>
+          <div id="score2" class="text-8xl font-black amber-glow tabular-nums">0</div>
+          <div id="serveIndicator2" class="mt-2 h-6 flex flex-col items-center justify-center">
+            <div id="dot2" class="w-1.5 h-1.5 rounded-full bg-transparent"></div>
+            <span id="sideText2" class="text-[10px] font-bold text-amber-600 uppercase mt-1"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Point Buttons -->
+      <div class="flex gap-4 mb-6">
+        <button onclick="handlePoint(1)" id="btn1" class="flex-1 bg-amber-500 hover:bg-amber-400 text-black py-5 rounded-2xl font-black text-xl transition-all active:scale-95 disabled:opacity-20">WIN RALLY</button>
+        <button onclick="handlePoint(2)" id="btn2" class="flex-1 bg-amber-500 hover:bg-amber-400 text-black py-5 rounded-2xl font-black text-xl transition-all active:scale-95 disabled:opacity-20">WIN RALLY</button>
+      </div>
+
+      <!-- Next Game Button -->
+      <button onclick="startNextGame()" id="nextGameBtn" class="hidden w-full bg-white text-black py-4 rounded-2xl font-black uppercase tracking-widest mb-6">Start Next Game</button>
+
+      <!-- History Controls -->
+      <div class="grid grid-cols-2 gap-3">
+        <button onclick="undo()" id="undoBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-400 py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest disabled:opacity-10">Undo</button>
+        <button onclick="redo()" id="redoBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-400 py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest disabled:opacity-10">Redo</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let scoringMode = 'PARS'; // HIHO or PARS
+    let matchHistory = [{
+      p1: 0, p2: 0, 
+      p1Games: 0, p2Games: 0, 
+      server: 1, // 1 or 2
+      serveSide: null, // 'L', 'R', or null (needs picking)
+      gameNum: 1,
+      isGameOver: false
+    }];
+    let currentStep = 0;
+
+    const setScoring = (mode) => {
+      scoringMode = mode;
+      document.getElementById('parsBtn').className = mode === 'PARS' ? 'px-3 py-1 text-xs font-bold rounded-md bg-amber-500 text-black' : 'px-3 py-1 text-xs font-bold text-slate-400';
+      document.getElementById('hihoBtn').className = mode === 'HIHO' ? 'px-3 py-1 text-xs font-bold rounded-md bg-amber-500 text-black' : 'px-3 py-1 text-xs font-bold text-slate-400';
+      resetMatch(true);
+    };
+
+    const handlePoint = (winner) => {
+      const state = matchHistory[currentStep];
+      if (state.isGameOver) return;
+
+      let nextState = JSON.parse(JSON.stringify(state));
+      
+      if (scoringMode === 'PARS') {
+        // PARS: Winner always gets a point
+        if (winner === 1) nextState.p1++; else nextState.p2++;
+        
+        if (winner === nextState.server) {
+          // Keep serve, alternate sides
+          nextState.serveSide = nextState.serveSide === 'L' ? 'R' : 'L';
+        } else {
+          // Hand-out: Change server, must pick side
+          nextState.server = winner;
+          nextState.serveSide = null;
+        }
+      } else {
+        // HIHO: Only server scores
+        if (winner === nextState.server) {
+          if (winner === 1) nextState.p1++; else nextState.p2++;
+          nextState.serveSide = nextState.serveSide === 'L' ? 'R' : 'L';
+        } else {
+          // Just change server, no point awarded
+          nextState.server = winner;
+          nextState.serveSide = null;
+        }
+      }
+
+      checkGameOver(nextState);
+      pushState(nextState);
+    };
+
+    const checkGameOver = (state) => {
+      const target = scoringMode === 'PARS' ? 11 : 9;
+      const lead = Math.abs(state.p1 - state.p2);
+      
+      if (scoringMode === 'PARS') {
+        if ((state.p1 >= target || state.p2 >= target) && lead >= 2) state.isGameOver = true;
+      } else {
+        // Traditional HIHO 9-point rule
+        if (state.p1 >= target || state.p2 >= target) state.isGameOver = true;
+      }
+    };
+
+    const pickSide = (side) => {
+      let nextState = JSON.parse(JSON.stringify(matchHistory[currentStep]));
+      nextState.serveSide = side;
+      pushState(nextState);
+    };
+
+    const pushState = (s) => {
+      matchHistory = matchHistory.slice(0, currentStep + 1);
+      matchHistory.push(s);
+      currentStep++;
+      updateUI();
+    };
+
+    const startNextGame = () => {
+      const state = matchHistory[currentStep];
+      pushState({
+        p1: 0, p2: 0,
+        p1Games: state.p1Games + (state.p1 > state.p2 ? 1 : 0),
+        p2Games: state.p2Games + (state.p2 > state.p1 ? 1 : 0),
+        server: state.p1 > state.p2 ? 1 : 2,
+        serveSide: null,
+        gameNum: state.gameNum + 1,
+        isGameOver: false
+      });
+    };
+
+    const updateUI = () => {
+      const state = matchHistory[currentStep];
+      const format = parseInt(document.getElementById('matchFormat').value);
+      
+      document.getElementById('score1').textContent = state.p1;
+      document.getElementById('score2').textContent = state.p2;
+      document.getElementById('p1Games').textContent = `SETS: ${state.p1Games}`;
+      document.getElementById('p2Games').textContent = `SETS: ${state.p2Games}`;
+
+      // Handle Service Visibility
+      const needsSide = state.serveSide === null && !state.isGameOver;
+      document.getElementById('sidePicker').classList.toggle('hidden', !needsSide);
+      document.getElementById('btn1').disabled = needsSide || state.isGameOver;
+      document.getElementById('btn2').disabled = needsSide || state.isGameOver;
+
+      // Service Indicators
+      document.getElementById('dot1').className = (state.server === 1 && !needsSide) ? "w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_10px_#f59e0b]" : "hidden";
+      document.getElementById('dot2').className = (state.server === 2 && !needsSide) ? "w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_10px_#f59e0b]" : "hidden";
+      document.getElementById('sideText1').textContent = (state.server === 1 && state.serveSide) ? (state.serveSide === 'L' ? 'Left Box' : 'Right Box') : '';
+      document.getElementById('sideText2').textContent = (state.server === 2 && state.serveSide) ? (state.serveSide === 'L' ? 'Left Box' : 'Right Box') : '';
+
+      // Game Over Logic
+      const setsToWin = Math.ceil(format / 2);
+      const matchOver = state.p1Games >= setsToWin || state.p2Games >= setsToWin;
+
+      if (state.isGameOver) {
+        document.getElementById('statusText').textContent = matchOver ? "Match Complete" : `Game ${state.gameNum} Finished`;
+        document.getElementById('nextGameBtn').classList.toggle('hidden', matchOver);
+      } else {
+        document.getElementById('statusText').textContent = `Game ${state.gameNum}: ${scoringMode} to ${scoringMode === 'PARS' ? 11 : 9}`;
+        document.getElementById('nextGameBtn').classList.add('hidden');
+      }
+
+      document.getElementById('undoBtn').disabled = currentStep === 0;
+      document.getElementById('redoBtn').disabled = currentStep === matchHistory.length - 1;
+    };
+
+    const undo = () => { if (currentStep > 0) { currentStep--; updateUI(); } };
+    const redo = () => { if (currentStep < matchHistory.length - 1) { currentStep++; updateUI(); } };
+    const resetMatch = (silent = false) => {
+      if (silent || confirm("Clear match?")) {
+        matchHistory = [{ p1: 0, p2: 0, p1Games: 0, p2Games: 0, server: 1, serveSide: null, gameNum: 1, isGameOver: false }];
+        currentStep = 0;
+        updateUI();
+      }
+    };
+
+    updateUI();
+  </script>
+</body>
+</html>
