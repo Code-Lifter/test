@@ -1,148 +1,453 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INOL Strategy Lab</title>
+    <title>INOL Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg: #060a10;
+            --surface: #0d1420;
+            --border: #1a2336;
+        }
+        * { box-sizing: border-box; }
+        body { font-family: 'Syne', system-ui, sans-serif; background: var(--bg); color: #e2e8f0; min-height: 100vh; }
+        .mono { font-family: 'DM Mono', 'Courier New', monospace; }
+
+```
+    .zone-easy { color: #64748b; }
+    .zone-good { color: #10b981; }
+    .zone-hard { color: #f59e0b; }
+    .zone-max  { color: #ef4444; }
+
+    .goal-btn { transition: all 0.2s ease; border: 1px solid #1a2336; }
+    .goal-btn.active-strength { background: #0f2040; border-color: #3b82f6; }
+    .goal-btn.active-volume   { background: #022c1a; border-color: #10b981; }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(-6px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    .set-row { animation: slideIn 0.18s ease forwards; }
+
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    input[type=range] { accent-color: #3b82f6; cursor: pointer; }
+
+    .inol-bar { transition: width 0.5s cubic-bezier(0.4,0,0.2,1), background 0.5s ease; }
+    .score-num { transition: color 0.4s ease; }
+
+    select option { background: #0d1420; }
+
+    /* subtle grid texture */
+    body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background-image: linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+                          linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+        background-size: 32px 32px;
+        pointer-events: none;
+        z-index: 0;
+    }
+    .content { position: relative; z-index: 1; }
+</style>
+```
+
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-10">
+<body class="p-4 md:p-8">
+<div class="content max-w-4xl mx-auto">
 
-    <div class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
-        
-        <!-- LEFT: INPUT & GENERATOR -->
-        <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-xl">
-            <h2 class="text-xl font-bold mb-6 text-blue-400">1. Set Your Baseline</h2>
-            
-            <div class="space-y-6">
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Your 1-Rep Max (kg/lbs)</label>
-                    <input type="number" id="oneRm" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-4 text-2xl font-black focus:ring-2 focus:ring-blue-500 outline-none" placeholder="100">
-                </div>
+```
+<!-- HEADER -->
+<div class="flex items-start justify-between mb-8">
+    <div>
+        <h1 class="text-2xl font-extrabold tracking-tight">INOL <span class="text-blue-400">Lab</span></h1>
+        <p class="text-[10px] text-slate-600 mono mt-0.5 uppercase tracking-widest">Index of Nastiness · Session Planner</p>
+    </div>
+    <!-- Unit toggle -->
+    <div class="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl p-1">
+        <button id="unit-kg" onclick="setUnit('kg')"
+            class="px-3 py-1.5 rounded-lg text-[11px] font-bold transition bg-blue-600 text-white">KG</button>
+        <button id="unit-lbs" onclick="setUnit('lbs')"
+            class="px-3 py-1.5 rounded-lg text-[11px] font-bold transition text-slate-500 hover:text-slate-300">LBS</button>
+    </div>
+</div>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <button onclick="generateWorkout('strength')" class="group p-4 bg-slate-800 hover:bg-blue-600 rounded-2xl transition text-left">
-                        <div class="text-xs text-slate-400 group-hover:text-blue-100 uppercase font-bold">Goal</div>
-                        <div class="text-lg font-bold">Strength</div>
-                    </button>
-                    <button onclick="generateWorkout('volume')" class="group p-4 bg-slate-800 hover:bg-emerald-600 rounded-2xl transition text-left">
-                        <div class="text-xs text-slate-400 group-hover:text-emerald-100 uppercase font-bold">Goal</div>
-                        <div class="text-lg font-bold">Volume</div>
-                    </button>
-                </div>
-            </div>
+<div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
 
-            <div class="mt-10 pt-8 border-t border-slate-800">
-                <h3 class="text-sm font-bold text-slate-500 uppercase mb-4 tracking-widest">Active Session Tracker</h3>
-                <div id="sets-container" class="space-y-3">
-                    <!-- Dynamic Rows -->
-                </div>
-                <button onclick="addSetRow()" class="mt-4 text-xs font-bold text-blue-400 hover:text-blue-300">+ Manually Add Set</button>
+    <!-- ── LEFT: Input ── -->
+    <div class="lg:col-span-3 space-y-4">
+
+        <!-- 1RM -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">
+                1-Rep Max (<span id="unit-label">kg</span>)
+            </label>
+            <div class="flex items-center gap-4">
+                <input type="number" id="oneRm" oninput="autoCalculate()"
+                    class="flex-1 bg-slate-950 border border-slate-700 rounded-xl p-4 text-4xl font-black mono focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder="240">
+                <div id="oneRmConverted" class="text-sm mono text-slate-600 whitespace-nowrap"></div>
             </div>
         </div>
 
-        <!-- RIGHT: RESULTS & ANALYSIS -->
-        <div class="flex flex-col gap-6">
-            <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-xl flex-1">
-                <div class="flex justify-between items-start mb-6">
-                    <h2 class="text-xl font-bold text-slate-300">Fatigue Analysis</h2>
-                    <button onclick="calculateFinal()" class="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-full text-xs font-bold transition">Run Math</button>
-                </div>
+        <!-- Goal -->
+        <div class="grid grid-cols-2 gap-3">
+            <button id="btn-strength" onclick="generateWorkout('strength')"
+                class="goal-btn bg-slate-900 p-5 rounded-2xl text-left">
+                <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Goal</div>
+                <div class="text-lg font-bold">Strength</div>
+                <div class="text-[10px] mono text-slate-500 mt-1">85% · 3–4 reps</div>
+            </button>
+            <button id="btn-volume" onclick="generateWorkout('volume')"
+                class="goal-btn bg-slate-900 p-5 rounded-2xl text-left">
+                <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Goal</div>
+                <div class="text-lg font-bold">Volume</div>
+                <div class="text-[10px] mono text-slate-500 mt-1">75% · 8–10 reps</div>
+            </button>
+        </div>
 
-                <div class="flex items-center gap-6 mb-8">
-                    <div id="totalVal" class="text-8xl font-black tracking-tighter">0.00</div>
-                    <div>
-                        <div id="status-pill" class="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase bg-slate-800 text-slate-500 mb-2">Standby</div>
-                        <p id="status-desc" class="text-sm text-slate-400 leading-relaxed max-w-[200px]">Waiting for session data...</p>
-                    </div>
-                </div>
-
-                <div id="suggestion-box" class="hidden bg-blue-900/20 border border-blue-800/50 p-4 rounded-2xl">
-                    <h4 class="text-blue-400 text-xs font-bold uppercase mb-2">Suggested Approach</h4>
-                    <p id="suggestion-text" class="text-sm text-blue-100"></p>
-                </div>
+        <!-- Sets -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Session Sets</h3>
+                <button onclick="clearSets()" class="text-[10px] text-slate-700 hover:text-red-400 font-bold transition">Clear all</button>
             </div>
 
-            <div class="bg-orange-600/10 border border-orange-600/20 p-6 rounded-3xl">
-                <p class="text-orange-400 text-xs italic">"Stress Test: If the suggested weight feels like an RPE 10 on the first set, your 1RM is outdated. Stop immediately."</p>
+            <!-- Column headers -->
+            <div class="grid grid-cols-12 gap-2 mb-2 px-0.5">
+                <div class="col-span-3 text-[9px] text-slate-600 uppercase font-bold tracking-wider">Exercise</div>
+                <div class="col-span-2 text-[9px] text-slate-600 uppercase font-bold tracking-wider">Weight</div>
+                <div class="col-span-1 text-[9px] text-slate-600 uppercase font-bold tracking-wider">Reps</div>
+                <div class="col-span-2 text-[9px] text-slate-600 uppercase font-bold tracking-wider">RPE</div>
+                <div class="col-span-3 text-[9px] text-slate-600 uppercase font-bold tracking-wider">Intensity</div>
+                <div class="col-span-1"></div>
             </div>
+
+            <div id="sets-container" class="space-y-2"></div>
+
+            <button onclick="addSetRow()" class="mt-4 text-xs font-bold text-blue-400 hover:text-blue-300 transition">
+                + Add Set
+            </button>
         </div>
     </div>
 
-    <script>
-        function addSetRow(weight = '', reps = '') {
-            const container = document.getElementById('sets-container');
-            const div = document.createElement('div');
-            div.className = "set-row flex gap-2 items-center animate-in slide-in-from-left duration-200";
-            div.innerHTML = `
-                <input type="number" class="w-20 bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm set-weight" value="${weight}" placeholder="Wt">
-                <input type="number" class="w-16 bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm set-reps" value="${reps}" placeholder="Reps">
-                <select class="flex-1 bg-slate-950 border border-slate-700 rounded-lg p-2 text-[10px] font-bold set-rpe">
-                    <option value="1.0">RPE 8 (Fast)</option>
-                    <option value="1.1">RPE 9 (Slow)</option>
-                    <option value="1.25">RPE 10 (Failure)</option>
-                </select>
-                <button onclick="this.closest('.set-row').remove()" class="text-slate-600 hover:text-red-500 px-2">✕</button>
-            `;
-            container.appendChild(div);
+    <!-- ── RIGHT: Analysis ── -->
+    <div class="lg:col-span-2 space-y-4">
+
+        <!-- Score card -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Session INOL</span>
+                <button onclick="calculateFinal()"
+                    class="bg-blue-600 hover:bg-blue-500 px-4 py-1.5 rounded-full text-[10px] font-bold transition">
+                    Run Math
+                </button>
+            </div>
+
+            <div id="totalVal" class="text-7xl font-black mono tracking-tighter my-3 score-num text-slate-200">—</div>
+
+            <div id="status-pill"
+                class="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase bg-slate-800 text-slate-500 mb-3">
+                Standby
+            </div>
+            <p id="status-desc" class="text-xs text-slate-500 leading-relaxed">Add sets to begin.</p>
+
+            <!-- INOL bar -->
+            <div class="mt-5">
+                <div class="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                    <div id="inol-bar" class="h-full rounded-full inol-bar bg-blue-500" style="width:0%"></div>
+                </div>
+                <div class="flex justify-between mt-1.5">
+                    <span class="text-[9px] mono text-slate-700">0</span>
+                    <span class="text-[9px] mono text-slate-700">0.4</span>
+                    <span class="text-[9px] mono text-slate-700">1.0</span>
+                    <span class="text-[9px] mono text-slate-700">2.0+</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Per-exercise breakdown -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+            <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">By Exercise</h3>
+            <div id="exercise-breakdown">
+                <p class="text-xs text-slate-700">Name your sets to see breakdown.</p>
+            </div>
+        </div>
+
+        <!-- Prescription box -->
+        <div id="suggestion-box" class="hidden bg-blue-950/30 border border-blue-900/40 rounded-2xl p-5">
+            <h4 class="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-2">Prescription</h4>
+            <p id="suggestion-text" class="text-xs text-blue-100 leading-relaxed"></p>
+        </div>
+
+        <!-- Note on RPE modifier -->
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4">
+            <p class="text-[10px] text-slate-600 leading-relaxed mono italic">
+                RPE modifies INOL: 6→×0.75 · 8→×1.0 · 10→×1.25. Pure Hristov uses reps/(100−intensity) only.
+            </p>
+        </div>
+
+        <!-- Warning -->
+        <div class="bg-amber-950/20 border border-amber-900/30 rounded-2xl p-4">
+            <p class="text-amber-600/80 text-[10px] italic leading-relaxed">
+                "If set 1 feels like RPE 10, your 1RM is outdated. Stop and reassess."
+            </p>
+        </div>
+    </div>
+</div>
+```
+
+</div>
+
+<script>
+    let currentUnit = 'kg';
+    let activeGoal = null;
+
+    // ── Unit system ───────────────────────────────────────
+    function setUnit(unit) {
+        const old = currentUnit;
+        currentUnit = unit;
+
+        ['kg','lbs'].forEach(u => {
+            const btn = document.getElementById('unit-' + u);
+            btn.className = u === unit
+                ? 'px-3 py-1.5 rounded-lg text-[11px] font-bold transition bg-blue-600 text-white'
+                : 'px-3 py-1.5 rounded-lg text-[11px] font-bold transition text-slate-500 hover:text-slate-300';
+        });
+        document.getElementById('unit-label').textContent = unit;
+
+        const factor = (old === 'kg' && unit === 'lbs') ? 2.2046
+                     : (old === 'lbs' && unit === 'kg') ? 1/2.2046 : 1;
+
+        const oneRmInput = document.getElementById('oneRm');
+        if (oneRmInput.value) oneRmInput.value = Math.round(parseFloat(oneRmInput.value) * factor);
+
+        document.querySelectorAll('.set-weight').forEach(inp => {
+            if (inp.value) inp.value = Math.round(parseFloat(inp.value) * factor);
+        });
+
+        autoCalculate();
+    }
+
+    function updateConvertedDisplay() {
+        const val = parseFloat(document.getElementById('oneRm').value);
+        const el = document.getElementById('oneRmConverted');
+        if (!val) { el.textContent = ''; return; }
+        el.textContent = currentUnit === 'kg'
+            ? `${Math.round(val * 2.2046)} lbs`
+            : `${Math.round(val / 2.2046)} kg`;
+    }
+
+    // ── Set rows ──────────────────────────────────────────
+    function addSetRow(exercise = '', weight = '', reps = '', rpe = 8) {
+        const container = document.getElementById('sets-container');
+        const div = document.createElement('div');
+        div.className = 'set-row grid grid-cols-12 gap-2 items-center';
+
+        const base = 'w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs mono focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500';
+
+        div.innerHTML = `
+            <input type="text"   class="col-span-3 ${base} set-exercise" value="${exercise}" placeholder="e.g. Squat"  oninput="autoCalculate()">
+            <input type="number" class="col-span-2 ${base} set-weight"   value="${weight}"   placeholder="Wt"           oninput="autoCalculate()">
+            <input type="number" class="col-span-1 ${base} set-reps"     value="${reps}"     placeholder="#"            oninput="autoCalculate()">
+            <div class="col-span-2 flex flex-col items-center gap-0.5">
+                <input type="range" class="w-full set-rpe" min="6" max="10" step="0.5" value="${rpe}"
+                    oninput="this.nextElementSibling.textContent=parseFloat(this.value).toFixed(1);autoCalculate()">
+                <span class="text-[9px] mono text-slate-500">${parseFloat(rpe).toFixed(1)}</span>
+            </div>
+            <div class="col-span-3 set-intensity-badge"></div>
+            <button onclick="this.closest('.set-row').remove();autoCalculate()"
+                class="col-span-1 text-slate-700 hover:text-red-500 text-xs transition text-right leading-none">✕</button>
+        `;
+        container.appendChild(div);
+        updateIntensityBadge(div);
+    }
+
+    function updateIntensityBadge(row) {
+        const oneRm = parseFloat(document.getElementById('oneRm').value);
+        const w     = parseFloat(row.querySelector('.set-weight').value);
+        const badge = row.querySelector('.set-intensity-badge');
+
+        if (!oneRm || !w) {
+            badge.innerHTML = '<span class="text-[9px] mono text-slate-700">—</span>';
+            return;
         }
 
-        function generateWorkout(goal) {
-            const oneRm = parseFloat(document.getElementById('oneRm').value);
-            if (!oneRm) { alert("Enter 1RM first."); return; }
-            
-            document.getElementById('sets-container').innerHTML = '';
-            const sugBox = document.getElementById('suggestion-box');
-            const sugText = document.getElementById('suggestion-text');
-            sugBox.classList.remove('hidden');
+        const pct = (w / oneRm) * 100;
+        let cls, label;
+        if      (pct < 60) { cls = 'zone-easy'; label = 'Easy'; }
+        else if (pct < 75) { cls = 'zone-good'; label = 'Mod'; }
+        else if (pct < 85) { cls = 'zone-hard'; label = 'Hard'; }
+        else               { cls = 'zone-max';  label = 'Max';  }
 
-            if (goal === 'strength') {
-                const weight = Math.round(oneRm * 0.85);
-                sugText.innerText = `For Strength: Aim for 3-4 sets of 3-4 reps at ${weight}kg. This hits an INOL of ~0.8.`;
-                for(let i=0; i<3; i++) addSetRow(weight, 4);
-            } else {
-                const weight = Math.round(oneRm * 0.75);
-                sugText.innerText = `For Volume: Aim for 3 sets of 8-10 reps at ${weight}kg. This hits an INOL of ~0.9.`;
-                for(let i=0; i<3; i++) addSetRow(weight, 8);
-            }
-            calculateFinal();
+        badge.innerHTML = `
+            <span class="inline-flex items-center gap-1 ${cls}">
+                <span class="text-[10px] mono font-bold">${pct.toFixed(0)}%</span>
+                <span class="text-[9px] opacity-60">${label}</span>
+            </span>`;
+    }
+
+    function clearSets() {
+        document.getElementById('sets-container').innerHTML = '';
+        autoCalculate();
+    }
+
+    // ── Goal generation ───────────────────────────────────
+    function generateWorkout(goal) {
+        const oneRm = parseFloat(document.getElementById('oneRm').value);
+        if (!oneRm) { alert('Enter your 1RM first.'); return; }
+
+        activeGoal = goal;
+        updateGoalButtons();
+        document.getElementById('sets-container').innerHTML = '';
+
+        const sugBox  = document.getElementById('suggestion-box');
+        const sugText = document.getElementById('suggestion-text');
+        sugBox.classList.remove('hidden');
+
+        if (goal === 'strength') {
+            const w = Math.round(oneRm * 0.85);
+            sugText.innerText = `Strength block: 3–4 sets × 3–4 reps at ${w}${currentUnit}. Targets INOL ~0.7–0.9. Rest 3–5 min between sets.`;
+            for (let i = 0; i < 3; i++) addSetRow('', w, 4, 8);
+        } else {
+            const w = Math.round(oneRm * 0.75);
+            sugText.innerText = `Volume block: 3 sets × 8–10 reps at ${w}${currentUnit}. Targets INOL ~0.9–1.0. Rest 2–3 min between sets.`;
+            for (let i = 0; i < 3; i++) addSetRow('', w, 8, 8);
+        }
+        calculateFinal();
+    }
+
+    function updateGoalButtons() {
+        document.getElementById('btn-strength').className =
+            'goal-btn bg-slate-900 p-5 rounded-2xl text-left' +
+            (activeGoal === 'strength' ? ' active-strength' : '');
+        document.getElementById('btn-volume').className =
+            'goal-btn bg-slate-900 p-5 rounded-2xl text-left' +
+            (activeGoal === 'volume' ? ' active-volume' : '');
+    }
+
+    // ── Calculation ───────────────────────────────────────
+    function autoCalculate() {
+        updateConvertedDisplay();
+        document.querySelectorAll('.set-row').forEach(updateIntensityBadge);
+        calculateFinal();
+    }
+
+    function getRpeMultiplier(rpe) {
+        // RPE 6 → ×0.75 · RPE 8 → ×1.0 · RPE 10 → ×1.25
+        return 0.75 + (rpe - 6) * 0.125;
+    }
+
+    function calculateFinal() {
+        const oneRm = parseFloat(document.getElementById('oneRm').value);
+        let totalInol = 0;
+        const exerciseMap = {};
+
+        document.querySelectorAll('.set-row').forEach(row => {
+            const w   = parseFloat(row.querySelector('.set-weight').value);
+            const r   = parseFloat(row.querySelector('.set-reps').value);
+            const rpe = parseFloat(row.querySelector('.set-rpe').value);
+            const ex  = row.querySelector('.set-exercise').value.trim() || 'Unnamed';
+            if (!w || !r || !oneRm) return;
+
+            const intensity = (w / oneRm) * 100;
+            if (intensity >= 100) return; // avoid division by zero / nonsense
+            const setInol = (r / (100 - intensity)) * getRpeMultiplier(rpe);
+            totalInol += setInol;
+            exerciseMap[ex] = (exerciseMap[ex] || 0) + setInol;
+        });
+
+        const display = document.getElementById('totalVal');
+        const pill    = document.getElementById('status-pill');
+        const desc    = document.getElementById('status-desc');
+        const bar     = document.getElementById('inol-bar');
+
+        const hasData = Object.keys(exerciseMap).length > 0;
+
+        if (!hasData) {
+            display.innerText = '—';
+            display.style.color = '';
+            pill.className = 'inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase bg-slate-800 text-slate-500 mb-3';
+            pill.innerText = 'Standby';
+            desc.innerText = 'Add sets to begin.';
+            bar.style.width = '0%';
+            bar.style.background = '#3b82f6';
+            renderExerciseBreakdown({});
+            return;
         }
 
-        function calculateFinal() {
-            const oneRm = parseFloat(document.getElementById('oneRm').value);
-            let totalInol = 0;
-            const rows = document.querySelectorAll('.set-row');
+        display.innerText = totalInol.toFixed(2);
+        bar.style.width = Math.min((totalInol / 2.0) * 100, 100) + '%';
 
-            rows.forEach(row => {
-                const w = parseFloat(row.querySelector('.set-weight').value);
-                const r = parseFloat(row.querySelector('.set-reps').value);
-                const mRpe = parseFloat(row.querySelector('.set-rpe').value);
-                if (w && r && oneRm) {
-                    const intensity = (w / oneRm) * 100;
-                    totalInol += (r / (100 - intensity)) * mRpe;
-                }
-            });
-
-            const display = document.getElementById('totalVal');
-            const pill = document.getElementById('status-pill');
-            const desc = document.getElementById('status-desc');
-            
-            display.innerText = totalInol.toFixed(2);
-
-            if (totalInol < 0.4) {
-                pill.className = "inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase bg-slate-800 text-slate-500 mb-2";
-                pill.innerText = "Underloaded";
-                desc.innerText = "Minimal stimulus. Good for active recovery only.";
-            } else if (totalInol <= 1.0) {
-                pill.className = "inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-400 mb-2";
-                pill.innerText = "Optimal";
-                desc.innerText = "The sweet spot for growth. Safe to repeat this weekly.";
-            } else {
-                pill.className = "inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase bg-red-500/20 text-red-400 mb-2";
-                pill.innerText = "High Stress";
-                desc.innerText = "Recovery debt incurred. Do not hit this exercise for 4-5 days.";
-            }
+        if (totalInol < 0.4) {
+            setStatus('Underloaded', 'bg-slate-800 text-slate-400',
+                'Minimal stimulus. Add volume or intensity for meaningful adaptation.',
+                '#475569', '#64748b', display);
+        } else if (totalInol <= 1.0) {
+            setStatus('Optimal', 'bg-emerald-900/50 text-emerald-400',
+                'The sweet spot for growth. Safe to repeat this stimulus weekly.',
+                '#10b981', '#10b981', display);
+        } else if (totalInol <= 2.0) {
+            setStatus('High Load', 'bg-amber-900/40 text-amber-400',
+                'Significant stress accumulated. Allow 4–5 days before repeating this exercise.',
+                '#f59e0b', '#f59e0b', display);
+        } else {
+            setStatus('Overreached', 'bg-red-900/40 text-red-400',
+                'Excessive volume — recovery debt is likely. Consider reducing sets or intensity.',
+                '#ef4444', '#ef4444', display);
         }
-    </script>
+
+        renderExerciseBreakdown(exerciseMap);
+    }
+
+    function setStatus(label, pillCls, descText, barColor, numColor, numEl) {
+        const pill = document.getElementById('status-pill');
+        const desc = document.getElementById('status-desc');
+        const bar  = document.getElementById('inol-bar');
+        pill.className = `inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase mb-3 ${pillCls}`;
+        pill.innerText = label;
+        desc.innerText = descText;
+        bar.style.background = barColor;
+        numEl.style.color = numColor;
+    }
+
+    function renderExerciseBreakdown(map) {
+        const el = document.getElementById('exercise-breakdown');
+        const entries = Object.entries(map);
+
+        if (!entries.length) {
+            el.innerHTML = '<p class="text-xs text-slate-700">Name your sets to see breakdown.</p>';
+            return;
+        }
+
+        const maxInol = Math.max(...entries.map(e => e[1]));
+
+        el.innerHTML = entries.map(([name, inol]) => {
+            let color;
+            if      (inol < 0.4)  color = '#475569';
+            else if (inol <= 1.0) color = '#10b981';
+            else if (inol <= 2.0) color = '#f59e0b';
+            else                  color = '#ef4444';
+
+            const pct = Math.min((inol / Math.max(maxInol, 1.0)) * 100, 100);
+            return `
+                <div class="space-y-1">
+                    <div class="flex justify-between items-baseline">
+                        <span class="text-xs font-semibold text-slate-300 truncate max-w-[130px]">${name}</span>
+                        <span class="text-xs mono font-bold" style="color:${color}">${inol.toFixed(2)}</span>
+                    </div>
+                    <div class="h-1 bg-slate-800 rounded-full overflow-hidden">
+                        <div class="h-full rounded-full inol-bar" style="width:${pct}%;background:${color}"></div>
+                    </div>
+                </div>`;
+        }).join('');
+    }
+</script>
+
 </body>
 </html>
