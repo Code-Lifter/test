@@ -3,143 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fatigue-Adjusted INOL Lab</title>
+    <title>INOL Strategy Lab</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-950 text-gray-100 min-h-screen p-4 md:p-8">
+<body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-10">
 
-    <div class="max-w-4xl mx-auto bg-gray-900 rounded-3xl shadow-2xl border border-gray-800 overflow-hidden">
-        <div class="bg-gradient-to-r from-red-600 to-orange-600 p-6">
-            <h1 class="text-2xl font-black uppercase tracking-tighter italic">Fatigue-Adjusted INOL</h1>
-            <p class="text-red-100 text-xs opacity-80">Autoregulated Volume & Intensity Tracking</p>
+    <div class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <!-- LEFT: INPUT & GENERATOR -->
+        <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-xl">
+            <h2 class="text-xl font-bold mb-6 text-blue-400">1. Set Your Baseline</h2>
+            
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Your 1-Rep Max (kg/lbs)</label>
+                    <input type="number" id="oneRm" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-4 text-2xl font-black focus:ring-2 focus:ring-blue-500 outline-none" placeholder="100">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="generateWorkout('strength')" class="group p-4 bg-slate-800 hover:bg-blue-600 rounded-2xl transition text-left">
+                        <div class="text-xs text-slate-400 group-hover:text-blue-100 uppercase font-bold">Goal</div>
+                        <div class="text-lg font-bold">Strength</div>
+                    </button>
+                    <button onclick="generateWorkout('volume')" class="group p-4 bg-slate-800 hover:bg-emerald-600 rounded-2xl transition text-left">
+                        <div class="text-xs text-slate-400 group-hover:text-emerald-100 uppercase font-bold">Goal</div>
+                        <div class="text-lg font-bold">Volume</div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-10 pt-8 border-t border-slate-800">
+                <h3 class="text-sm font-bold text-slate-500 uppercase mb-4 tracking-widest">Active Session Tracker</h3>
+                <div id="sets-container" class="space-y-3">
+                    <!-- Dynamic Rows -->
+                </div>
+                <button onclick="addSetRow()" class="mt-4 text-xs font-bold text-blue-400 hover:text-blue-300">+ Manually Add Set</button>
+            </div>
         </div>
 
-        <div class="p-6 space-y-6">
-            <!-- Global 1RM -->
-            <div class="flex flex-col md:flex-row md:items-center gap-4 bg-gray-800/50 p-4 rounded-xl">
-                <div class="flex-1">
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Target Exercise 1-Rep Max</label>
-                    <input type="number" id="oneRm" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-xl font-bold focus:ring-2 focus:ring-orange-500 outline-none" placeholder="e.g. 140">
+        <!-- RIGHT: RESULTS & ANALYSIS -->
+        <div class="flex flex-col gap-6">
+            <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-xl flex-1">
+                <div class="flex justify-between items-start mb-6">
+                    <h2 class="text-xl font-bold text-slate-300">Fatigue Analysis</h2>
+                    <button onclick="calculateFinal()" class="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-full text-xs font-bold transition">Run Math</button>
                 </div>
-                <div class="text-xs text-gray-500 max-w-xs italic">
-                    "The math fails if this number is an ego-lift. Use your real, clean-form max."
-                </div>
-            </div>
 
-            <!-- Headers for Desktop -->
-            <div class="hidden md:grid grid-cols-12 gap-4 px-2 text-[10px] font-bold text-gray-500 uppercase">
-                <div class="col-span-2">Weight</div>
-                <div class="col-span-2">Reps</div>
-                <div class="col-span-3">Rest Taken</div>
-                <div class="col-span-3">Feeling (RPE)</div>
-                <div class="col-span-2 text-right">Action</div>
-            </div>
-
-            <div id="sets-container" class="space-y-4">
-                <!-- Dynamic Rows Go Here -->
-            </div>
-
-            <div class="flex flex-wrap gap-3 pt-4 border-t border-gray-800">
-                <button onclick="addSetRow()" class="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-xl font-bold text-sm transition">+ Add Set</button>
-                <button onclick="calculateFinal()" class="flex-1 px-6 py-3 bg-orange-600 hover:bg-orange-500 rounded-xl font-bold text-sm shadow-lg shadow-orange-900/40 transition">Calculate Fatigue Score</button>
-            </div>
-
-            <!-- Result Panel -->
-            <div id="result-panel" class="hidden mt-8 p-6 bg-black rounded-2xl border-l-4 border-orange-600">
-                <div class="flex justify-between items-center">
+                <div class="flex items-center gap-6 mb-8">
+                    <div id="totalVal" class="text-8xl font-black tracking-tighter">0.00</div>
                     <div>
-                        <span class="text-[10px] font-bold text-gray-500 uppercase">Total Fatigue Score (Adjusted INOL)</span>
-                        <div id="totalVal" class="text-7xl font-black">0.00</div>
-                    </div>
-                    <div id="rating" class="text-right">
-                        <div id="status-text" class="text-2xl font-bold text-orange-500">READY</div>
-                        <div id="status-desc" class="text-xs text-gray-400 mt-1 max-w-[200px]">Enter sets to begin analysis.</div>
+                        <div id="status-pill" class="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase bg-slate-800 text-slate-500 mb-2">Standby</div>
+                        <p id="status-desc" class="text-sm text-slate-400 leading-relaxed max-w-[200px]">Waiting for session data...</p>
                     </div>
                 </div>
+
+                <div id="suggestion-box" class="hidden bg-blue-900/20 border border-blue-800/50 p-4 rounded-2xl">
+                    <h4 class="text-blue-400 text-xs font-bold uppercase mb-2">Suggested Approach</h4>
+                    <p id="suggestion-text" class="text-sm text-blue-100"></p>
+                </div>
+            </div>
+
+            <div class="bg-orange-600/10 border border-orange-600/20 p-6 rounded-3xl">
+                <p class="text-orange-400 text-xs italic">"Stress Test: If the suggested weight feels like an RPE 10 on the first set, your 1RM is outdated. Stop immediately."</p>
             </div>
         </div>
     </div>
 
     <script>
-        function addSetRow() {
+        function addSetRow(weight = '', reps = '') {
             const container = document.getElementById('sets-container');
             const div = document.createElement('div');
-            div.className = "set-row grid grid-cols-1 md:grid-cols-12 gap-4 items-end bg-gray-800/30 p-4 rounded-xl border border-gray-800/50";
+            div.className = "set-row flex gap-2 items-center animate-in slide-in-from-left duration-200";
             div.innerHTML = `
-                <div class="col-span-2">
-                    <label class="md:hidden text-[10px] text-gray-500">WEIGHT</label>
-                    <input type="number" class="w-full bg-gray-900 border border-gray-700 rounded p-2 set-weight" placeholder="Weight">
-                </div>
-                <div class="col-span-2">
-                    <label class="md:hidden text-[10px] text-gray-500">REPS</label>
-                    <input type="number" class="w-full bg-gray-900 border border-gray-700 rounded p-2 set-reps" placeholder="Reps">
-                </div>
-                <div class="col-span-3">
-                    <label class="md:hidden text-[10px] text-gray-500">REST</label>
-                    <select class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm set-rest">
-                        <option value="1.0">> 3 Mins (Full)</option>
-                        <option value="1.15">1-2 Mins (Medium)</option>
-                        <option value="1.25">< 60 Secs (Short)</option>
-                    </select>
-                </div>
-                <div class="col-span-3">
-                    <label class="md:hidden text-[10px] text-gray-500">FEELING</label>
-                    <select class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm set-rpe">
-                        <option value="1.0">RPE 7-8 (Moved Well)</option>
-                        <option value="1.1">RPE 9 (Grinder)</option>
-                        <option value="1.25">RPE 10 (Max Effort)</option>
-                    </select>
-                </div>
-                <div class="col-span-2 text-right">
-                    <button onclick="this.closest('.set-row').remove()" class="text-gray-600 hover:text-red-500">Remove</button>
-                </div>
+                <input type="number" class="w-20 bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm set-weight" value="${weight}" placeholder="Wt">
+                <input type="number" class="w-16 bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm set-reps" value="${reps}" placeholder="Reps">
+                <select class="flex-1 bg-slate-950 border border-slate-700 rounded-lg p-2 text-[10px] font-bold set-rpe">
+                    <option value="1.0">RPE 8 (Fast)</option>
+                    <option value="1.1">RPE 9 (Slow)</option>
+                    <option value="1.25">RPE 10 (Failure)</option>
+                </select>
+                <button onclick="this.closest('.set-row').remove()" class="text-slate-600 hover:text-red-500 px-2">✕</button>
             `;
             container.appendChild(div);
         }
 
+        function generateWorkout(goal) {
+            const oneRm = parseFloat(document.getElementById('oneRm').value);
+            if (!oneRm) { alert("Enter 1RM first."); return; }
+            
+            document.getElementById('sets-container').innerHTML = '';
+            const sugBox = document.getElementById('suggestion-box');
+            const sugText = document.getElementById('suggestion-text');
+            sugBox.classList.remove('hidden');
+
+            if (goal === 'strength') {
+                const weight = Math.round(oneRm * 0.85);
+                sugText.innerText = `For Strength: Aim for 3-4 sets of 3-4 reps at ${weight}kg. This hits an INOL of ~0.8.`;
+                for(let i=0; i<3; i++) addSetRow(weight, 4);
+            } else {
+                const weight = Math.round(oneRm * 0.75);
+                sugText.innerText = `For Volume: Aim for 3 sets of 8-10 reps at ${weight}kg. This hits an INOL of ~0.9.`;
+                for(let i=0; i<3; i++) addSetRow(weight, 8);
+            }
+            calculateFinal();
+        }
+
         function calculateFinal() {
             const oneRm = parseFloat(document.getElementById('oneRm').value);
-            if (!oneRm) { alert("Enter your 1RM first."); return; }
-
-            let totalAdjustedInol = 0;
+            let totalInol = 0;
             const rows = document.querySelectorAll('.set-row');
 
             rows.forEach(row => {
                 const w = parseFloat(row.querySelector('.set-weight').value);
                 const r = parseFloat(row.querySelector('.set-reps').value);
-                const mRest = parseFloat(row.querySelector('.set-rest').value);
                 const mRpe = parseFloat(row.querySelector('.set-rpe').value);
-
-                if (w && r) {
+                if (w && r && oneRm) {
                     const intensity = (w / oneRm) * 100;
-                    const baseInol = r / (100 - intensity);
-                    totalAdjustedInol += (baseInol * mRest * mRpe);
+                    totalInol += (r / (100 - intensity)) * mRpe;
                 }
             });
 
-            document.getElementById('result-panel').classList.remove('hidden');
-            document.getElementById('totalVal').innerText = totalAdjustedInol.toFixed(2);
-
-            const status = document.getElementById('status-text');
+            const display = document.getElementById('totalVal');
+            const pill = document.getElementById('status-pill');
             const desc = document.getElementById('status-desc');
+            
+            display.innerText = totalInol.toFixed(2);
 
-            if (totalAdjustedInol <= 1.0) {
-                status.innerText = "OPTIMAL";
-                status.className = "text-2xl font-bold text-emerald-500";
-                desc.innerText = "Perfect balance. You are stimulating growth without over-reaching.";
-            } else if (totalAdjustedInol <= 1.5) {
-                status.innerText = "HEAVY TAX";
-                status.className = "text-2xl font-bold text-orange-500";
-                desc.innerText = "Significant systemic fatigue. You'll need extra recovery time.";
+            if (totalInol < 0.4) {
+                pill.className = "inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase bg-slate-800 text-slate-500 mb-2";
+                pill.innerText = "Underloaded";
+                desc.innerText = "Minimal stimulus. Good for active recovery only.";
+            } else if (totalInol <= 1.0) {
+                pill.className = "inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-400 mb-2";
+                pill.innerText = "Optimal";
+                desc.innerText = "The sweet spot for growth. Safe to repeat this weekly.";
             } else {
-                status.innerText = "REDLINE";
-                status.className = "text-2xl font-bold text-red-500";
-                desc.innerText = "Overtraining risk. If you keep this up, you'll regress or snap.";
+                pill.className = "inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase bg-red-500/20 text-red-400 mb-2";
+                pill.innerText = "High Stress";
+                desc.innerText = "Recovery debt incurred. Do not hit this exercise for 4-5 days.";
             }
         }
-
-        // Initialize with one row
-        addSetRow();
     </script>
 </body>
 </html>
