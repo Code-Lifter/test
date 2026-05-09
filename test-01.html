@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INOL Lab</title>
+    <title>INOL Lab V2 | Autoregulation Engine</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -12,290 +11,251 @@
             --bg: #060a10;
             --surface: #0d1420;
             --border: #1a2336;
+            --accent: #3b82f6;
+            --accent-bg: #0f2040;
         }
         * { box-sizing: border-box; }
         body { font-family: 'Syne', system-ui, sans-serif; background: var(--bg); color: #e2e8f0; min-height: 100vh; }
         .mono { font-family: 'DM Mono', 'Courier New', monospace; }
 
-```
-    .zone-easy { color: #64748b; }
-    .zone-good { color: #10b981; }
-    .zone-hard { color: #f59e0b; }
-    .zone-max  { color: #ef4444; }
+        .zone-easy { color: #64748b; }
+        .zone-good { color: #10b981; }
+        .zone-hard { color: #f59e0b; }
+        .zone-max  { color: #ef4444; }
 
-    .preset-btn {
-        transition: all 0.18s ease;
-        border: 1px solid #1a2336;
-        background: #0d1420;
-        cursor: pointer;
-        text-align: left;
-    }
-    .preset-btn:hover { border-color: #334155; background: #111827; }
-    .preset-btn.active { border-color: var(--accent); background: var(--accent-bg); }
+        .preset-btn {
+            transition: all 0.18s ease;
+            border: 1px solid #1a2336;
+            background: #0d1420;
+            cursor: pointer;
+            text-align: left;
+        }
+        .preset-btn:hover { border-color: #334155; background: #111827; }
+        .preset-btn.active { border-color: var(--accent); background: var(--accent-bg); }
 
-    .cat-label {
-        font-size: 9px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        color: #475569;
-        margin-bottom: 6px;
-        padding-left: 2px;
-    }
+        .cat-label {
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #475569;
+            margin-bottom: 6px;
+            padding-left: 2px;
+        }
 
-    @keyframes slideIn {
-        from { opacity: 0; transform: translateY(-6px); }
-        to   { opacity: 1; transform: translateY(0); }
-    }
-    .set-row { animation: slideIn 0.18s ease forwards; }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .set-row { animation: slideIn 0.18s ease forwards; }
 
-    input[type=number]::-webkit-inner-spin-button,
-    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
-    input[type=range] { accent-color: #3b82f6; cursor: pointer; }
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+        input[type=range] { accent-color: var(--accent); cursor: pointer; }
 
-    .inol-bar { transition: width 0.5s cubic-bezier(0.4,0,0.2,1), background 0.5s ease; }
-    .score-num { transition: color 0.4s ease; }
+        .inol-bar { transition: width 0.5s cubic-bezier(0.4,0,0.2,1), background 0.5s ease; }
+        .score-num { transition: color 0.4s ease; }
 
-    select option { background: #0d1420; }
+        select option { background: #0d1420; }
 
-    /* subtle grid texture */
-    body::before {
-        content: '';
-        position: fixed;
-        inset: 0;
-        background-image: linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
-                          linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
-        background-size: 32px 32px;
-        pointer-events: none;
-        z-index: 0;
-    }
-    .content { position: relative; z-index: 1; }
-</style>
-```
-
+        /* Subtle grid texture */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 32px 32px;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .content { position: relative; z-index: 1; }
+    </style>
 </head>
 <body class="p-4 md:p-8">
-<div class="content max-w-4xl mx-auto">
+<div class="content max-w-5xl mx-auto">
 
-```
-<!-- HEADER -->
-<div class="flex items-start justify-between mb-8">
-    <div>
-        <h1 class="text-2xl font-extrabold tracking-tight">INOL <span class="text-blue-400">Lab</span></h1>
-        <p class="text-[10px] text-slate-600 mono mt-0.5 uppercase tracking-widest">Index of Nastiness · Session Planner</p>
-    </div>
-    <!-- Unit toggle -->
-    <div class="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl p-1">
-        <button id="unit-kg" onclick="setUnit('kg')"
-            class="px-3 py-1.5 rounded-lg text-[11px] font-bold transition bg-blue-600 text-white">KG</button>
-        <button id="unit-lbs" onclick="setUnit('lbs')"
-            class="px-3 py-1.5 rounded-lg text-[11px] font-bold transition text-slate-500 hover:text-slate-300">LBS</button>
-    </div>
-</div>
-
-<div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
-
-    <!-- ── LEFT: Input ── -->
-    <div class="lg:col-span-3 space-y-4">
-
-        <!-- 1RM -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">
-                1-Rep Max (<span id="unit-label">kg</span>)
-            </label>
-            <div class="flex items-center gap-4">
-                <input type="number" id="oneRm" oninput="autoCalculate()"
-                    class="flex-1 bg-slate-950 border border-slate-700 rounded-xl p-4 text-4xl font-black mono focus:ring-2 focus:ring-blue-500 outline-none"
-                    placeholder="240">
-                <div id="oneRmConverted" class="text-sm mono text-slate-600 whitespace-nowrap"></div>
-            </div>
+    <!-- HEADER -->
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
+        <div>
+            <h1 class="text-3xl font-extrabold tracking-tight">INOL <span class="text-blue-500">Lab V2</span></h1>
+            <p class="text-[10px] text-slate-500 mono mt-1 uppercase tracking-widest">Dynamic Autoregulation Engine</p>
         </div>
-
-        <!-- Presets -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-5">
-            <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Training Presets</h3>
-
-            <!-- Powerlifting -->
-            <div>
-                <div class="cat-label">⚡ Powerlifting</div>
-                <div class="grid grid-cols-3 gap-2">
-                    <button id="preset-5x5" onclick="loadPreset('5x5')" class="preset-btn rounded-xl p-3">
-                        <div class="text-xs font-bold">5×5</div>
-                        <div class="text-[9px] mono text-slate-600 mt-0.5">85% · RPE 8</div>
-                    </button>
-                    <button id="preset-3x3" onclick="loadPreset('3x3')" class="preset-btn rounded-xl p-3">
-                        <div class="text-xs font-bold">3×3</div>
-                        <div class="text-[9px] mono text-slate-600 mt-0.5">92% · RPE 9</div>
-                    </button>
-                    <button id="preset-531" onclick="loadPreset('531')" class="preset-btn rounded-xl p-3">
-                        <div class="text-xs font-bold">5/3/1</div>
-                        <div class="text-[9px] mono text-slate-600 mt-0.5">Wave · 65–85%</div>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Bodybuilding -->
-            <div>
-                <div class="cat-label">💪 Bodybuilding</div>
-                <div class="grid grid-cols-3 gap-2">
-                    <button id="preset-3x12" onclick="loadPreset('3x12')" class="preset-btn rounded-xl p-3">
-                        <div class="text-xs font-bold">3×12</div>
-                        <div class="text-[9px] mono text-slate-600 mt-0.5">67% · RPE 8</div>
-                    </button>
-                    <button id="preset-4x10" onclick="loadPreset('4x10')" class="preset-btn rounded-xl p-3">
-                        <div class="text-xs font-bold">4×10</div>
-                        <div class="text-[9px] mono text-slate-600 mt-0.5">70% · RPE 8</div>
-                    </button>
-                    <button id="preset-gvt" onclick="loadPreset('gvt')" class="preset-btn rounded-xl p-3">
-                        <div class="text-xs font-bold">GVT</div>
-                        <div class="text-[9px] mono text-slate-600 mt-0.5">10×10 · 60%</div>
-                    </button>
-                </div>
-            </div>
-
-            <!-- High Intensity -->
-            <div>
-                <div class="cat-label">🔥 High Intensity</div>
-                <div class="grid grid-cols-2 gap-2">
-                    <button id="preset-dorian" onclick="loadPreset('dorian')" class="preset-btn rounded-xl p-3">
-                        <div class="text-xs font-bold">Dorian Yates</div>
-                        <div class="text-[9px] mono text-slate-600 mt-0.5">Heavy Duty · 2 sets to failure</div>
-                    </button>
-                    <button id="preset-mentzer" onclick="loadPreset('mentzer')" class="preset-btn rounded-xl p-3">
-                        <div class="text-xs font-bold">Mike Mentzer</div>
-                        <div class="text-[9px] mono text-slate-600 mt-0.5">1 set · beyond failure</div>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Intensity Techniques -->
-            <div>
-                <div class="cat-label">⚙️ Techniques</div>
-                <div class="grid grid-cols-3 gap-2">
-                    <button id="preset-dropset" onclick="loadPreset('dropset')" class="preset-btn rounded-xl p-3">
-                        <div class="text-xs font-bold">Drop Set</div>
-                        <div class="text-[9px] mono text-slate-600 mt-0.5">Top → strip down</div>
-                    </button>
-                    <button id="preset-restpause" onclick="loadPreset('restpause')" class="preset-btn rounded-xl p-3">
-                        <div class="text-xs font-bold">Rest-Pause</div>
-                        <div class="text-[9px] mono text-slate-600 mt-0.5">Cluster + mini-rest</div>
-                    </button>
-                    <button id="preset-cluster" onclick="loadPreset('cluster')" class="preset-btn rounded-xl p-3">
-                        <div class="text-xs font-bold">Clusters</div>
-                        <div class="text-[9px] mono text-slate-600 mt-0.5">5×(3+3) · 85%</div>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Sets -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Session Sets</h3>
-                <button onclick="clearSets()" class="text-[10px] text-slate-700 hover:text-red-400 font-bold transition">Clear all</button>
-            </div>
-
-            <!-- Column headers -->
-            <div class="grid grid-cols-12 gap-2 mb-2 px-0.5">
-                <div class="col-span-3 text-[9px] text-slate-600 uppercase font-bold tracking-wider">Exercise</div>
-                <div class="col-span-2 text-[9px] text-slate-600 uppercase font-bold tracking-wider">Weight</div>
-                <div class="col-span-1 text-[9px] text-slate-600 uppercase font-bold tracking-wider">Reps</div>
-                <div class="col-span-2 text-[9px] text-slate-600 uppercase font-bold tracking-wider">RPE</div>
-                <div class="col-span-3 text-[9px] text-slate-600 uppercase font-bold tracking-wider">Intensity</div>
-                <div class="col-span-1"></div>
-            </div>
-
-            <div id="sets-container" class="space-y-2"></div>
-
-            <button onclick="addSetRow()" class="mt-4 text-xs font-bold text-blue-400 hover:text-blue-300 transition">
-                + Add Set
-            </button>
+        <div class="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl p-1">
+            <button id="unit-kg" onclick="setUnit('kg')" class="px-4 py-2 rounded-lg text-[11px] font-bold transition bg-blue-600 text-white shadow-lg">KG</button>
+            <button id="unit-lbs" onclick="setUnit('lbs')" class="px-4 py-2 rounded-lg text-[11px] font-bold transition text-slate-500 hover:text-slate-300">LBS</button>
         </div>
     </div>
 
-    <!-- ── RIGHT: Analysis ── -->
-    <div class="lg:col-span-2 space-y-4">
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
 
-        <!-- Score card -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-            <div class="flex justify-between items-center mb-2">
-                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Session INOL</span>
-                <button onclick="calculateFinal()"
-                    class="bg-blue-600 hover:bg-blue-500 px-4 py-1.5 rounded-full text-[10px] font-bold transition">
-                    Run Math
+        <!-- ── LEFT: INPUT ── -->
+        <div class="lg:col-span-3 space-y-6">
+
+            <!-- 1RM Baseline -->
+            <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl backdrop-blur-sm">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">
+                    Target Exercise 1-Rep Max (<span id="unit-label">kg</span>)
+                </label>
+                <div class="flex items-center gap-4">
+                    <input type="number" id="oneRm" oninput="autoCalculate()"
+                        class="flex-1 bg-slate-950 border border-slate-700 rounded-2xl p-4 text-4xl font-black mono focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        placeholder="140">
+                    <div id="oneRmConverted" class="text-sm mono text-slate-600 whitespace-nowrap"></div>
+                </div>
+            </div>
+
+            <!-- Set Entry -->
+            <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl backdrop-blur-sm">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Session Data</h3>
+                    <button onclick="clearSets()" class="text-[10px] text-slate-600 hover:text-red-400 font-bold transition px-2 py-1 rounded bg-slate-950">Clear all</button>
+                </div>
+
+                <!-- Column Headers -->
+                <div class="grid grid-cols-12 gap-2 mb-3 px-1">
+                    <div class="col-span-3 text-[9px] text-slate-500 uppercase font-bold tracking-wider">Exercise</div>
+                    <div class="col-span-2 text-[9px] text-slate-500 uppercase font-bold tracking-wider">Weight</div>
+                    <div class="col-span-2 text-[9px] text-slate-500 uppercase font-bold tracking-wider">Reps</div>
+                    <div class="col-span-2 text-[9px] text-slate-500 uppercase font-bold tracking-wider text-center">RPE</div>
+                    <div class="col-span-2 text-[9px] text-slate-500 uppercase font-bold tracking-wider text-right">Load %</div>
+                    <div class="col-span-1"></div>
+                </div>
+
+                <div id="sets-container" class="space-y-3"></div>
+
+                <button onclick="addSetRow()" class="mt-6 w-full py-3 rounded-xl border border-dashed border-slate-700 text-xs font-bold text-blue-400 hover:text-blue-300 hover:border-blue-500 hover:bg-slate-950 transition">
+                    + Add Custom Set
                 </button>
             </div>
 
-            <div id="totalVal" class="text-7xl font-black mono tracking-tighter my-3 score-num text-slate-200">—</div>
-
-            <div id="status-pill"
-                class="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase bg-slate-800 text-slate-500 mb-3">
-                Standby
-            </div>
-            <p id="status-desc" class="text-xs text-slate-500 leading-relaxed">Add sets to begin.</p>
-
-            <!-- INOL bar -->
-            <div class="mt-5">
-                <div class="h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                    <div id="inol-bar" class="h-full rounded-full inol-bar bg-blue-500" style="width:0%"></div>
-                </div>
-                <div class="flex justify-between mt-1.5">
-                    <span class="text-[9px] mono text-slate-700">0</span>
-                    <span class="text-[9px] mono text-slate-700">0.4</span>
-                    <span class="text-[9px] mono text-slate-700">1.0</span>
-                    <span class="text-[9px] mono text-slate-700">2.0+</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Per-exercise breakdown -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-            <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">By Exercise</h3>
-            <div id="exercise-breakdown">
-                <p class="text-xs text-slate-700">Name your sets to see breakdown.</p>
-            </div>
-        </div>
-
-        <!-- Prescription box -->
-        <div id="suggestion-box" class="hidden bg-blue-950/30 border border-blue-900/40 rounded-2xl p-5 space-y-4">
-            <h4 class="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Prescription</h4>
-            <!-- Stats row -->
-            <div class="grid grid-cols-2 gap-2">
-                <div class="bg-blue-950/40 rounded-xl p-3">
-                    <div class="text-[9px] font-bold text-blue-500 uppercase tracking-wider mb-1">Rest Between Sets</div>
-                    <div id="rx-rest" class="text-sm font-bold text-blue-100 mono">—</div>
-                </div>
-                <div class="bg-blue-950/40 rounded-xl p-3">
-                    <div class="text-[9px] font-bold text-blue-500 uppercase tracking-wider mb-1">Frequency</div>
-                    <div id="rx-freq" class="text-sm font-bold text-blue-100 mono">—</div>
+            <!-- Presets (Data Entry Only) -->
+            <div class="bg-slate-900/50 border border-slate-800 rounded-3xl p-6">
+                <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Quick Load Presets (Initializes Data)</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <div class="cat-label">Strength & Volume</div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="preset-5x5" onclick="loadPreset('5x5')" class="preset-btn rounded-xl p-3">
+                                <div class="text-xs font-bold text-slate-200">5×5 Base</div>
+                                <div class="text-[9px] mono text-slate-500 mt-1">85% · RPE 8</div>
+                            </button>
+                            <button id="preset-3x3" onclick="loadPreset('3x3')" class="preset-btn rounded-xl p-3">
+                                <div class="text-xs font-bold text-slate-200">3×3 Peak</div>
+                                <div class="text-[9px] mono text-slate-500 mt-1">92% · RPE 9</div>
+                            </button>
+                            <button id="preset-4x10" onclick="loadPreset('4x10')" class="preset-btn rounded-xl p-3">
+                                <div class="text-xs font-bold text-slate-200">4×10 Hyper</div>
+                                <div class="text-[9px] mono text-slate-500 mt-1">70% · RPE 8</div>
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="cat-label">High Intensity</div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="preset-dorian" onclick="loadPreset('dorian')" class="preset-btn rounded-xl p-3 border-red-900/30">
+                                <div class="text-xs font-bold text-slate-200">Heavy Duty</div>
+                                <div class="text-[9px] mono text-red-500/70 mt-1">1x Max Effort</div>
+                            </button>
+                            <button id="preset-mentzer" onclick="loadPreset('mentzer')" class="preset-btn rounded-xl p-3 border-red-900/30">
+                                <div class="text-xs font-bold text-slate-200">Mentzer HIT</div>
+                                <div class="text-[9px] mono text-red-500/70 mt-1">Beyond Failure</div>
+                            </button>
+                            <button id="preset-dropset" onclick="loadPreset('dropset')" class="preset-btn rounded-xl p-3 border-amber-900/30">
+                                <div class="text-xs font-bold text-slate-200">Drop Set</div>
+                                <div class="text-[9px] mono text-amber-500/70 mt-1">Top → Strip</div>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <p id="suggestion-text" class="text-xs text-blue-200/70 leading-relaxed"></p>
+
         </div>
 
-        <!-- Note on RPE modifier -->
-        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4">
-            <p class="text-[10px] text-slate-600 leading-relaxed mono italic">
-                RPE modifies INOL: 6→×0.75 · 8→×1.0 · 10→×1.25. Pure Hristov uses reps/(100−intensity) only.
-            </p>
-        </div>
+        <!-- ── RIGHT: ANALYSIS ENGINE ── -->
+        <div class="lg:col-span-2 space-y-6">
 
-        <!-- Warning -->
-        <div class="bg-amber-950/20 border border-amber-900/30 rounded-2xl p-4">
-            <p class="text-amber-600/80 text-[10px] italic leading-relaxed">
-                "If set 1 feels like RPE 10, your 1RM is outdated. Stop and reassess."
-            </p>
+            <!-- Global Score Card -->
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden">
+                <!-- Abstract background glow -->
+                <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="flex justify-between items-center mb-4 relative z-10">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Global CNS Tax</span>
+                    <button onclick="calculateFinal()" class="bg-blue-600 hover:bg-blue-500 px-5 py-2 rounded-lg text-[10px] font-bold transition shadow-lg">Run Math</button>
+                </div>
+
+                <div class="flex items-end gap-4 mb-4 relative z-10">
+                    <div id="totalVal" class="text-7xl font-black mono tracking-tighter score-num text-slate-200 leading-none">—</div>
+                    <div class="pb-2">
+                        <div id="status-pill" class="inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase bg-slate-800 text-slate-500 tracking-widest border border-slate-700">Standby</div>
+                    </div>
+                </div>
+
+                <div class="mt-6 relative z-10">
+                    <div class="h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+                        <div id="inol-bar" class="h-full rounded-full inol-bar bg-slate-800" style="width:0%"></div>
+                    </div>
+                    <div class="flex justify-between mt-2 px-1">
+                        <span class="text-[9px] font-bold text-slate-600">0.0</span>
+                        <span class="text-[9px] font-bold text-slate-600">1.0</span>
+                        <span class="text-[9px] font-bold text-slate-600">2.0</span>
+                        <span class="text-[9px] font-bold text-slate-600">3.0+</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dynamic Prescription Engine -->
+            <div id="prescription-engine" class="hidden bg-slate-900/90 border border-blue-900/30 rounded-3xl p-6 shadow-xl">
+                <h4 class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    Adaptive Prescription
+                </h4>
+                
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="bg-slate-950 rounded-2xl p-4 border border-slate-800">
+                        <div class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Target Rest</div>
+                        <div id="rx-rest" class="text-base font-bold text-slate-200 mono">—</div>
+                    </div>
+                    <div class="bg-slate-950 rounded-2xl p-4 border border-slate-800">
+                        <div class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Next Session</div>
+                        <div id="rx-freq" class="text-base font-bold text-slate-200 mono">—</div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950 rounded-2xl p-4 border border-slate-800">
+                    <p id="rx-note" class="text-sm text-slate-300 leading-relaxed"></p>
+                </div>
+            </div>
+
+            <!-- Local Tissue Fatigue (Exercise Map) -->
+            <div class="bg-slate-900/50 border border-slate-800 rounded-3xl p-6">
+                <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Local Tissue Fatigue</h3>
+                <div id="exercise-breakdown" class="space-y-4">
+                    <p class="text-xs text-slate-600 italic">Name your sets to analyze isolated damage.</p>
+                </div>
+            </div>
+
         </div>
     </div>
-</div>
-```
-
 </div>
 
 <script>
     let currentUnit = 'kg';
 
-    // ── Unit system ───────────────────────────────────────
+    // ── Nonlinear RPE Map (The CNS Reality) ────────────────
+    function getRpeMultiplier(rpe) {
+        const map = {
+            6: 0.70, 6.5: 0.76, 7: 0.83, 7.5: 0.91,
+            8: 1.00, 8.5: 1.12, 9: 1.28, 9.5: 1.48, 10: 1.75
+        };
+        // Ensure we snap to nearest half step if slider allows granular, otherwise fallback
+        const roundedRpe = Math.round(rpe * 2) / 2;
+        return map[roundedRpe] || 1.0;
+    }
+
+    // ── Unit System ───────────────────────────────────────
     function setUnit(unit) {
         const old = currentUnit;
         currentUnit = unit;
@@ -303,8 +263,8 @@
         ['kg','lbs'].forEach(u => {
             const btn = document.getElementById('unit-' + u);
             btn.className = u === unit
-                ? 'px-3 py-1.5 rounded-lg text-[11px] font-bold transition bg-blue-600 text-white'
-                : 'px-3 py-1.5 rounded-lg text-[11px] font-bold transition text-slate-500 hover:text-slate-300';
+                ? 'px-4 py-2 rounded-lg text-[11px] font-bold transition bg-blue-600 text-white shadow-lg'
+                : 'px-4 py-2 rounded-lg text-[11px] font-bold transition text-slate-500 hover:text-slate-300 bg-transparent';
         });
         document.getElementById('unit-label').textContent = unit;
 
@@ -330,29 +290,41 @@
             : `${Math.round(val / 2.2046)} kg`;
     }
 
-    // ── Set rows ──────────────────────────────────────────
+    // ── DOM Rows ──────────────────────────────────────────
     function addSetRow(exercise = '', weight = '', reps = '', rpe = 8) {
         const container = document.getElementById('sets-container');
         const div = document.createElement('div');
-        div.className = 'set-row grid grid-cols-12 gap-2 items-center';
+        div.className = 'set-row grid grid-cols-12 gap-2 items-center bg-slate-950 p-2 rounded-xl border border-slate-800';
 
-        const base = 'w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs mono focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500';
+        const baseInput = 'w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm mono text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors';
 
         div.innerHTML = `
-            <input type="text"   class="col-span-3 ${base} set-exercise" value="${exercise}" placeholder="e.g. Squat"  oninput="autoCalculate()">
-            <input type="number" class="col-span-2 ${base} set-weight"   value="${weight}"   placeholder="Wt"           oninput="autoCalculate()">
-            <input type="number" class="col-span-1 ${base} set-reps"     value="${reps}"     placeholder="#"            oninput="autoCalculate()">
-            <div class="col-span-2 flex flex-col items-center gap-0.5">
+            <input type="text"   class="col-span-3 ${baseInput} set-exercise" value="${exercise}" placeholder="Exercise" oninput="autoCalculate()">
+            <input type="number" class="col-span-2 ${baseInput} set-weight"   value="${weight}"   placeholder="Wt"       oninput="autoCalculate()">
+            <input type="number" class="col-span-2 ${baseInput} set-reps"     value="${reps}"     placeholder="Reps"     oninput="autoCalculate()">
+            
+            <div class="col-span-2 flex flex-col justify-center px-2">
                 <input type="range" class="w-full set-rpe" min="6" max="10" step="0.5" value="${rpe}"
-                    oninput="this.nextElementSibling.textContent=parseFloat(this.value).toFixed(1);autoCalculate()">
-                <span class="text-[9px] mono text-slate-500">${parseFloat(rpe).toFixed(1)}</span>
+                    oninput="this.nextElementSibling.textContent=parseFloat(this.value).toFixed(1); autoCalculate(); updateRpeColor(this)">
+                <span class="text-[10px] font-bold text-center mt-1 text-slate-400 rpe-label">${parseFloat(rpe).toFixed(1)}</span>
             </div>
-            <div class="col-span-3 set-intensity-badge"></div>
+            
+            <div class="col-span-2 text-right set-intensity-badge flex justify-end items-center pr-2"></div>
+            
             <button onclick="this.closest('.set-row').remove();autoCalculate()"
-                class="col-span-1 text-slate-700 hover:text-red-500 text-xs transition text-right leading-none">✕</button>
+                class="col-span-1 flex justify-center items-center w-full h-full text-slate-600 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition">✕</button>
         `;
         container.appendChild(div);
+        updateRpeColor(div.querySelector('.set-rpe'));
         updateIntensityBadge(div);
+    }
+
+    function updateRpeColor(slider) {
+        const val = parseFloat(slider.value);
+        const label = slider.nextElementSibling;
+        if (val >= 9.5) { label.style.color = '#ef4444'; } // Red
+        else if (val >= 8.5) { label.style.color = '#f59e0b'; } // Amber
+        else { label.style.color = '#94a3b8'; } // Slate
     }
 
     function updateIntensityBadge(row) {
@@ -361,22 +333,14 @@
         const badge = row.querySelector('.set-intensity-badge');
 
         if (!oneRm || !w) {
-            badge.innerHTML = '<span class="text-[9px] mono text-slate-700">—</span>';
+            badge.innerHTML = '<span class="text-xs mono font-bold text-slate-700">—</span>';
             return;
         }
 
         const pct = (w / oneRm) * 100;
-        let cls, label;
-        if      (pct < 60) { cls = 'zone-easy'; label = 'Easy'; }
-        else if (pct < 75) { cls = 'zone-good'; label = 'Mod'; }
-        else if (pct < 85) { cls = 'zone-hard'; label = 'Hard'; }
-        else               { cls = 'zone-max';  label = 'Max';  }
-
-        badge.innerHTML = `
-            <span class="inline-flex items-center gap-1 ${cls}">
-                <span class="text-[10px] mono font-bold">${pct.toFixed(0)}%</span>
-                <span class="text-[9px] opacity-60">${label}</span>
-            </span>`;
+        let colorCls = pct >= 100 ? 'text-red-500' : pct >= 85 ? 'text-amber-500' : 'text-emerald-500';
+        
+        badge.innerHTML = `<span class="text-xs mono font-black ${colorCls}">${pct.toFixed(0)}%</span>`;
     }
 
     function clearSets() {
@@ -384,173 +348,176 @@
         autoCalculate();
     }
 
-    // ── Presets ───────────────────────────────────────────
+    // ── Presets (Data Entry Only, NO hardcoded advice) ────
     const PRESETS = {
-        '5x5':       { label: '5×5 — StrongLifts',        pct: 0.85, sets: [[5,5,8],[5,5,8],[5,5,8],[5,5,8],[5,5,8]],                    rest: '3–5 min',  freq: '3× per week',     note: '5 sets × 5 reps at 85% 1RM. The cornerstone of linear progression. Add 2.5kg each session until you stall.' },
-        '3x3':       { label: '3×3 — Peaking',             pct: 0.92, sets: [[3,3,9],[3,3,9],[3,3,9]],                                    rest: '4–6 min',  freq: '1–2× per week',   note: '3 sets × 3 reps at 92% 1RM. Heavy peaking protocol — use in the final 2–3 weeks before a max attempt.' },
-        '531':       { label: 'Wendler 5/3/1 — Week 1',    pct: 0.65, sets: [[0.65,5,7],[0.75,5,8],[0.85,5,9]],  wave: true,              rest: '3–5 min',  freq: '4× per week',     note: 'Wave loading: 65%×5, 75%×5, 85%×5+. The "+" set — do as many reps as possible at RPE 9+. Cycles through 5/3/1 weeks before a deload.' },
-        '3x12':      { label: '3×12 — Hypertrophy',        pct: 0.67, sets: [[12,12,8],[12,12,8],[12,12,8]],                              rest: '60–90 sec', freq: '2× per week',    note: '3 sets × 12 reps at ~67% 1RM. Classic bodybuilding hypertrophy range. Keep rest short to maintain metabolic stress.' },
-        '4x10':      { label: '4×10 — Volume Block',       pct: 0.70, sets: [[10,10,8],[10,10,8],[10,10,8],[10,10,8]],                    rest: '90 sec',   freq: '2× per week',     note: '4 sets × 10 reps at 70% 1RM. High volume accumulation phase. Do not increase weight until all 4×10 feel like RPE 7.' },
-        'gvt':       { label: 'GVT — German Volume',       pct: 0.60, sets: Array(10).fill([10,10,8]),                                    rest: '60 sec',   freq: '1× per week',     note: '10 sets × 10 reps at 60% 1RM. Extreme volume — expect INOL well above 2.0. Use every 4–6 weeks as a shock block only.' },
-        'dorian':    { label: 'Dorian Yates — Heavy Duty', pct: 0.80, sets: [[8,8,7],[6,6,10]],                                           rest: '2–3 min',  freq: '1× per week',     note: '1 warm-up set at RPE 7, then 1 all-out working set to absolute failure. Dorian trained each muscle once per week and no more.' },
-        'mentzer':   { label: 'Mike Mentzer — HIT',        pct: 0.85, sets: [[6,6,10]],                                                   rest: 'N/A',      freq: 'Every 4–7 days',  note: '1 set to positive failure (RPE 10), then a partner assists forced reps or you immediately drop weight. One set is enough — more is counterproductive by this method.' },
-        'dropset':   { label: 'Drop Set',                  pct: 0.80, sets: [[8,8,9],[6,6,10],[10,10,10]],       drop: [1.0, 0.75, 0.55], rest: '0 sec (drops), 2 min after', freq: '1× per week per muscle', note: 'Top set at 80%, strip to ~75%, strip again to ~55%. No rest between drops — rack, strip plates, go immediately. One triple-drop counts as one brutal working set.' },
-        'restpause': { label: 'Rest-Pause',                pct: 0.80, sets: [[8,8,10],[4,4,9],[3,3,9]],                                   rest: '15 sec between clusters', freq: '1–2× per week', note: 'Hard set to near-failure, 15 sec rest, squeeze out 4 more reps, 15 sec rest, 3 more. Same weight throughout. Physiologically equivalent to one extended set.' },
-        'cluster':   { label: 'Cluster Sets',              pct: 0.85, sets: [[3,3,8],[3,3,8],[3,3,8],[3,3,8],[3,3,8]],                    rest: '20 sec intra-set, 3 min between clusters', freq: '2× per week', note: '5 clusters of 3+3 reps at 85% with 20 sec intra-set rest. Lets you handle near-max loads with far more total reps than straight sets.' },
+        '5x5':       { pct: 0.85, sets: [[0.85,5,8],[0.85,5,8],[0.85,5,8],[0.85,5,8],[0.85,5,8]], label: 'Compound' },
+        '3x3':       { pct: 0.92, sets: [[0.92,3,9],[0.92,3,9],[0.92,3,9]], label: 'Heavy Comp' },
+        '4x10':      { pct: 0.70, sets: [[0.70,10,8],[0.70,10,8],[0.70,10,8],[0.70,10,8]], label: 'Hypertrophy' },
+        'dorian':    { pct: 0.80, sets: [[0.60,8,7], [0.80,8,10]], label: 'Heavy Duty' }, // Warmup + Failure
+        'mentzer':   { pct: 0.85, sets: [[0.85,6,10]], label: 'HIT' }, // 1 set absolute failure
+        'dropset':   { pct: 1.00, sets: [[0.80,8,9],[0.70,6,10],[0.50,10,10]], label: 'Strip Set' }, 
     };
-
-    let activePreset = null;
 
     function loadPreset(key) {
         const oneRm = parseFloat(document.getElementById('oneRm').value);
-        if (!oneRm) { alert('Enter your 1RM first.'); return; }
+        if (!oneRm) { alert('Enter your Target 1RM first to load preset weights.'); return; }
 
         const preset = PRESETS[key];
         if (!preset) return;
 
-        activePreset = key;
-        updatePresetButtons();
         document.getElementById('sets-container').innerHTML = '';
 
-        const sugBox  = document.getElementById('suggestion-box');
-        const sugText = document.getElementById('suggestion-text');
-        sugBox.classList.remove('hidden');
-        document.getElementById('rx-rest').innerText = preset.rest;
-        document.getElementById('rx-freq').innerText = preset.freq;
-        sugText.innerText = preset.note;
-
-        preset.sets.forEach((s, i) => {
-            let w, reps, rpe;
-            if (preset.wave) {
-                // Wendler: s[0] is pct, s[1] is reps, s[2] is rpe
-                w   = Math.round(oneRm * s[0]);
-                reps = s[1];
-                rpe  = s[2];
-            } else if (preset.drop) {
-                // Drop set: different weights per set
-                w   = Math.round(oneRm * preset.pct * preset.drop[i]);
-                reps = s[1];
-                rpe  = s[2];
-            } else {
-                w   = Math.round(oneRm * preset.pct);
-                reps = s[1];
-                rpe  = s[2];
-            }
-            addSetRow('', w, reps, rpe);
+        preset.sets.forEach(s => {
+            const w = Math.round(oneRm * s[0]);
+            addSetRow(preset.label, w, s[1], s[2]);
         });
 
-        calculateFinal();
+        autoCalculate();
     }
 
-    function updatePresetButtons() {
-        const accent = {
-            '5x5':'#3b82f6','3x3':'#3b82f6','531':'#3b82f6',
-            '3x12':'#10b981','4x10':'#10b981','gvt':'#10b981',
-            'dorian':'#ef4444','mentzer':'#ef4444',
-            'dropset':'#f59e0b','restpause':'#f59e0b','cluster':'#f59e0b'
-        };
-        const accentBg = {
-            '5x5':'#0f2040','3x3':'#0f2040','531':'#0f2040',
-            '3x12':'#022c1a','4x10':'#022c1a','gvt':'#022c1a',
-            'dorian':'#2c0a0a','mentzer':'#2c0a0a',
-            'dropset':'#2c1a00','restpause':'#2c1a00','cluster':'#2c1a00'
-        };
-        Object.keys(PRESETS).forEach(k => {
-            const btn = document.getElementById('preset-' + k);
-            if (!btn) return;
-            if (k === activePreset) {
-                btn.style.borderColor = accent[k];
-                btn.style.background  = accentBg[k];
-            } else {
-                btn.style.borderColor = '';
-                btn.style.background  = '';
-            }
-        });
-    }
-
-    // ── Calculation ───────────────────────────────────────
+    // ── V2 Core Engine ────────────────────────────────────
     function autoCalculate() {
         updateConvertedDisplay();
         document.querySelectorAll('.set-row').forEach(updateIntensityBadge);
         calculateFinal();
     }
 
-    function getRpeMultiplier(rpe) {
-        // RPE 6 → ×0.75 · RPE 8 → ×1.0 · RPE 10 → ×1.25
-        return 0.75 + (rpe - 6) * 0.125;
-    }
-
     function calculateFinal() {
         const oneRm = parseFloat(document.getElementById('oneRm').value);
         let totalInol = 0;
         const exerciseMap = {};
+        let supraMaximalDetected = false;
 
         document.querySelectorAll('.set-row').forEach(row => {
             const w   = parseFloat(row.querySelector('.set-weight').value);
             const r   = parseFloat(row.querySelector('.set-reps').value);
             const rpe = parseFloat(row.querySelector('.set-rpe').value);
-            const ex  = row.querySelector('.set-exercise').value.trim() || 'Unnamed';
+            const ex  = row.querySelector('.set-exercise').value.trim() || 'Unnamed Set';
+            
             if (!w || !r || !oneRm) return;
 
             const intensity = (w / oneRm) * 100;
-            if (intensity >= 100) return; // avoid division by zero / nonsense
-            const setInol = (r / (100 - intensity)) * getRpeMultiplier(rpe);
+            
+            // 1. Supramaximal Detection
+            if (intensity >= 100) supraMaximalDetected = true;
+
+            // 2. Denominator Clamp (prevents infinity, allows tracking of overloads)
+            const cappedIntensity = Math.min(intensity, 99);
+            
+            // 3. Nonlinear RPE Scaling
+            const setInol = (r / (100 - cappedIntensity)) * getRpeMultiplier(rpe);
+            
             totalInol += setInol;
             exerciseMap[ex] = (exerciseMap[ex] || 0) + setInol;
         });
 
+        updateUI(totalInol, exerciseMap);
+
+        const highestExerciseInol = Object.keys(exerciseMap).length > 0 
+            ? Math.max(...Object.values(exerciseMap)) 
+            : 0;
+
+        generatePrescription(totalInol, highestExerciseInol, supraMaximalDetected);
+    }
+
+    function updateUI(totalInol, map) {
         const display = document.getElementById('totalVal');
         const pill    = document.getElementById('status-pill');
-        const desc    = document.getElementById('status-desc');
         const bar     = document.getElementById('inol-bar');
-
-        const hasData = Object.keys(exerciseMap).length > 0;
+        const hasData = Object.keys(map).length > 0;
 
         if (!hasData) {
             display.innerText = '—';
             display.style.color = '';
-            pill.className = 'inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase bg-slate-800 text-slate-500 mb-3';
+            pill.className = 'inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-slate-800 text-slate-500 border border-slate-700';
             pill.innerText = 'Standby';
-            desc.innerText = 'Add sets to begin.';
             bar.style.width = '0%';
-            bar.style.background = '#3b82f6';
+            bar.style.background = '#1e293b';
             renderExerciseBreakdown({});
+            document.getElementById('prescription-engine').classList.add('hidden');
             return;
         }
 
         display.innerText = totalInol.toFixed(2);
-        bar.style.width = Math.min((totalInol / 2.0) * 100, 100) + '%';
+        // Visual cap at 3.0 for the bar
+        bar.style.width = Math.min((totalInol / 3.0) * 100, 100) + '%';
 
         if (totalInol < 0.4) {
-            setStatus('Underloaded', 'bg-slate-800 text-slate-400',
-                'Minimal stimulus. Add volume or intensity for meaningful adaptation.',
-                '#475569', '#64748b', display);
+            setStatus('Underloaded', 'bg-slate-800 text-slate-400 border-slate-700', '#64748b', '#94a3b8', display);
         } else if (totalInol <= 1.0) {
-            setStatus('Optimal', 'bg-emerald-900/50 text-emerald-400',
-                'The sweet spot for growth. Safe to repeat this stimulus weekly.',
-                '#10b981', '#10b981', display);
+            setStatus('Productive', 'bg-emerald-900/30 text-emerald-400 border-emerald-800/50', '#10b981', '#34d399', display);
         } else if (totalInol <= 2.0) {
-            setStatus('High Load', 'bg-amber-900/40 text-amber-400',
-                'Significant stress accumulated. Allow 4–5 days before repeating this exercise.',
-                '#f59e0b', '#f59e0b', display);
+            setStatus('High Fatigue', 'bg-amber-900/30 text-amber-400 border-amber-800/50', '#f59e0b', '#fbbf24', display);
         } else {
-            setStatus('Overreached', 'bg-red-900/40 text-red-400',
-                'Excessive volume — recovery debt is likely. Consider reducing sets or intensity.',
-                '#ef4444', '#ef4444', display);
+            setStatus('Recovery Debt', 'bg-red-900/30 text-red-400 border-red-800/50', '#ef4444', '#f87171', display);
         }
 
-        renderExerciseBreakdown(exerciseMap);
+        renderExerciseBreakdown(map);
     }
 
-    function setStatus(label, pillCls, descText, barColor, numColor, numEl) {
+    function setStatus(label, pillCls, barColor, numColor, numEl) {
         const pill = document.getElementById('status-pill');
-        const desc = document.getElementById('status-desc');
         const bar  = document.getElementById('inol-bar');
-        pill.className = `inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase mb-3 ${pillCls}`;
+        pill.className = `inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${pillCls}`;
         pill.innerText = label;
-        desc.innerText = descText;
         bar.style.background = barColor;
         numEl.style.color = numColor;
+    }
+
+    // ── V2 Dynamic Prescription Engine ────────────────────
+    function generatePrescription(totalInol, highestExerciseInol, isSupraMaximal) {
+        if (totalInol === 0) return;
+
+        const engineBox = document.getElementById('prescription-engine');
+        const rxRest    = document.getElementById('rx-rest');
+        const rxFreq    = document.getElementById('rx-freq');
+        const rxNote    = document.getElementById('rx-note');
+        
+        engineBox.classList.remove('hidden');
+
+        let freqAdvice = '';
+        let restAdvice = '';
+        let noteHtml = '';
+
+        // 1. Evaluate Local Tissue Damage
+        if (highestExerciseInol < 0.4) {
+            freqAdvice = '24 Hours';
+            noteHtml = 'Tissue damage is minimal. This acts as active recovery or technique practice.';
+        } else if (highestExerciseInol <= 1.0) {
+            freqAdvice = '48–72 Hours';
+            noteHtml = 'Optimal localized stimulus. Muscle protein synthesis will peak safely. Ready to hit this pattern again in 2-3 days.';
+        } else if (highestExerciseInol <= 1.75) {
+            freqAdvice = '72–96 Hours';
+            noteHtml = 'High localized fatigue. You dug deep here; respect the recovery timeline before applying load to these specific structures again.';
+        } else {
+            freqAdvice = '4–7 Days';
+            noteHtml = '<span class="text-amber-400 font-bold">Massive tissue fatigue detected.</span> Do not repeat this specific movement pattern until fully recovered.';
+        }
+
+        // 2. Evaluate Global Systemic Cost
+        if (totalInol > 2.5) {
+            freqAdvice = 'Deload Recommended';
+            noteHtml += '<br><br><span class="text-red-400 font-bold">SYSTEMIC WARNING:</span> Total session volume is creating a heavy recovery debt. Watch for CNS burnout, grip weakness, or sleep disruption.';
+            engineBox.classList.add('border-red-900/50', 'bg-red-950/20');
+        } else {
+            engineBox.classList.remove('border-red-900/50', 'bg-red-950/20');
+        }
+
+        // 3. Supramaximal Override
+        if (isSupraMaximal) {
+            noteHtml = '<span class="bg-red-900/50 text-red-200 px-2 py-1 rounded text-xs font-bold mr-2">SUPRAMAX DETECTED</span> You exceeded your inputted 1RM. This generates extreme neural fatigue. Recalibrate your baseline if this was a clean PR.<br><br>' + noteHtml;
+        }
+
+        // 4. Autoregulate Rest based on Intensity
+        if (totalInol > 1.5 || highestExerciseInol > 1.0) {
+            restAdvice = '3–5 min+'; // Heavy CNS tax requires ATP replenishment
+        } else {
+            restAdvice = 'Auto (1–2 min)'; // Hypertrophy/Metabolic focus
+        }
+
+        rxFreq.innerText = freqAdvice;
+        rxRest.innerText = restAdvice;
+        rxNote.innerHTML = noteHtml;
     }
 
     function renderExerciseBreakdown(map) {
@@ -558,7 +525,7 @@
         const entries = Object.entries(map);
 
         if (!entries.length) {
-            el.innerHTML = '<p class="text-xs text-slate-700">Name your sets to see breakdown.</p>';
+            el.innerHTML = '<p class="text-xs text-slate-600 italic">Name your sets to analyze isolated damage.</p>';
             return;
         }
 
@@ -566,24 +533,27 @@
 
         el.innerHTML = entries.map(([name, inol]) => {
             let color;
-            if      (inol < 0.4)  color = '#475569';
-            else if (inol <= 1.0) color = '#10b981';
-            else if (inol <= 2.0) color = '#f59e0b';
-            else                  color = '#ef4444';
+            if      (inol < 0.4)  color = '#64748b'; // Slate
+            else if (inol <= 1.0) color = '#10b981'; // Emerald
+            else if (inol <= 1.75) color = '#f59e0b'; // Amber
+            else                  color = '#ef4444'; // Red
 
             const pct = Math.min((inol / Math.max(maxInol, 1.0)) * 100, 100);
             return `
-                <div class="space-y-1">
+                <div class="space-y-1.5 bg-slate-950/50 p-3 rounded-xl border border-slate-800">
                     <div class="flex justify-between items-baseline">
-                        <span class="text-xs font-semibold text-slate-300 truncate max-w-[130px]">${name}</span>
-                        <span class="text-xs mono font-bold" style="color:${color}">${inol.toFixed(2)}</span>
+                        <span class="text-xs font-bold text-slate-300 truncate max-w-[160px] uppercase tracking-wide">${name}</span>
+                        <span class="text-sm mono font-black" style="color:${color}">${inol.toFixed(2)}</span>
                     </div>
-                    <div class="h-1 bg-slate-800 rounded-full overflow-hidden">
-                        <div class="h-full rounded-full inol-bar" style="width:${pct}%;background:${color}"></div>
+                    <div class="h-1.5 bg-slate-900 rounded-full overflow-hidden">
+                        <div class="h-full rounded-full transition-all duration-500 ease-out" style="width:${pct}%;background:${color}"></div>
                     </div>
                 </div>`;
         }).join('');
     }
+
+    // Initialize with one empty row
+    addSetRow();
 </script>
 
 </body>
