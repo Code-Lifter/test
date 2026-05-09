@@ -23,9 +23,25 @@
     .zone-hard { color: #f59e0b; }
     .zone-max  { color: #ef4444; }
 
-    .goal-btn { transition: all 0.2s ease; border: 1px solid #1a2336; }
-    .goal-btn.active-strength { background: #0f2040; border-color: #3b82f6; }
-    .goal-btn.active-volume   { background: #022c1a; border-color: #10b981; }
+    .preset-btn {
+        transition: all 0.18s ease;
+        border: 1px solid #1a2336;
+        background: #0d1420;
+        cursor: pointer;
+        text-align: left;
+    }
+    .preset-btn:hover { border-color: #334155; background: #111827; }
+    .preset-btn.active { border-color: var(--accent); background: var(--accent-bg); }
+
+    .cat-label {
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: #475569;
+        margin-bottom: 6px;
+        padding-left: 2px;
+    }
 
     @keyframes slideIn {
         from { opacity: 0; transform: translateY(-6px); }
@@ -95,20 +111,81 @@
             </div>
         </div>
 
-        <!-- Goal -->
-        <div class="grid grid-cols-2 gap-3">
-            <button id="btn-strength" onclick="generateWorkout('strength')"
-                class="goal-btn bg-slate-900 p-5 rounded-2xl text-left">
-                <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Goal</div>
-                <div class="text-lg font-bold">Strength</div>
-                <div class="text-[10px] mono text-slate-500 mt-1">85% · 3–4 reps</div>
-            </button>
-            <button id="btn-volume" onclick="generateWorkout('volume')"
-                class="goal-btn bg-slate-900 p-5 rounded-2xl text-left">
-                <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Goal</div>
-                <div class="text-lg font-bold">Volume</div>
-                <div class="text-[10px] mono text-slate-500 mt-1">75% · 8–10 reps</div>
-            </button>
+        <!-- Presets -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-5">
+            <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Training Presets</h3>
+
+            <!-- Powerlifting -->
+            <div>
+                <div class="cat-label">⚡ Powerlifting</div>
+                <div class="grid grid-cols-3 gap-2">
+                    <button id="preset-5x5" onclick="loadPreset('5x5')" class="preset-btn rounded-xl p-3">
+                        <div class="text-xs font-bold">5×5</div>
+                        <div class="text-[9px] mono text-slate-600 mt-0.5">85% · RPE 8</div>
+                    </button>
+                    <button id="preset-3x3" onclick="loadPreset('3x3')" class="preset-btn rounded-xl p-3">
+                        <div class="text-xs font-bold">3×3</div>
+                        <div class="text-[9px] mono text-slate-600 mt-0.5">92% · RPE 9</div>
+                    </button>
+                    <button id="preset-531" onclick="loadPreset('531')" class="preset-btn rounded-xl p-3">
+                        <div class="text-xs font-bold">5/3/1</div>
+                        <div class="text-[9px] mono text-slate-600 mt-0.5">Wave · 65–85%</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bodybuilding -->
+            <div>
+                <div class="cat-label">💪 Bodybuilding</div>
+                <div class="grid grid-cols-3 gap-2">
+                    <button id="preset-3x12" onclick="loadPreset('3x12')" class="preset-btn rounded-xl p-3">
+                        <div class="text-xs font-bold">3×12</div>
+                        <div class="text-[9px] mono text-slate-600 mt-0.5">67% · RPE 8</div>
+                    </button>
+                    <button id="preset-4x10" onclick="loadPreset('4x10')" class="preset-btn rounded-xl p-3">
+                        <div class="text-xs font-bold">4×10</div>
+                        <div class="text-[9px] mono text-slate-600 mt-0.5">70% · RPE 8</div>
+                    </button>
+                    <button id="preset-gvt" onclick="loadPreset('gvt')" class="preset-btn rounded-xl p-3">
+                        <div class="text-xs font-bold">GVT</div>
+                        <div class="text-[9px] mono text-slate-600 mt-0.5">10×10 · 60%</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- High Intensity -->
+            <div>
+                <div class="cat-label">🔥 High Intensity</div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="preset-dorian" onclick="loadPreset('dorian')" class="preset-btn rounded-xl p-3">
+                        <div class="text-xs font-bold">Dorian Yates</div>
+                        <div class="text-[9px] mono text-slate-600 mt-0.5">Heavy Duty · 2 sets to failure</div>
+                    </button>
+                    <button id="preset-mentzer" onclick="loadPreset('mentzer')" class="preset-btn rounded-xl p-3">
+                        <div class="text-xs font-bold">Mike Mentzer</div>
+                        <div class="text-[9px] mono text-slate-600 mt-0.5">1 set · beyond failure</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Intensity Techniques -->
+            <div>
+                <div class="cat-label">⚙️ Techniques</div>
+                <div class="grid grid-cols-3 gap-2">
+                    <button id="preset-dropset" onclick="loadPreset('dropset')" class="preset-btn rounded-xl p-3">
+                        <div class="text-xs font-bold">Drop Set</div>
+                        <div class="text-[9px] mono text-slate-600 mt-0.5">Top → strip down</div>
+                    </button>
+                    <button id="preset-restpause" onclick="loadPreset('restpause')" class="preset-btn rounded-xl p-3">
+                        <div class="text-xs font-bold">Rest-Pause</div>
+                        <div class="text-[9px] mono text-slate-600 mt-0.5">Cluster + mini-rest</div>
+                    </button>
+                    <button id="preset-cluster" onclick="loadPreset('cluster')" class="preset-btn rounded-xl p-3">
+                        <div class="text-xs font-bold">Clusters</div>
+                        <div class="text-[9px] mono text-slate-600 mt-0.5">5×(3+3) · 85%</div>
+                    </button>
+                </div>
+            </div>
         </div>
 
         <!-- Sets -->
@@ -180,9 +257,20 @@
         </div>
 
         <!-- Prescription box -->
-        <div id="suggestion-box" class="hidden bg-blue-950/30 border border-blue-900/40 rounded-2xl p-5">
-            <h4 class="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-2">Prescription</h4>
-            <p id="suggestion-text" class="text-xs text-blue-100 leading-relaxed"></p>
+        <div id="suggestion-box" class="hidden bg-blue-950/30 border border-blue-900/40 rounded-2xl p-5 space-y-4">
+            <h4 class="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Prescription</h4>
+            <!-- Stats row -->
+            <div class="grid grid-cols-2 gap-2">
+                <div class="bg-blue-950/40 rounded-xl p-3">
+                    <div class="text-[9px] font-bold text-blue-500 uppercase tracking-wider mb-1">Rest Between Sets</div>
+                    <div id="rx-rest" class="text-sm font-bold text-blue-100 mono">—</div>
+                </div>
+                <div class="bg-blue-950/40 rounded-xl p-3">
+                    <div class="text-[9px] font-bold text-blue-500 uppercase tracking-wider mb-1">Frequency</div>
+                    <div id="rx-freq" class="text-sm font-bold text-blue-100 mono">—</div>
+                </div>
+            </div>
+            <p id="suggestion-text" class="text-xs text-blue-200/70 leading-relaxed"></p>
         </div>
 
         <!-- Note on RPE modifier -->
@@ -206,7 +294,6 @@
 
 <script>
     let currentUnit = 'kg';
-    let activeGoal = null;
 
     // ── Unit system ───────────────────────────────────────
     function setUnit(unit) {
@@ -297,38 +384,88 @@
         autoCalculate();
     }
 
-    // ── Goal generation ───────────────────────────────────
-    function generateWorkout(goal) {
+    // ── Presets ───────────────────────────────────────────
+    const PRESETS = {
+        '5x5':       { label: '5×5 — StrongLifts',        pct: 0.85, sets: [[5,5,8],[5,5,8],[5,5,8],[5,5,8],[5,5,8]],                    rest: '3–5 min',  freq: '3× per week',     note: '5 sets × 5 reps at 85% 1RM. The cornerstone of linear progression. Add 2.5kg each session until you stall.' },
+        '3x3':       { label: '3×3 — Peaking',             pct: 0.92, sets: [[3,3,9],[3,3,9],[3,3,9]],                                    rest: '4–6 min',  freq: '1–2× per week',   note: '3 sets × 3 reps at 92% 1RM. Heavy peaking protocol — use in the final 2–3 weeks before a max attempt.' },
+        '531':       { label: 'Wendler 5/3/1 — Week 1',    pct: 0.65, sets: [[0.65,5,7],[0.75,5,8],[0.85,5,9]],  wave: true,              rest: '3–5 min',  freq: '4× per week',     note: 'Wave loading: 65%×5, 75%×5, 85%×5+. The "+" set — do as many reps as possible at RPE 9+. Cycles through 5/3/1 weeks before a deload.' },
+        '3x12':      { label: '3×12 — Hypertrophy',        pct: 0.67, sets: [[12,12,8],[12,12,8],[12,12,8]],                              rest: '60–90 sec', freq: '2× per week',    note: '3 sets × 12 reps at ~67% 1RM. Classic bodybuilding hypertrophy range. Keep rest short to maintain metabolic stress.' },
+        '4x10':      { label: '4×10 — Volume Block',       pct: 0.70, sets: [[10,10,8],[10,10,8],[10,10,8],[10,10,8]],                    rest: '90 sec',   freq: '2× per week',     note: '4 sets × 10 reps at 70% 1RM. High volume accumulation phase. Do not increase weight until all 4×10 feel like RPE 7.' },
+        'gvt':       { label: 'GVT — German Volume',       pct: 0.60, sets: Array(10).fill([10,10,8]),                                    rest: '60 sec',   freq: '1× per week',     note: '10 sets × 10 reps at 60% 1RM. Extreme volume — expect INOL well above 2.0. Use every 4–6 weeks as a shock block only.' },
+        'dorian':    { label: 'Dorian Yates — Heavy Duty', pct: 0.80, sets: [[8,8,7],[6,6,10]],                                           rest: '2–3 min',  freq: '1× per week',     note: '1 warm-up set at RPE 7, then 1 all-out working set to absolute failure. Dorian trained each muscle once per week and no more.' },
+        'mentzer':   { label: 'Mike Mentzer — HIT',        pct: 0.85, sets: [[6,6,10]],                                                   rest: 'N/A',      freq: 'Every 4–7 days',  note: '1 set to positive failure (RPE 10), then a partner assists forced reps or you immediately drop weight. One set is enough — more is counterproductive by this method.' },
+        'dropset':   { label: 'Drop Set',                  pct: 0.80, sets: [[8,8,9],[6,6,10],[10,10,10]],       drop: [1.0, 0.75, 0.55], rest: '0 sec (drops), 2 min after', freq: '1× per week per muscle', note: 'Top set at 80%, strip to ~75%, strip again to ~55%. No rest between drops — rack, strip plates, go immediately. One triple-drop counts as one brutal working set.' },
+        'restpause': { label: 'Rest-Pause',                pct: 0.80, sets: [[8,8,10],[4,4,9],[3,3,9]],                                   rest: '15 sec between clusters', freq: '1–2× per week', note: 'Hard set to near-failure, 15 sec rest, squeeze out 4 more reps, 15 sec rest, 3 more. Same weight throughout. Physiologically equivalent to one extended set.' },
+        'cluster':   { label: 'Cluster Sets',              pct: 0.85, sets: [[3,3,8],[3,3,8],[3,3,8],[3,3,8],[3,3,8]],                    rest: '20 sec intra-set, 3 min between clusters', freq: '2× per week', note: '5 clusters of 3+3 reps at 85% with 20 sec intra-set rest. Lets you handle near-max loads with far more total reps than straight sets.' },
+    };
+
+    let activePreset = null;
+
+    function loadPreset(key) {
         const oneRm = parseFloat(document.getElementById('oneRm').value);
         if (!oneRm) { alert('Enter your 1RM first.'); return; }
 
-        activeGoal = goal;
-        updateGoalButtons();
+        const preset = PRESETS[key];
+        if (!preset) return;
+
+        activePreset = key;
+        updatePresetButtons();
         document.getElementById('sets-container').innerHTML = '';
 
         const sugBox  = document.getElementById('suggestion-box');
         const sugText = document.getElementById('suggestion-text');
         sugBox.classList.remove('hidden');
+        document.getElementById('rx-rest').innerText = preset.rest;
+        document.getElementById('rx-freq').innerText = preset.freq;
+        sugText.innerText = preset.note;
 
-        if (goal === 'strength') {
-            const w = Math.round(oneRm * 0.85);
-            sugText.innerText = `Strength block: 3–4 sets × 3–4 reps at ${w}${currentUnit}. Targets INOL ~0.7–0.9. Rest 3–5 min between sets.`;
-            for (let i = 0; i < 3; i++) addSetRow('', w, 4, 8);
-        } else {
-            const w = Math.round(oneRm * 0.75);
-            sugText.innerText = `Volume block: 3 sets × 8–10 reps at ${w}${currentUnit}. Targets INOL ~0.9–1.0. Rest 2–3 min between sets.`;
-            for (let i = 0; i < 3; i++) addSetRow('', w, 8, 8);
-        }
+        preset.sets.forEach((s, i) => {
+            let w, reps, rpe;
+            if (preset.wave) {
+                // Wendler: s[0] is pct, s[1] is reps, s[2] is rpe
+                w   = Math.round(oneRm * s[0]);
+                reps = s[1];
+                rpe  = s[2];
+            } else if (preset.drop) {
+                // Drop set: different weights per set
+                w   = Math.round(oneRm * preset.pct * preset.drop[i]);
+                reps = s[1];
+                rpe  = s[2];
+            } else {
+                w   = Math.round(oneRm * preset.pct);
+                reps = s[1];
+                rpe  = s[2];
+            }
+            addSetRow('', w, reps, rpe);
+        });
+
         calculateFinal();
     }
 
-    function updateGoalButtons() {
-        document.getElementById('btn-strength').className =
-            'goal-btn bg-slate-900 p-5 rounded-2xl text-left' +
-            (activeGoal === 'strength' ? ' active-strength' : '');
-        document.getElementById('btn-volume').className =
-            'goal-btn bg-slate-900 p-5 rounded-2xl text-left' +
-            (activeGoal === 'volume' ? ' active-volume' : '');
+    function updatePresetButtons() {
+        const accent = {
+            '5x5':'#3b82f6','3x3':'#3b82f6','531':'#3b82f6',
+            '3x12':'#10b981','4x10':'#10b981','gvt':'#10b981',
+            'dorian':'#ef4444','mentzer':'#ef4444',
+            'dropset':'#f59e0b','restpause':'#f59e0b','cluster':'#f59e0b'
+        };
+        const accentBg = {
+            '5x5':'#0f2040','3x3':'#0f2040','531':'#0f2040',
+            '3x12':'#022c1a','4x10':'#022c1a','gvt':'#022c1a',
+            'dorian':'#2c0a0a','mentzer':'#2c0a0a',
+            'dropset':'#2c1a00','restpause':'#2c1a00','cluster':'#2c1a00'
+        };
+        Object.keys(PRESETS).forEach(k => {
+            const btn = document.getElementById('preset-' + k);
+            if (!btn) return;
+            if (k === activePreset) {
+                btn.style.borderColor = accent[k];
+                btn.style.background  = accentBg[k];
+            } else {
+                btn.style.borderColor = '';
+                btn.style.background  = '';
+            }
+        });
     }
 
     // ── Calculation ───────────────────────────────────────
