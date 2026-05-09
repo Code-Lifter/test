@@ -3,139 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic INOL Tracker</title>
+    <title>Fatigue-Adjusted INOL Lab</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex items-center justify-center p-4">
+<body class="bg-gray-950 text-gray-100 min-h-screen p-4 md:p-8">
 
-    <div class="max-w-2xl w-full bg-slate-800 rounded-2xl shadow-2xl p-6 border border-slate-700">
-        <div class="mb-6">
-            <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">Session Intensity Lab</h1>
-            <p class="text-slate-400 text-sm">Calculates cumulative INOL for non-identical sets.</p>
+    <div class="max-w-4xl mx-auto bg-gray-900 rounded-3xl shadow-2xl border border-gray-800 overflow-hidden">
+        <div class="bg-gradient-to-r from-red-600 to-orange-600 p-6">
+            <h1 class="text-2xl font-black uppercase tracking-tighter italic">Fatigue-Adjusted INOL</h1>
+            <p class="text-red-100 text-xs opacity-80">Autoregulated Volume & Intensity Tracking</p>
         </div>
 
-        <!-- Global 1RM -->
-        <div class="mb-8 p-4 bg-slate-900/50 rounded-xl border border-slate-700">
-            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Exercise 1-Rep Max (Ref)</label>
-            <input type="number" id="oneRm" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500 transition" placeholder="Enter 1RM (e.g., 140kg)">
-        </div>
-
-        <!-- Sets Container -->
-        <div id="sets-container" class="space-y-3 mb-6">
-            <!-- Initial Row -->
-            <div class="set-row grid grid-cols-12 gap-3 items-center animate-in fade-in duration-300">
-                <div class="col-span-5">
-                    <label class="block text-[10px] text-slate-500 mb-1">WEIGHT</label>
-                    <input type="number" class="set-weight w-full bg-slate-700 border-none rounded-lg p-2 text-white" placeholder="Weight">
+        <div class="p-6 space-y-6">
+            <!-- Global 1RM -->
+            <div class="flex flex-col md:flex-row md:items-center gap-4 bg-gray-800/50 p-4 rounded-xl">
+                <div class="flex-1">
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Target Exercise 1-Rep Max</label>
+                    <input type="number" id="oneRm" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-xl font-bold focus:ring-2 focus:ring-orange-500 outline-none" placeholder="e.g. 140">
                 </div>
-                <div class="col-span-5">
-                    <label class="block text-[10px] text-slate-500 mb-1">REPS</label>
-                    <input type="number" class="set-reps w-full bg-slate-700 border-none rounded-lg p-2 text-white" placeholder="Reps">
-                </div>
-                <div class="col-span-2 pt-5">
-                    <button onclick="removeSet(this)" class="text-slate-500 hover:text-red-400 transition">✕</button>
+                <div class="text-xs text-gray-500 max-w-xs italic">
+                    "The math fails if this number is an ego-lift. Use your real, clean-form max."
                 </div>
             </div>
-        </div>
 
-        <!-- Controls -->
-        <div class="flex gap-3 mb-8">
-            <button onclick="addSet()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-sm font-bold py-3 rounded-xl transition">
-                + Add Set
-            </button>
-            <button onclick="calculateTotalInol()" class="flex-[2] bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-900/20 transition">
-                Calculate Total INOL
-            </button>
-        </div>
+            <!-- Headers for Desktop -->
+            <div class="hidden md:grid grid-cols-12 gap-4 px-2 text-[10px] font-bold text-gray-500 uppercase">
+                <div class="col-span-2">Weight</div>
+                <div class="col-span-2">Reps</div>
+                <div class="col-span-3">Rest Taken</div>
+                <div class="col-span-3">Feeling (RPE)</div>
+                <div class="col-span-2 text-right">Action</div>
+            </div>
 
-        <!-- Results Display -->
-        <div id="result-box" class="hidden border-t border-slate-700 pt-6">
-            <div class="flex justify-between items-end">
-                <div>
-                    <span class="text-xs text-slate-500 uppercase font-bold">Cumulative Score</span>
-                    <div id="totalInol" class="text-6xl font-black text-white">0.00</div>
-                </div>
-                <div id="status-pill" class="px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest">
-                    READY
+            <div id="sets-container" class="space-y-4">
+                <!-- Dynamic Rows Go Here -->
+            </div>
+
+            <div class="flex flex-wrap gap-3 pt-4 border-t border-gray-800">
+                <button onclick="addSetRow()" class="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-xl font-bold text-sm transition">+ Add Set</button>
+                <button onclick="calculateFinal()" class="flex-1 px-6 py-3 bg-orange-600 hover:bg-orange-500 rounded-xl font-bold text-sm shadow-lg shadow-orange-900/40 transition">Calculate Fatigue Score</button>
+            </div>
+
+            <!-- Result Panel -->
+            <div id="result-panel" class="hidden mt-8 p-6 bg-black rounded-2xl border-l-4 border-orange-600">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <span class="text-[10px] font-bold text-gray-500 uppercase">Total Fatigue Score (Adjusted INOL)</span>
+                        <div id="totalVal" class="text-7xl font-black">0.00</div>
+                    </div>
+                    <div id="rating" class="text-right">
+                        <div id="status-text" class="text-2xl font-bold text-orange-500">READY</div>
+                        <div id="status-desc" class="text-xs text-gray-400 mt-1 max-w-[200px]">Enter sets to begin analysis.</div>
+                    </div>
                 </div>
             </div>
-            <p id="insight" class="mt-4 text-sm text-slate-400 italic"></p>
         </div>
     </div>
 
     <script>
-        function addSet() {
+        function addSetRow() {
             const container = document.getElementById('sets-container');
-            const newRow = document.createElement('div');
-            newRow.className = "set-row grid grid-cols-12 gap-3 items-center animate-in slide-in-from-top-2 duration-200";
-            newRow.innerHTML = `
-                <div class="col-span-5">
-                    <input type="number" class="set-weight w-full bg-slate-700 border-none rounded-lg p-2 text-white" placeholder="Weight">
-                </div>
-                <div class="col-span-5">
-                    <input type="number" class="set-reps w-full bg-slate-700 border-none rounded-lg p-2 text-white" placeholder="Reps">
+            const div = document.createElement('div');
+            div.className = "set-row grid grid-cols-1 md:grid-cols-12 gap-4 items-end bg-gray-800/30 p-4 rounded-xl border border-gray-800/50";
+            div.innerHTML = `
+                <div class="col-span-2">
+                    <label class="md:hidden text-[10px] text-gray-500">WEIGHT</label>
+                    <input type="number" class="w-full bg-gray-900 border border-gray-700 rounded p-2 set-weight" placeholder="Weight">
                 </div>
                 <div class="col-span-2">
-                    <button onclick="removeSet(this)" class="text-slate-500 hover:text-red-400 transition">✕</button>
+                    <label class="md:hidden text-[10px] text-gray-500">REPS</label>
+                    <input type="number" class="w-full bg-gray-900 border border-gray-700 rounded p-2 set-reps" placeholder="Reps">
+                </div>
+                <div class="col-span-3">
+                    <label class="md:hidden text-[10px] text-gray-500">REST</label>
+                    <select class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm set-rest">
+                        <option value="1.0">> 3 Mins (Full)</option>
+                        <option value="1.15">1-2 Mins (Medium)</option>
+                        <option value="1.25">< 60 Secs (Short)</option>
+                    </select>
+                </div>
+                <div class="col-span-3">
+                    <label class="md:hidden text-[10px] text-gray-500">FEELING</label>
+                    <select class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm set-rpe">
+                        <option value="1.0">RPE 7-8 (Moved Well)</option>
+                        <option value="1.1">RPE 9 (Grinder)</option>
+                        <option value="1.25">RPE 10 (Max Effort)</option>
+                    </select>
+                </div>
+                <div class="col-span-2 text-right">
+                    <button onclick="this.closest('.set-row').remove()" class="text-gray-600 hover:text-red-500">Remove</button>
                 </div>
             `;
-            container.appendChild(newRow);
+            container.appendChild(div);
         }
 
-        function removeSet(btn) {
-            const rows = document.querySelectorAll('.set-row');
-            if (rows.length > 1) {
-                btn.closest('.set-row').remove();
-            }
-        }
-
-        function calculateTotalInol() {
+        function calculateFinal() {
             const oneRm = parseFloat(document.getElementById('oneRm').value);
-            const rows = document.querySelectorAll('.set-row');
-            
-            if (!oneRm) { alert("Reference 1RM required."); return; }
+            if (!oneRm) { alert("Enter your 1RM first."); return; }
 
-            let cumulativeInol = 0;
+            let totalAdjustedInol = 0;
+            const rows = document.querySelectorAll('.set-row');
 
             rows.forEach(row => {
-                const weight = parseFloat(row.querySelector('.set-weight').value);
-                const reps = parseFloat(row.querySelector('.set-reps').value);
-                
-                if (weight && reps) {
-                    const intensity = (weight / oneRm) * 100;
-                    // Formula: Reps / (100 - Intensity)
-                    const setInol = reps / (100 - intensity);
-                    cumulativeInol += setInol;
+                const w = parseFloat(row.querySelector('.set-weight').value);
+                const r = parseFloat(row.querySelector('.set-reps').value);
+                const mRest = parseFloat(row.querySelector('.set-rest').value);
+                const mRpe = parseFloat(row.querySelector('.set-rpe').value);
+
+                if (w && r) {
+                    const intensity = (w / oneRm) * 100;
+                    const baseInol = r / (100 - intensity);
+                    totalAdjustedInol += (baseInol * mRest * mRpe);
                 }
             });
 
-            // UI Updates
-            const resBox = document.getElementById('result-box');
-            const display = document.getElementById('totalInol');
-            const pill = document.getElementById('status-pill');
-            const insight = document.getElementById('insight');
+            document.getElementById('result-panel').classList.remove('hidden');
+            document.getElementById('totalVal').innerText = totalAdjustedInol.toFixed(2);
 
-            resBox.classList.remove('hidden');
-            display.innerText = cumulativeInol.toFixed(2);
+            const status = document.getElementById('status-text');
+            const desc = document.getElementById('status-desc');
 
-            if (cumulativeInol < 0.4) {
-                pill.innerText = "Minimal";
-                pill.className = "px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest bg-slate-700 text-slate-300";
-                insight.innerText = "This is a warm-up or a deload. You aren't challenging your homeostasis here.";
-            } else if (cumulativeInol <= 1.0) {
-                pill.innerText = "Optimal";
-                pill.className = "px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest bg-emerald-900/50 text-emerald-400";
-                insight.innerText = "Excellent stimulus. This builds strength without over-taxing your CNS.";
-            } else if (cumulativeInol <= 1.5) {
-                pill.innerText = "Hardcore";
-                pill.className = "px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest bg-orange-900/50 text-orange-400";
-                insight.innerText = "High fatigue debt. Ensure your sleep and nutrition are locked in tonight.";
+            if (totalAdjustedInol <= 1.0) {
+                status.innerText = "OPTIMAL";
+                status.className = "text-2xl font-bold text-emerald-500";
+                desc.innerText = "Perfect balance. You are stimulating growth without over-reaching.";
+            } else if (totalAdjustedInol <= 1.5) {
+                status.innerText = "HEAVY TAX";
+                status.className = "text-2xl font-bold text-orange-500";
+                desc.innerText = "Significant systemic fatigue. You'll need extra recovery time.";
             } else {
-                pill.innerText = "Overkill";
-                pill.className = "px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest bg-red-900/50 text-red-400";
-                insight.innerText = "You've crossed into the red. Repeated sessions at this level usually lead to injury or regression.";
+                status.innerText = "REDLINE";
+                status.className = "text-2xl font-bold text-red-500";
+                desc.innerText = "Overtraining risk. If you keep this up, you'll regress or snap.";
             }
         }
+
+        // Initialize with one row
+        addSetRow();
     </script>
 </body>
 </html>
