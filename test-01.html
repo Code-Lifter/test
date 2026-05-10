@@ -89,7 +89,7 @@
                 </label>
                 <div class="flex items-center gap-4">
                     <input type="number" id="oneRm" oninput="autoCalculate()"
-                        class="flex-1 bg-slate-950 border border-slate-700 rounded-2xl p-4 text-4xl font-black mono focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        class="flex-1 w-full min-w-0 bg-slate-950 border border-slate-700 rounded-2xl p-4 text-4xl font-black mono focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                         placeholder="140">
                     <div id="oneRmConverted" class="text-sm mono text-slate-600 whitespace-nowrap"></div>
                 </div>
@@ -251,7 +251,6 @@
             6: 0.70, 6.5: 0.76, 7: 0.83, 7.5: 0.91,
             8: 1.00, 8.5: 1.12, 9: 1.28, 9.5: 1.48, 10: 1.75
         };
-        // Snap to nearest half step for the map
         const roundedRpe = Math.round(rpe * 2) / 2;
         return map[roundedRpe] || 1.0;
     }
@@ -297,7 +296,8 @@
         const div = document.createElement('div');
         div.className = 'set-row grid grid-cols-12 gap-2 items-center bg-slate-950 p-2 rounded-xl border border-slate-800';
 
-        const baseInput = 'w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm mono text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors';
+        // FIXED MOBILE GRID OVERFLOW WITH min-w-0
+        const baseInput = 'w-full min-w-0 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm mono text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors';
 
         div.innerHTML = `
             <input type="text"   class="col-span-3 ${baseInput} set-exercise" value="${exercise}" placeholder="Exercise" oninput="autoCalculate()">
@@ -351,17 +351,12 @@
 
     // ── Presets ───────────────────────────────────────────
     const PRESETS = {
-        // Strength
         '5x5':       { sets: [[0.85,5,8],[0.85,5,8],[0.85,5,8],[0.85,5,8],[0.85,5,8]], label: '5x5 Base' },
         '3x3':       { sets: [[0.92,3,9],[0.92,3,9],[0.92,3,9]], label: '3x3 Peak' },
         '531':       { sets: [[0.65,5,7],[0.75,5,8],[0.85,5,9.5]], label: '5/3/1 Wave' }, 
-        
-        // Hypertrophy
         '3x12':      { sets: [[0.67,12,8],[0.67,12,8],[0.67,12,8]], label: '3x12 Pump' },
         '4x10':      { sets: [[0.70,10,8],[0.70,10,8],[0.70,10,8],[0.70,10,8]], label: '4x10 Volume' },
         'gvt':       { sets: Array(10).fill([0.60,10,8]), label: 'German Volume' },
-        
-        // Intensity Techniques
         'mentzer':   { sets: [[0.85,6,10]], label: 'Mentzer HIT' },
         'dropset':   { sets: [[0.80,8,9.5],[0.65,6,10],[0.50,10,10]], label: 'Drop Set' }, 
         'restpause': { sets: [[0.80,8,10],[0.80,4,10],[0.80,3,10]], label: 'Rest-Pause' } 
@@ -406,14 +401,8 @@
             if (!w || !r || !oneRm) return;
 
             const intensity = (w / oneRm) * 100;
-            
-            // 1. Supramaximal Detection
             if (intensity >= 100) supraMaximalDetected = true;
-
-            // 2. Denominator Clamp (prevents infinity)
             const cappedIntensity = Math.min(intensity, 99);
-            
-            // 3. Nonlinear RPE Scaling
             const setInol = (r / (100 - cappedIntensity)) * getRpeMultiplier(rpe);
             
             totalInol += setInol;
@@ -448,7 +437,6 @@
         }
 
         display.innerText = totalInol.toFixed(2);
-        // Visual cap at 3.0 for the bar
         bar.style.width = Math.min((totalInol / 3.0) * 100, 100) + '%';
 
         if (totalInol < 0.4) {
@@ -473,7 +461,6 @@
         numEl.style.color = numColor;
     }
 
-    // ── V2 Dynamic Prescription Engine ────────────────────
     function generatePrescription(totalInol, highestExerciseInol, isSupraMaximal) {
         if (totalInol === 0) return;
 
@@ -488,7 +475,6 @@
         let restAdvice = '';
         let noteHtml = '';
 
-        // 1. Evaluate Local Tissue Damage
         if (highestExerciseInol < 0.4) {
             freqAdvice = '24 Hours';
             noteHtml = 'Tissue damage is minimal. This acts as active recovery or technique practice.';
@@ -503,7 +489,6 @@
             noteHtml = '<span class="text-amber-400 font-bold">Massive tissue fatigue detected.</span> Do not repeat this specific movement pattern until fully recovered.';
         }
 
-        // 2. Evaluate Global Systemic Cost
         if (totalInol > 2.5) {
             freqAdvice = 'Deload Recommended';
             noteHtml += '<br><br><span class="text-red-400 font-bold">SYSTEMIC WARNING:</span> Total session volume is creating a heavy recovery debt. Watch for CNS burnout, grip weakness, or sleep disruption.';
@@ -512,16 +497,14 @@
             engineBox.classList.remove('border-red-900/50', 'bg-red-950/20');
         }
 
-        // 3. Supramaximal Override
         if (isSupraMaximal) {
             noteHtml = '<span class="bg-red-900/50 text-red-200 px-2 py-1 rounded text-xs font-bold mr-2">SUPRAMAX DETECTED</span> You exceeded your inputted 1RM. This generates extreme neural fatigue. Recalibrate your baseline if this was a clean PR.<br><br>' + noteHtml;
         }
 
-        // 4. Autoregulate Rest based on Intensity
         if (totalInol > 1.5 || highestExerciseInol > 1.0) {
-            restAdvice = '3–5 min+'; // Heavy CNS tax requires ATP replenishment
+            restAdvice = '3–5 min+'; 
         } else {
-            restAdvice = 'Auto (1–2 min)'; // Hypertrophy/Metabolic focus
+            restAdvice = 'Auto (1–2 min)'; 
         }
 
         rxFreq.innerText = freqAdvice;
@@ -542,10 +525,10 @@
 
         el.innerHTML = entries.map(([name, inol]) => {
             let color;
-            if      (inol < 0.4)  color = '#64748b'; // Slate
-            else if (inol <= 1.0) color = '#10b981'; // Emerald
-            else if (inol <= 1.75) color = '#f59e0b'; // Amber
-            else                  color = '#ef4444'; // Red
+            if      (inol < 0.4)  color = '#64748b'; 
+            else if (inol <= 1.0) color = '#10b981'; 
+            else if (inol <= 1.75) color = '#f59e0b'; 
+            else                  color = '#ef4444'; 
 
             const pct = Math.min((inol / Math.max(maxInol, 1.0)) * 100, 100);
             return `
@@ -561,7 +544,6 @@
         }).join('');
     }
 
-    // Initialize with one empty row
     addSetRow();
 </script>
 </body>
