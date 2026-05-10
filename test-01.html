@@ -18,11 +18,6 @@
         body { font-family: 'Syne', system-ui, sans-serif; background: var(--bg); color: #e2e8f0; min-height: 100vh; }
         .mono { font-family: 'DM Mono', 'Courier New', monospace; }
 
-        .zone-easy { color: #64748b; }
-        .zone-good { color: #10b981; }
-        .zone-hard { color: #f59e0b; }
-        .zone-max  { color: #ef4444; }
-
         .preset-btn {
             transition: all 0.18s ease;
             border: 1px solid #1a2336;
@@ -31,7 +26,6 @@
             text-align: left;
         }
         .preset-btn:hover { border-color: #334155; background: #111827; }
-        .preset-btn.active { border-color: var(--accent); background: var(--accent-bg); }
 
         .cat-label {
             font-size: 9px;
@@ -55,7 +49,6 @@
 
         .inol-bar { transition: width 0.5s cubic-bezier(0.4,0,0.2,1), background 0.5s ease; }
         .score-num { transition: color 0.4s ease; }
-
         select option { background: #0d1420; }
 
         /* Subtle grid texture */
@@ -73,9 +66,8 @@
     </style>
 </head>
 <body class="p-4 md:p-8">
-<div class="content max-w-5xl mx-auto">
+<div class="content max-w-6xl mx-auto">
 
-    <!-- HEADER -->
     <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
         <div>
             <h1 class="text-3xl font-extrabold tracking-tight">INOL <span class="text-blue-500">Lab V2</span></h1>
@@ -83,16 +75,14 @@
         </div>
         <div class="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl p-1">
             <button id="unit-kg" onclick="setUnit('kg')" class="px-4 py-2 rounded-lg text-[11px] font-bold transition bg-blue-600 text-white shadow-lg">KG</button>
-            <button id="unit-lbs" onclick="setUnit('lbs')" class="px-4 py-2 rounded-lg text-[11px] font-bold transition text-slate-500 hover:text-slate-300">LBS</button>
+            <button id="unit-lbs" onclick="setUnit('lbs')" class="px-4 py-2 rounded-lg text-[11px] font-bold transition text-slate-500 hover:text-slate-300 bg-transparent">LBS</button>
         </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
 
-        <!-- ── LEFT: INPUT ── -->
         <div class="lg:col-span-3 space-y-6">
 
-            <!-- 1RM Baseline -->
             <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl backdrop-blur-sm">
                 <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">
                     Target Exercise 1-Rep Max (<span id="unit-label">kg</span>)
@@ -105,14 +95,12 @@
                 </div>
             </div>
 
-            <!-- Set Entry -->
             <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl backdrop-blur-sm">
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Session Data</h3>
                     <button onclick="clearSets()" class="text-[10px] text-slate-600 hover:text-red-400 font-bold transition px-2 py-1 rounded bg-slate-950">Clear all</button>
                 </div>
 
-                <!-- Column Headers -->
                 <div class="grid grid-cols-12 gap-2 mb-3 px-1">
                     <div class="col-span-3 text-[9px] text-slate-500 uppercase font-bold tracking-wider">Exercise</div>
                     <div class="col-span-2 text-[9px] text-slate-500 uppercase font-bold tracking-wider">Weight</div>
@@ -129,42 +117,60 @@
                 </button>
             </div>
 
-            <!-- Presets (Data Entry Only) -->
             <div class="bg-slate-900/50 border border-slate-800 rounded-3xl p-6">
                 <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Quick Load Presets (Initializes Data)</h3>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                        <div class="cat-label">Strength & Volume</div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button id="preset-5x5" onclick="loadPreset('5x5')" class="preset-btn rounded-xl p-3">
+                        <div class="cat-label">Strength</div>
+                        <div class="grid grid-cols-1 gap-2">
+                            <button onclick="loadPreset('5x5')" class="preset-btn rounded-xl p-3">
                                 <div class="text-xs font-bold text-slate-200">5×5 Base</div>
                                 <div class="text-[9px] mono text-slate-500 mt-1">85% · RPE 8</div>
                             </button>
-                            <button id="preset-3x3" onclick="loadPreset('3x3')" class="preset-btn rounded-xl p-3">
+                            <button onclick="loadPreset('3x3')" class="preset-btn rounded-xl p-3">
                                 <div class="text-xs font-bold text-slate-200">3×3 Peak</div>
                                 <div class="text-[9px] mono text-slate-500 mt-1">92% · RPE 9</div>
                             </button>
-                            <button id="preset-4x10" onclick="loadPreset('4x10')" class="preset-btn rounded-xl p-3">
-                                <div class="text-xs font-bold text-slate-200">4×10 Hyper</div>
-                                <div class="text-[9px] mono text-slate-500 mt-1">70% · RPE 8</div>
+                            <button onclick="loadPreset('531')" class="preset-btn rounded-xl p-3">
+                                <div class="text-xs font-bold text-slate-200">5/3/1 Wave</div>
+                                <div class="text-[9px] mono text-slate-500 mt-1">65% → 85%+</div>
                             </button>
                         </div>
                     </div>
+
+                    <div>
+                        <div class="cat-label">Hypertrophy</div>
+                        <div class="grid grid-cols-1 gap-2">
+                            <button onclick="loadPreset('3x12')" class="preset-btn rounded-xl p-3">
+                                <div class="text-xs font-bold text-slate-200">3×12 Pump</div>
+                                <div class="text-[9px] mono text-slate-500 mt-1">67% · RPE 8</div>
+                            </button>
+                            <button onclick="loadPreset('4x10')" class="preset-btn rounded-xl p-3">
+                                <div class="text-xs font-bold text-slate-200">4×10 Volume</div>
+                                <div class="text-[9px] mono text-slate-500 mt-1">70% · RPE 8</div>
+                            </button>
+                            <button onclick="loadPreset('gvt')" class="preset-btn rounded-xl p-3 border-emerald-900/30 hover:border-emerald-700">
+                                <div class="text-xs font-bold text-slate-200">GVT (10x10)</div>
+                                <div class="text-[9px] mono text-emerald-500/70 mt-1">60% · High Tax</div>
+                            </button>
+                        </div>
+                    </div>
+
                     <div>
                         <div class="cat-label">High Intensity</div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button id="preset-dorian" onclick="loadPreset('dorian')" class="preset-btn rounded-xl p-3 border-red-900/30">
-                                <div class="text-xs font-bold text-slate-200">Heavy Duty</div>
+                        <div class="grid grid-cols-1 gap-2">
+                            <button onclick="loadPreset('mentzer')" class="preset-btn rounded-xl p-3 border-red-900/30 hover:border-red-700">
+                                <div class="text-xs font-bold text-slate-200">Mentzer HIT</div>
                                 <div class="text-[9px] mono text-red-500/70 mt-1">1x Max Effort</div>
                             </button>
-                            <button id="preset-mentzer" onclick="loadPreset('mentzer')" class="preset-btn rounded-xl p-3 border-red-900/30">
-                                <div class="text-xs font-bold text-slate-200">Mentzer HIT</div>
-                                <div class="text-[9px] mono text-red-500/70 mt-1">Beyond Failure</div>
-                            </button>
-                            <button id="preset-dropset" onclick="loadPreset('dropset')" class="preset-btn rounded-xl p-3 border-amber-900/30">
+                            <button onclick="loadPreset('dropset')" class="preset-btn rounded-xl p-3 border-amber-900/30 hover:border-amber-700">
                                 <div class="text-xs font-bold text-slate-200">Drop Set</div>
                                 <div class="text-[9px] mono text-amber-500/70 mt-1">Top → Strip</div>
+                            </button>
+                            <button onclick="loadPreset('restpause')" class="preset-btn rounded-xl p-3 border-amber-900/30 hover:border-amber-700">
+                                <div class="text-xs font-bold text-slate-200">Rest-Pause</div>
+                                <div class="text-[9px] mono text-amber-500/70 mt-1">Cluster to Failure</div>
                             </button>
                         </div>
                     </div>
@@ -173,12 +179,9 @@
 
         </div>
 
-        <!-- ── RIGHT: ANALYSIS ENGINE ── -->
         <div class="lg:col-span-2 space-y-6">
 
-            <!-- Global Score Card -->
             <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden">
-                <!-- Abstract background glow -->
                 <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
                 <div class="flex justify-between items-center mb-4 relative z-10">
@@ -206,8 +209,7 @@
                 </div>
             </div>
 
-            <!-- Dynamic Prescription Engine -->
-            <div id="prescription-engine" class="hidden bg-slate-900/90 border border-blue-900/30 rounded-3xl p-6 shadow-xl">
+            <div id="prescription-engine" class="hidden bg-slate-900/90 border border-blue-900/30 rounded-3xl p-6 shadow-xl transition-all">
                 <h4 class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                     Adaptive Prescription
@@ -229,7 +231,6 @@
                 </div>
             </div>
 
-            <!-- Local Tissue Fatigue (Exercise Map) -->
             <div class="bg-slate-900/50 border border-slate-800 rounded-3xl p-6">
                 <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Local Tissue Fatigue</h3>
                 <div id="exercise-breakdown" class="space-y-4">
@@ -250,7 +251,7 @@
             6: 0.70, 6.5: 0.76, 7: 0.83, 7.5: 0.91,
             8: 1.00, 8.5: 1.12, 9: 1.28, 9.5: 1.48, 10: 1.75
         };
-        // Ensure we snap to nearest half step if slider allows granular, otherwise fallback
+        // Snap to nearest half step for the map
         const roundedRpe = Math.round(rpe * 2) / 2;
         return map[roundedRpe] || 1.0;
     }
@@ -348,14 +349,22 @@
         autoCalculate();
     }
 
-    // ── Presets (Data Entry Only, NO hardcoded advice) ────
+    // ── Presets ───────────────────────────────────────────
     const PRESETS = {
-        '5x5':       { pct: 0.85, sets: [[0.85,5,8],[0.85,5,8],[0.85,5,8],[0.85,5,8],[0.85,5,8]], label: 'Compound' },
-        '3x3':       { pct: 0.92, sets: [[0.92,3,9],[0.92,3,9],[0.92,3,9]], label: 'Heavy Comp' },
-        '4x10':      { pct: 0.70, sets: [[0.70,10,8],[0.70,10,8],[0.70,10,8],[0.70,10,8]], label: 'Hypertrophy' },
-        'dorian':    { pct: 0.80, sets: [[0.60,8,7], [0.80,8,10]], label: 'Heavy Duty' }, // Warmup + Failure
-        'mentzer':   { pct: 0.85, sets: [[0.85,6,10]], label: 'HIT' }, // 1 set absolute failure
-        'dropset':   { pct: 1.00, sets: [[0.80,8,9],[0.70,6,10],[0.50,10,10]], label: 'Strip Set' }, 
+        // Strength
+        '5x5':       { sets: [[0.85,5,8],[0.85,5,8],[0.85,5,8],[0.85,5,8],[0.85,5,8]], label: '5x5 Base' },
+        '3x3':       { sets: [[0.92,3,9],[0.92,3,9],[0.92,3,9]], label: '3x3 Peak' },
+        '531':       { sets: [[0.65,5,7],[0.75,5,8],[0.85,5,9.5]], label: '5/3/1 Wave' }, 
+        
+        // Hypertrophy
+        '3x12':      { sets: [[0.67,12,8],[0.67,12,8],[0.67,12,8]], label: '3x12 Pump' },
+        '4x10':      { sets: [[0.70,10,8],[0.70,10,8],[0.70,10,8],[0.70,10,8]], label: '4x10 Volume' },
+        'gvt':       { sets: Array(10).fill([0.60,10,8]), label: 'German Volume' },
+        
+        // Intensity Techniques
+        'mentzer':   { sets: [[0.85,6,10]], label: 'Mentzer HIT' },
+        'dropset':   { sets: [[0.80,8,9.5],[0.65,6,10],[0.50,10,10]], label: 'Drop Set' }, 
+        'restpause': { sets: [[0.80,8,10],[0.80,4,10],[0.80,3,10]], label: 'Rest-Pause' } 
     };
 
     function loadPreset(key) {
@@ -401,7 +410,7 @@
             // 1. Supramaximal Detection
             if (intensity >= 100) supraMaximalDetected = true;
 
-            // 2. Denominator Clamp (prevents infinity, allows tracking of overloads)
+            // 2. Denominator Clamp (prevents infinity)
             const cappedIntensity = Math.min(intensity, 99);
             
             // 3. Nonlinear RPE Scaling
@@ -555,6 +564,5 @@
     // Initialize with one empty row
     addSetRow();
 </script>
-
 </body>
 </html>
