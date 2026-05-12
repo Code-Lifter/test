@@ -126,17 +126,6 @@
       background: rgba(255,255,255,0.16);
     }
 
-    .net-label {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.5rem;
-      font-weight: 900;
-      letter-spacing: 0.35em;
-      color: rgba(255,255,255,0.18);
-      writing-mode: vertical-lr;
-      text-transform: uppercase;
-      padding: 5px 0;
-    }
-
     /* ── Serving glow ── */
     @keyframes serveGlow {
       0%, 100% { box-shadow: 0 0 8px rgba(251,191,36,0.3); }
@@ -206,43 +195,35 @@
   <div class="flex-1 flex flex-col items-center justify-center p-3 sm:p-4 w-full">
 
     <!-- Controls Bar -->
-    <div class="controls-card p-3 sm:p-4 rounded-xl w-full max-w-md mb-3 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4">
-
-      <!-- Swap button -->
-      <button onclick="toggleSides()"
-        class="w-full sm:w-auto flex-1 bg-white/5 hover:bg-white/10 border border-white/10 text-white/65 hover:text-white py-2 px-3 rounded-lg text-sm font-bold tracking-widest uppercase transition-all active:scale-95 flex justify-center items-center gap-2">
-        <span id="swapIcon" class="transition-transform duration-300">↔️</span> Swap Ends
-      </button>
+    <div class="controls-card p-3 sm:p-4 rounded-xl w-full max-w-md mb-3 flex flex-wrap justify-center items-center gap-4 sm:gap-6">
 
       <!-- Toggles -->
-      <div class="flex flex-wrap sm:flex-nowrap sm:flex-col gap-4 sm:gap-2 w-full sm:w-auto justify-center">
-        <div class="flex justify-between items-center gap-2">
-          <span class="text-[11px] font-bold text-white/45 tracking-widest uppercase">First to 10</span>
-          <label class="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" id="shortGameToggle" class="sr-only peer" onchange="toggleSettings()">
-            <div class="toggle-track w-9 h-5 bg-white/10 rounded-full peer peer-checked:bg-cyan-500
-              peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px]
-              after:left-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
-          </label>
-        </div>
-        <div class="flex justify-between items-center gap-2">
-          <span class="text-[11px] font-bold text-white/45 tracking-widest uppercase">Best of 3</span>
-          <label class="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" id="bo3Toggle" class="sr-only peer" onchange="toggleSettings()" checked>
-            <div class="toggle-track w-9 h-5 bg-white/10 rounded-full peer peer-checked:bg-cyan-500
-              peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px]
-              after:left-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
-          </label>
-        </div>
-        <div class="flex justify-between items-center gap-2">
-          <span class="text-[11px] font-bold text-white/45 tracking-widest uppercase">Hard Cap</span>
-          <label class="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" id="capToggle" class="sr-only peer" onchange="toggleSettings()" checked>
-            <div class="toggle-track w-9 h-5 bg-white/10 rounded-full peer peer-checked:bg-cyan-500
-              peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px]
-              after:left-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
-          </label>
-        </div>
+      <div class="flex justify-between items-center gap-2">
+        <span class="text-[11px] font-bold text-white/45 tracking-widest uppercase">First to 10</span>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" id="shortGameToggle" class="sr-only peer" onchange="toggleSettings()">
+          <div class="toggle-track w-9 h-5 bg-white/10 rounded-full peer peer-checked:bg-cyan-500
+            peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px]
+            after:left-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+        </label>
+      </div>
+      <div class="flex justify-between items-center gap-2">
+        <span class="text-[11px] font-bold text-white/45 tracking-widest uppercase">Best of 3</span>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" id="bo3Toggle" class="sr-only peer" onchange="toggleSettings()" checked>
+          <div class="toggle-track w-9 h-5 bg-white/10 rounded-full peer peer-checked:bg-cyan-500
+            peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px]
+            after:left-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+        </label>
+      </div>
+      <div class="flex justify-between items-center gap-2">
+        <span class="text-[11px] font-bold text-white/45 tracking-widest uppercase">Hard Cap</span>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" id="capToggle" class="sr-only peer" onchange="toggleSettings()" checked>
+          <div class="toggle-track w-9 h-5 bg-white/10 rounded-full peer peer-checked:bg-cyan-500
+            peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px]
+            after:left-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+        </label>
       </div>
     </div>
 
@@ -262,7 +243,7 @@
       <div id="playerBoard" class="flex justify-between items-stretch mb-6 gap-3 sm:gap-4 transition-all duration-500">
 
         <!-- Player 1 -->
-        <div id="p1Card" class="p1-card flex-1 p-3 sm:p-4 rounded-xl flex flex-col items-center">
+        <div id="p1Card" class="p1-card flex-1 p-3 sm:p-4 rounded-xl flex flex-col items-center relative z-0">
 
           <div class="flex flex-col items-center w-full mb-1 gap-1">
             <input type="text" id="p1Name" value="Player 1"
@@ -287,21 +268,22 @@
           <button onclick="addPoint(1)" class="btn-p1 mt-auto" id="btn1">+ 1</button>
         </div>
 
-        <!-- Net Divider -->
-        <div id="vsText" class="net-divider">
+        <!-- Net Divider with Swap Button -->
+        <div id="vsText" class="net-divider relative z-10">
           <div class="net-post"></div>
           <div class="net-strands">
             <div class="net-strand"></div>
             <div class="net-strand"></div>
-            <div class="net-strand"></div>
-            <div class="net-strand"></div>
-            <div class="net-strand"></div>
           </div>
-          <span class="net-label">NET</span>
+          
+          <!-- Swap Ends Button -->
+          <button onclick="toggleSides()" 
+            class="my-2 w-9 h-9 rounded-full bg-[#0d2645] border border-white/20 text-white/55 hover:text-white hover:bg-white/10 hover:border-cyan-500/50 flex items-center justify-center transition-all active:scale-90 shadow-xl"
+            title="Swap Ends">
+            <span id="swapIcon" class="transition-transform duration-300 text-sm">↔️</span>
+          </button>
+
           <div class="net-strands">
-            <div class="net-strand"></div>
-            <div class="net-strand"></div>
-            <div class="net-strand"></div>
             <div class="net-strand"></div>
             <div class="net-strand"></div>
           </div>
@@ -309,7 +291,7 @@
         </div>
 
         <!-- Player 2 -->
-        <div id="p2Card" class="p2-card flex-1 p-3 sm:p-4 rounded-xl flex flex-col items-center">
+        <div id="p2Card" class="p2-card flex-1 p-3 sm:p-4 rounded-xl flex flex-col items-center relative z-0">
 
           <div class="flex flex-col items-center w-full mb-1 gap-1">
             <input type="text" id="p2Name" value="Player 2"
@@ -388,7 +370,7 @@
     let isCurrentGameOver = false;
     let isMatchOver       = false;
 
-    const STORAGE_KEY = 'badmintonTrackerStateV7';
+    const STORAGE_KEY = 'badmintonTrackerStateV8';
 
     window.onload = () => {
       const savedData = localStorage.getItem(STORAGE_KEY);
