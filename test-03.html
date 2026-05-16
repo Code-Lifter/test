@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INOL Lab V2.1 | Autoregulation Engine</title>
+    <title>INOL Lab V2.2 | Autoregulation Engine</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -69,7 +69,7 @@
 
     <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
         <div>
-            <h1 class="text-3xl font-extrabold tracking-tight">INOL <span class="text-blue-500">Lab V2.1</span></h1>
+            <h1 class="text-3xl font-extrabold tracking-tight">INOL <span class="text-blue-500">Lab V2.2</span></h1>
             <p class="text-[10px] text-slate-500 mono mt-1 uppercase tracking-widest">Dynamic Autoregulation Engine</p>
         </div>
         <div class="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl p-1">
@@ -82,7 +82,6 @@
 
         <div class="lg:col-span-3 space-y-6">
 
-            <!-- 1RM Section with Estimate Toggle -->
             <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl backdrop-blur-sm">
                 <div class="flex justify-between items-center mb-3">
                     <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest">
@@ -94,7 +93,6 @@
                     </div>
                 </div>
 
-                <!-- Direct Mode -->
                 <div id="rm-direct-container" class="flex items-center gap-4">
                     <input type="number" id="oneRm" oninput="autoCalculate()"
                         class="flex-1 w-full min-w-0 bg-slate-950 border border-slate-700 rounded-2xl p-4 text-4xl font-black mono focus:ring-2 focus:ring-blue-500 outline-none transition-all"
@@ -102,7 +100,6 @@
                     <div id="oneRmConverted" class="text-sm mono text-slate-600 whitespace-nowrap"></div>
                 </div>
 
-                <!-- Estimate Mode -->
                 <div id="rm-est-container" class="hidden gap-3">
                     <div class="flex-1">
                         <input type="number" id="est-weight" oninput="calculateEstimate()" placeholder="Weight" class="w-full bg-slate-950 border border-slate-700 rounded-2xl p-4 text-2xl font-black mono focus:ring-2 focus:ring-blue-500 outline-none">
@@ -558,13 +555,13 @@
         let noteHtml = '';
 
         if (highestExerciseInol < 0.4) {
-            freqAdvice = '24 Hours';
+            freqAdvice = '1 Day';
             noteHtml = 'Tissue damage is minimal. This acts as active recovery or technique practice.';
         } else if (highestExerciseInol <= 1.0) {
-            freqAdvice = '48–72 Hours';
+            freqAdvice = '2–3 Days';
             noteHtml = 'Optimal localized stimulus. Muscle protein synthesis will peak safely. Ready to hit this pattern again in 2-3 days.';
         } else if (highestExerciseInol <= 1.75) {
-            freqAdvice = '72–96 Hours';
+            freqAdvice = '3–4 Days';
             noteHtml = 'High localized fatigue. You dug deep here; respect the recovery timeline before applying load to these specific structures again.';
         } else {
             freqAdvice = '4–7 Days';
