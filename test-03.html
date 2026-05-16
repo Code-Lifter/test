@@ -1,308 +1,639 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pro Ping Pong Tracker</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INOL Lab V2 | Autoregulation Engine</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg: #060a10;
+            --surface: #0d1420;
+            --border: #1a2336;
+            --accent: #3b82f6;
+            --accent-bg: #0f2040;
+        }
+        * { box-sizing: border-box; }
+        body { font-family: 'Syne', system-ui, sans-serif; background: var(--bg); color: #e2e8f0; min-height: 100vh; }
+        .mono { font-family: 'DM Mono', 'Courier New', monospace; }
+
+        .preset-btn {
+            transition: all 0.18s ease;
+            border: 1px solid #1a2336;
+            background: #0d1420;
+            cursor: pointer;
+            text-align: left;
+        }
+        .preset-btn:hover { border-color: #334155; background: #111827; }
+
+        .cat-label {
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #475569;
+            margin-bottom: 6px;
+            padding-left: 2px;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .set-row { animation: slideIn 0.18s ease forwards; }
+
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+        input[type=range] { accent-color: var(--accent); cursor: pointer; }
+
+        .inol-bar { transition: width 0.5s cubic-bezier(0.4,0,0.2,1), background 0.5s ease; }
+        .score-num { transition: color 0.4s ease; }
+        select option { background: #0d1420; }
+
+        /* Subtle grid texture */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 32px 32px;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .content { position: relative; z-index: 1; }
+    </style>
 </head>
-<body class="bg-slate-900 text-white min-h-screen flex flex-col font-sans selection:bg-emerald-500/30 transition-colors duration-500" id="appBody">
+<body class="p-4 md:p-8">
+<div class="content max-w-6xl mx-auto">
 
-  <a href="#" class="block w-full text-center py-4 text-slate-400 hover:text-emerald-400 font-semibold transition-colors border-b border-slate-800">
-    &larr; Back to Home
-  </a>
-
-  <div class="flex-1 flex flex-col items-center justify-center p-4 w-full">
-    
-    <div class="bg-slate-800 p-4 rounded-xl shadow-lg w-full max-w-md mb-4 border border-slate-700 flex justify-between items-center gap-4">
-      
-      <button onclick="toggleSides()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-300 py-2 px-3 rounded-lg text-sm font-semibold transition-colors flex justify-center items-center gap-2 active:scale-95">
-        <span id="swapIcon">↔️</span> Swap Ends
-      </button>
-
-      <div class="flex flex-col items-end justify-center">
-        <span class="text-xs font-semibold text-slate-400 mb-1">Best of 3</span>
-        <label class="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" id="bo3Toggle" class="sr-only peer" onchange="toggleSettings()" checked>
-          <div class="w-11 h-6 bg-slate-600 rounded-full peer peer-checked:bg-emerald-500 peer-checked:after:translate-x-full after:transition-all after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5"></div>
-        </label>
-      </div>
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
+        <div>
+            <h1 class="text-3xl font-extrabold tracking-tight">INOL <span class="text-blue-500">Lab V2</span></h1>
+            <p class="text-[10px] text-slate-500 mono mt-1 uppercase tracking-widest">Dynamic Autoregulation Engine</p>
+        </div>
+        <div class="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl p-1">
+            <button id="unit-kg" onclick="setUnit('kg')" class="px-4 py-2 rounded-lg text-[11px] font-bold transition bg-blue-600 text-white shadow-lg">KG</button>
+            <button id="unit-lbs" onclick="setUnit('lbs')" class="px-4 py-2 rounded-lg text-[11px] font-bold transition text-slate-500 hover:text-slate-300 bg-transparent">LBS</button>
+        </div>
     </div>
 
-    <div class="bg-slate-800 p-6 sm:p-8 rounded-2xl shadow-2xl max-w-md w-full text-center border border-slate-700 transition-all duration-500" id="mainCard">
-      
-      <div id="status" class="text-lg sm:text-xl font-bold text-slate-400 mb-6 h-10 flex items-center justify-center bg-slate-900 rounded-lg border border-transparent transition-all duration-300">
-        Game 1: First to 11 (Win by 2)
-      </div>
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
 
-      <div id="playerBoard" class="flex justify-between items-stretch mb-8 gap-4 sm:gap-6 transition-all duration-500">
-        
-        <div id="p1Card" class="flex-1 bg-slate-700/50 p-4 rounded-xl border border-slate-600 transition-all duration-300 flex flex-col items-center">
-          
-          <div class="flex flex-col items-center w-full mb-1 gap-1">
-            <input type="text" id="p1Name" value="Player 1" onfocus="this.select()" onchange="saveExtraState()" class="bg-transparent border-b border-transparent hover:border-slate-500 focus:border-emerald-500 focus:outline-none w-full text-center text-lg sm:text-xl font-bold text-slate-200 truncate transition-colors">
-            <span id="p1Games" class="text-emerald-400 text-xs font-black bg-slate-900 px-2 py-0.5 rounded hidden whitespace-nowrap border border-emerald-500/20">0 Wins</span>
-          </div>
+        <div class="lg:col-span-3 space-y-6">
 
-          <div id="serve1" class="text-yellow-400 text-xs font-bold uppercase mt-1 tracking-wider h-4 transition-opacity mb-2">🏓 Serving</div>
-          <div id="score1" class="text-6xl sm:text-7xl font-black mb-4 tabular-nums mt-auto">0</div>
-          <button onclick="addPoint(1)" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 py-3 sm:py-4 rounded-lg font-bold text-lg transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100" id="btn1">+1</button>
+            <!-- 1RM Section with Estimate Toggle -->
+            <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl backdrop-blur-sm">
+                <div class="flex justify-between items-center mb-3">
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                        Target Exercise 1-Rep Max (<span id="unit-label">kg</span>)
+                    </label>
+                    <div class="flex bg-slate-950 rounded-lg p-1 border border-slate-800">
+                        <button id="mode-direct" onclick="setRmMode('direct')" class="px-2 py-1 text-[9px] font-bold uppercase rounded bg-slate-800 text-slate-300 transition">Direct</button>
+                        <button id="mode-est" onclick="setRmMode('est')" class="px-2 py-1 text-[9px] font-bold uppercase rounded text-slate-500 hover:text-slate-300 transition">Estimate</button>
+                    </div>
+                </div>
+
+                <!-- Direct Mode -->
+                <div id="rm-direct-container" class="flex items-center gap-4">
+                    <input type="number" id="oneRm" oninput="autoCalculate()"
+                        class="flex-1 w-full min-w-0 bg-slate-950 border border-slate-700 rounded-2xl p-4 text-4xl font-black mono focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        placeholder="140">
+                    <div id="oneRmConverted" class="text-sm mono text-slate-600 whitespace-nowrap"></div>
+                </div>
+
+                <!-- Estimate Mode -->
+                <div id="rm-est-container" class="hidden gap-3">
+                    <div class="flex-1">
+                        <input type="number" id="est-weight" oninput="calculateEstimate()" placeholder="Weight" class="w-full bg-slate-950 border border-slate-700 rounded-2xl p-4 text-2xl font-black mono focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div class="flex-1">
+                        <input type="number" id="est-reps" oninput="calculateEstimate()" placeholder="Reps" class="w-full bg-slate-950 border border-slate-700 rounded-2xl p-4 text-2xl font-black mono focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div class="flex flex-col items-center justify-center bg-blue-900/10 border border-blue-900/30 rounded-2xl px-6 min-w-[120px]">
+                        <span class="text-[9px] text-blue-500 font-bold uppercase tracking-widest mb-1">Calculated</span>
+                        <span id="est-result" class="text-3xl font-black mono text-blue-400">—</span>
+                    </div>
+                </div>
+                <p id="est-warning" class="hidden mt-3 text-[10px] text-amber-500/80 font-bold uppercase tracking-wide">
+                    ⚠️ Warning: Estimating 1RM above 8 reps introduces severe compounding data errors.
+                </p>
+            </div>
+
+            <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl backdrop-blur-sm">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Session Data</h3>
+                    <button onclick="clearSets()" class="text-[10px] text-slate-600 hover:text-red-400 font-bold transition px-2 py-1 rounded bg-slate-950">Clear all</button>
+                </div>
+
+                <div class="grid grid-cols-12 gap-2 mb-3 px-1">
+                    <div class="col-span-3 text-[9px] text-slate-500 uppercase font-bold tracking-wider">Exercise</div>
+                    <div class="col-span-2 text-[9px] text-slate-500 uppercase font-bold tracking-wider">Weight</div>
+                    <div class="col-span-2 text-[9px] text-slate-500 uppercase font-bold tracking-wider">Reps</div>
+                    <div class="col-span-2 text-[9px] text-slate-500 uppercase font-bold tracking-wider text-center">RPE</div>
+                    <div class="col-span-2 text-[9px] text-slate-500 uppercase font-bold tracking-wider text-right">Load %</div>
+                    <div class="col-span-1"></div>
+                </div>
+
+                <div id="sets-container" class="space-y-3"></div>
+
+                <button onclick="addSetRow()" class="mt-6 w-full py-3 rounded-xl border border-dashed border-slate-700 text-xs font-bold text-blue-400 hover:text-blue-300 hover:border-blue-500 hover:bg-slate-950 transition">
+                    + Add Custom Set
+                </button>
+            </div>
+
+            <div class="bg-slate-900/50 border border-slate-800 rounded-3xl p-6">
+                <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Quick Load Presets (Initializes Data)</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <div class="cat-label">Strength</div>
+                        <div class="grid grid-cols-1 gap-2">
+                            <button onclick="loadPreset('5x5')" class="preset-btn rounded-xl p-3">
+                                <div class="text-xs font-bold text-slate-200">5×5 Base</div>
+                                <div class="text-[9px] mono text-slate-500 mt-1">85% · RPE 8</div>
+                            </button>
+                            <button onclick="loadPreset('3x3')" class="preset-btn rounded-xl p-3">
+                                <div class="text-xs font-bold text-slate-200">3×3 Peak</div>
+                                <div class="text-[9px] mono text-slate-500 mt-1">92% · RPE 9</div>
+                            </button>
+                            <button onclick="loadPreset('531')" class="preset-btn rounded-xl p-3">
+                                <div class="text-xs font-bold text-slate-200">5/3/1 Wave</div>
+                                <div class="text-[9px] mono text-slate-500 mt-1">65% → 85%+</div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="cat-label">Hypertrophy</div>
+                        <div class="grid grid-cols-1 gap-2">
+                            <button onclick="loadPreset('3x12')" class="preset-btn rounded-xl p-3">
+                                <div class="text-xs font-bold text-slate-200">3×12 Pump</div>
+                                <div class="text-[9px] mono text-slate-500 mt-1">67% · RPE 8</div>
+                            </button>
+                            <button onclick="loadPreset('4x10')" class="preset-btn rounded-xl p-3">
+                                <div class="text-xs font-bold text-slate-200">4×10 Volume</div>
+                                <div class="text-[9px] mono text-slate-500 mt-1">70% · RPE 8</div>
+                            </button>
+                            <button onclick="loadPreset('gvt')" class="preset-btn rounded-xl p-3 border-emerald-900/30 hover:border-emerald-700">
+                                <div class="text-xs font-bold text-slate-200">GVT (10x10)</div>
+                                <div class="text-[9px] mono text-emerald-500/70 mt-1">60% · High Tax</div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="cat-label">High Intensity</div>
+                        <div class="grid grid-cols-1 gap-2">
+                            <button onclick="loadPreset('mentzer')" class="preset-btn rounded-xl p-3 border-red-900/30 hover:border-red-700">
+                                <div class="text-xs font-bold text-slate-200">Mentzer HIT</div>
+                                <div class="text-[9px] mono text-red-500/70 mt-1">1x Max Effort</div>
+                            </button>
+                            <button onclick="loadPreset('dropset')" class="preset-btn rounded-xl p-3 border-amber-900/30 hover:border-amber-700">
+                                <div class="text-xs font-bold text-slate-200">Drop Set</div>
+                                <div class="text-[9px] mono text-amber-500/70 mt-1">Top → Strip</div>
+                            </button>
+                            <button onclick="loadPreset('restpause')" class="preset-btn rounded-xl p-3 border-amber-900/30 hover:border-amber-700">
+                                <div class="text-xs font-bold text-slate-200">Rest-Pause</div>
+                                <div class="text-[9px] mono text-amber-500/70 mt-1">Cluster to Failure</div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
-        <div id="vsText" class="text-2xl sm:text-3xl font-black text-slate-600 pb-16 flex items-center transition-colors duration-300">VS</div>
+        <div class="lg:col-span-2 space-y-6">
 
-        <div id="p2Card" class="flex-1 bg-slate-700/50 p-4 rounded-xl border border-slate-600 transition-all duration-300 flex flex-col items-center">
-          
-          <div class="flex flex-col items-center w-full mb-1 gap-1">
-             <input type="text" id="p2Name" value="Player 2" onfocus="this.select()" onchange="saveExtraState()" class="bg-transparent border-b border-transparent hover:border-slate-500 focus:border-blue-500 focus:outline-none w-full text-center text-lg sm:text-xl font-bold text-slate-200 truncate transition-colors">
-             <span id="p2Games" class="text-blue-400 text-xs font-black bg-slate-900 px-2 py-0.5 rounded hidden whitespace-nowrap border border-blue-500/20">0 Wins</span>
-          </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden">
+                <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
-          <div id="serve2" class="text-yellow-400 text-xs font-bold uppercase mt-1 tracking-wider h-4 transition-opacity invisible mb-2">🏓 Serving</div>
-          <div id="score2" class="text-6xl sm:text-7xl font-black mb-4 tabular-nums mt-auto">0</div>
-          <button onclick="addPoint(2)" class="w-full bg-blue-500 hover:bg-blue-400 text-slate-900 py-3 sm:py-4 rounded-lg font-bold text-lg transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100" id="btn2">+1</button>
+                <div class="flex justify-between items-center mb-4 relative z-10">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Global CNS Tax</span>
+                    <button onclick="calculateFinal()" class="bg-blue-600 hover:bg-blue-500 px-5 py-2 rounded-lg text-[10px] font-bold transition shadow-lg">Run Math</button>
+                </div>
+
+                <div class="flex items-end gap-4 mb-4 relative z-10">
+                    <div id="totalVal" class="text-7xl font-black mono tracking-tighter score-num text-slate-200 leading-none">—</div>
+                    <div class="pb-2">
+                        <div id="status-pill" class="inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase bg-slate-800 text-slate-500 tracking-widest border border-slate-700">Standby</div>
+                    </div>
+                </div>
+
+                <div class="mt-6 relative z-10">
+                    <div class="h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+                        <div id="inol-bar" class="h-full rounded-full inol-bar bg-slate-800" style="width:0%"></div>
+                    </div>
+                    <div class="flex justify-between mt-2 px-1">
+                        <span class="text-[9px] font-bold text-slate-600">0.0</span>
+                        <span class="text-[9px] font-bold text-slate-600">1.0</span>
+                        <span class="text-[9px] font-bold text-slate-600">2.0</span>
+                        <span class="text-[9px] font-bold text-slate-600">3.0+</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="prescription-engine" class="hidden bg-slate-900/90 border border-blue-900/30 rounded-3xl p-6 shadow-xl transition-all">
+                <h4 class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    Adaptive Prescription
+                </h4>
+                
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="bg-slate-950 rounded-2xl p-4 border border-slate-800">
+                        <div class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Target Rest</div>
+                        <div id="rx-rest" class="text-base font-bold text-slate-200 mono">—</div>
+                    </div>
+                    <div class="bg-slate-950 rounded-2xl p-4 border border-slate-800">
+                        <div class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Next Session</div>
+                        <div id="rx-freq" class="text-base font-bold text-slate-200 mono">—</div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950 rounded-2xl p-4 border border-slate-800">
+                    <p id="rx-note" class="text-sm text-slate-300 leading-relaxed"></p>
+                </div>
+            </div>
+
+            <div class="bg-slate-900/50 border border-slate-800 rounded-3xl p-6">
+                <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Local Tissue Fatigue</h3>
+                <div id="exercise-breakdown" class="space-y-4">
+                    <p class="text-xs text-slate-600 italic">Name your sets to analyze isolated damage.</p>
+                </div>
+            </div>
+
         </div>
-      </div>
-
-      <button onclick="nextGame()" id="nextGameBtn" class="w-full bg-yellow-500 hover:bg-yellow-400 text-slate-900 py-4 rounded-lg font-black text-lg transition-all mb-4 hidden animate-pulse">
-        Start Next Game (Swap Ends)
-      </button>
-
-      <div class="grid grid-cols-2 gap-4 mb-4" id="timeMachine">
-        <button onclick="undo()" id="undoBtn" class="bg-slate-700 hover:bg-slate-600 text-slate-300 py-2 rounded-lg font-semibold transition-colors disabled:opacity-30 flex justify-center items-center gap-2">
-          &#8617; Undo
-        </button>
-        <button onclick="redo()" id="redoBtn" class="bg-slate-700 hover:bg-slate-600 text-slate-300 py-2 rounded-lg font-semibold transition-colors disabled:opacity-30 flex justify-center items-center gap-2">
-          Redo &#8618;
-        </button>
-      </div>
-
-      <button onclick="resetMatch()" class="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/50 py-3 rounded-lg font-bold transition-colors mt-2">Reset Entire Match</button>
     </div>
-  </div>
+</div>
 
-  <script>
-    // State Architecture
-    let matchHistory = [{ 
-        p1: 0, p2: 0, 
-        p1Games: 0, p2Games: 0, 
-        gameNum: 1, 
-        initialServer: 1 
-    }];
-    let currentStep = 0;
-    
-    // Extra UI State
-    let isBo3 = true;
-    let isSwapped = false;
-    let p1NameStr = "Player 1";
-    let p2NameStr = "Player 2";
+<script>
+    let currentUnit = 'kg';
+    let rmMode = 'direct';
 
-    let isCurrentGameOver = false;
-    let isMatchOver = false;
+    // ── Nonlinear RPE Map (The CNS Reality) ────────────────
+    function getRpeMultiplier(rpe) {
+        const map = {
+            6: 0.70, 6.5: 0.76, 7: 0.83, 7.5: 0.91,
+            8: 1.00, 8.5: 1.12, 9: 1.28, 9.5: 1.48, 10: 1.75
+        };
+        const roundedRpe = Math.round(rpe * 2) / 2;
+        return map[roundedRpe] || 1.0;
+    }
 
-    const STORAGE_KEY = 'pingPongTrackerProV4';
-
-    window.onload = () => {
-      const savedData = localStorage.getItem(STORAGE_KEY);
-      if (savedData) {
-        const parsed = JSON.parse(savedData);
-        matchHistory = parsed.history || matchHistory;
-        currentStep = parsed.step || 0;
-        isBo3 = parsed.isBo3 !== undefined ? parsed.isBo3 : true;
-        isSwapped = parsed.isSwapped || false;
-        p1NameStr = parsed.p1NameStr || "Player 1";
-        p2NameStr = parsed.p2NameStr || "Player 2";
+    // ── 1RM Estimation Logic ──────────────────────────────
+    function setRmMode(mode) {
+        rmMode = mode;
         
-        document.getElementById('bo3Toggle').checked = isBo3;
-        document.getElementById('p1Name').value = p1NameStr;
-        document.getElementById('p2Name').value = p2NameStr;
-      }
-      updateUI();
-    };
-
-    const saveData = () => {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        history: matchHistory, step: currentStep, isBo3, isSwapped, p1NameStr, p2NameStr
-      }));
-    };
-
-    const saveExtraState = () => {
-        p1NameStr = document.getElementById('p1Name').value;
-        p2NameStr = document.getElementById('p2Name').value;
-        saveData();
-    }
-
-    const toggleSettings = () => {
-      isBo3 = document.getElementById('bo3Toggle').checked;
-      updateUI();
-    };
-
-    const toggleSides = () => {
-        isSwapped = !isSwapped;
-        updateUI();
-    }
-
-    const addPoint = (player) => {
-      if (isCurrentGameOver) return;
-      
-      matchHistory = matchHistory.slice(0, currentStep + 1);
-      const state = matchHistory[currentStep];
-      
-      const newState = { 
-        ...state,
-        p1: state.p1 + (player === 1 ? 1 : 0), 
-        p2: state.p2 + (player === 2 ? 1 : 0)
-      };
-      
-      matchHistory.push(newState);
-      currentStep++;
-      updateUI();
-    };
-
-    const nextGame = () => {
-      const state = matchHistory[currentStep];
-      const p1Won = state.p1 > state.p2;
-      
-      const newState = {
-        p1: 0, p2: 0,
-        p1Games: state.p1Games + (p1Won ? 1 : 0),
-        p2Games: state.p2Games + (!p1Won ? 1 : 0),
-        gameNum: state.gameNum + 1,
-        initialServer: state.initialServer === 1 ? 2 : 1
-      };
-
-      // Automatically visually swap sides when a new game starts
-      isSwapped = !isSwapped;
-
-      matchHistory = matchHistory.slice(0, currentStep + 1);
-      matchHistory.push(newState);
-      currentStep++;
-      updateUI();
-    };
-
-    const undo = () => { if (currentStep > 0) { currentStep--; updateUI(); } };
-    const redo = () => { if (currentStep < matchHistory.length - 1) { currentStep++; updateUI(); } };
-
-    const resetMatch = () => {
-      if(confirm('Wipe the board and start a fresh match?')) {
-        matchHistory = [{ p1: 0, p2: 0, p1Games: 0, p2Games: 0, gameNum: 1, initialServer: 1 }];
-        currentStep = 0;
-        isSwapped = false;
-        updateUI();
-      }
-    };
-
-    const updateUI = () => {
-      const state = matchHistory[currentStep];
-      document.getElementById('score1').textContent = state.p1;
-      document.getElementById('score2').textContent = state.p2;
-
-      const isDeuce = state.p1 >= 10 && state.p2 >= 10;
-      isCurrentGameOver = ((state.p1 >= 11 || state.p2 >= 11) && Math.abs(state.p1 - state.p2) >= 2);
-
-      let virtualP1Games = state.p1Games + (isCurrentGameOver && state.p1 > state.p2 ? 1 : 0);
-      let virtualP2Games = state.p2Games + (isCurrentGameOver && state.p2 > state.p1 ? 1 : 0);
-      isMatchOver = isBo3 && (virtualP1Games === 2 || virtualP2Games === 2);
-
-      // DOM Elements
-      const playerBoard = document.getElementById('playerBoard');
-      const p1Card = document.getElementById('p1Card');
-      const p2Card = document.getElementById('p2Card');
-      const vsText = document.getElementById('vsText');
-      const statusEl = document.getElementById('status');
-      const serve1El = document.getElementById('serve1');
-      const serve2El = document.getElementById('serve2');
-      const btn1 = document.getElementById('btn1');
-      const btn2 = document.getElementById('btn2');
-      const nextGameBtn = document.getElementById('nextGameBtn');
-      const timeMachine = document.getElementById('timeMachine');
-
-      // Best of 3 Game Trackers
-      const p1GamesEl = document.getElementById('p1Games');
-      const p2GamesEl = document.getElementById('p2Games');
-      p1GamesEl.style.display = isBo3 ? 'block' : 'none';
-      p2GamesEl.style.display = isBo3 ? 'block' : 'none';
-      p1GamesEl.textContent = `${state.p1Games} Wins`;
-      p2GamesEl.textContent = `${state.p2Games} Wins`;
-
-      // ITTF Rule: Change ends at 5 points in the decider game
-      const isDecider = isBo3 && state.gameNum === 3;
-      const swapAt5 = isDecider && (state.p1 === 5 || state.p2 === 5) && !isCurrentGameOver;
-
-      // Handle Visual Swapping
-      playerBoard.style.flexDirection = isSwapped ? 'row-reverse' : 'row';
-      document.getElementById('swapIcon').style.transform = isSwapped ? 'rotateY(180deg)' : 'none';
-
-      // Base High-Stakes Styles
-      p1Card.className = 'flex-1 bg-slate-700/50 p-4 rounded-xl border transition-all duration-300 flex flex-col items-center ' + (isDeuce && !isCurrentGameOver ? 'border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.15)]' : 'border-slate-600');
-      p2Card.className = 'flex-1 bg-slate-700/50 p-4 rounded-xl border transition-all duration-300 flex flex-col items-center ' + (isDeuce && !isCurrentGameOver ? 'border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.15)]' : 'border-slate-600');
-      vsText.className = 'text-2xl sm:text-3xl font-black pb-16 flex items-center transition-colors duration-300 ' + (isDeuce && !isCurrentGameOver ? 'text-yellow-500/80' : 'text-slate-600');
-
-      if (isCurrentGameOver) {
-        if (isMatchOver) {
-            const winner = virtualP1Games === 2 ? p1NameStr : p2NameStr;
-            statusEl.textContent = `🏆 ${winner} WINS THE MATCH 🏆`;
-            statusEl.className = 'text-lg sm:text-xl font-bold text-yellow-400 mb-6 h-10 flex items-center justify-center bg-slate-900 rounded-lg border border-transparent';
-            nextGameBtn.classList.add('hidden');
+        // Update Buttons
+        document.getElementById('mode-direct').className = mode === 'direct' 
+            ? 'px-2 py-1 text-[9px] font-bold uppercase rounded bg-slate-800 text-slate-300 transition' 
+            : 'px-2 py-1 text-[9px] font-bold uppercase rounded text-slate-500 hover:text-slate-300 transition';
             
-            if(virtualP1Games === 2) {
-                p1Card.classList.replace('border-slate-600', 'border-emerald-500');
-                p1Card.classList.replace('border-yellow-500/50', 'border-emerald-500');
-            } else {
-                p2Card.classList.replace('border-slate-600', 'border-blue-500');
-                p2Card.classList.replace('border-yellow-500/50', 'border-blue-500');
-            }
-        } else if (isBo3) {
-            statusEl.textContent = `Game ${state.gameNum} Complete!`;
-            statusEl.className = 'text-lg sm:text-xl font-bold text-emerald-400 mb-6 h-10 flex items-center justify-center bg-slate-900 rounded-lg border border-transparent';
-            nextGameBtn.classList.remove('hidden');
-            timeMachine.classList.add('hidden');
+        document.getElementById('mode-est').className = mode === 'est' 
+            ? 'px-2 py-1 text-[9px] font-bold uppercase rounded bg-slate-800 text-slate-300 transition' 
+            : 'px-2 py-1 text-[9px] font-bold uppercase rounded text-slate-500 hover:text-slate-300 transition';
+
+        // Toggle UI
+        if (mode === 'direct') {
+            document.getElementById('rm-direct-container').classList.remove('hidden');
+            document.getElementById('rm-direct-container').classList.add('flex');
+            document.getElementById('rm-est-container').classList.add('hidden');
+            document.getElementById('rm-est-container').classList.remove('flex');
+            document.getElementById('est-warning').classList.add('hidden');
         } else {
-            const winner = state.p1 > state.p2 ? p1NameStr : p2NameStr;
-            statusEl.textContent = `🏆 ${winner} Takes the Game!`;
-            statusEl.className = 'text-lg sm:text-xl font-bold text-yellow-400 mb-6 h-10 flex items-center justify-center bg-slate-900 rounded-lg border border-transparent';
+            document.getElementById('rm-direct-container').classList.add('hidden');
+            document.getElementById('rm-direct-container').classList.remove('flex');
+            document.getElementById('rm-est-container').classList.remove('hidden');
+            document.getElementById('rm-est-container').classList.add('flex');
+            calculateEstimate();
+        }
+    }
+
+    function calculateEstimate() {
+        const w = parseFloat(document.getElementById('est-weight').value);
+        const r = parseFloat(document.getElementById('est-reps').value);
+        const resultEl = document.getElementById('est-result');
+        const warnEl = document.getElementById('est-warning');
+
+        if (!w || !r) {
+            resultEl.innerText = '—';
+            warnEl.classList.add('hidden');
+            return;
+        }
+
+        // Epley Formula
+        let estRm = Math.round(w * (1 + (r / 30)));
+        resultEl.innerText = estRm;
+        
+        // Feed the invisible direct input to run the engine
+        document.getElementById('oneRm').value = estRm;
+        
+        if (r >= 8) {
+            warnEl.classList.remove('hidden');
+        } else {
+            warnEl.classList.add('hidden');
         }
         
-        serve1El.classList.add('invisible');
-        serve2El.classList.add('invisible');
-        btn1.disabled = true;
-        btn2.disabled = true;
+        autoCalculate();
+    }
 
-      } else {
-        nextGameBtn.classList.add('hidden');
-        timeMachine.classList.remove('hidden');
-        btn1.disabled = false;
-        btn2.disabled = false;
+    // ── Unit System ───────────────────────────────────────
+    function setUnit(unit) {
+        const old = currentUnit;
+        currentUnit = unit;
 
-        let servesPassed = 0;
-        if (isDeuce) {
-            servesPassed = 10 + (state.p1 + state.p2 - 20); 
-        } else {
-            servesPassed = Math.floor((state.p1 + state.p2) / 2); 
+        ['kg','lbs'].forEach(u => {
+            const btn = document.getElementById('unit-' + u);
+            btn.className = u === unit
+                ? 'px-4 py-2 rounded-lg text-[11px] font-bold transition bg-blue-600 text-white shadow-lg'
+                : 'px-4 py-2 rounded-lg text-[11px] font-bold transition text-slate-500 hover:text-slate-300 bg-transparent';
+        });
+        document.getElementById('unit-label').textContent = unit;
+
+        const factor = (old === 'kg' && unit === 'lbs') ? 2.2046
+                     : (old === 'lbs' && unit === 'kg') ? 1/2.2046 : 1;
+
+        const oneRmInput = document.getElementById('oneRm');
+        if (oneRmInput.value) oneRmInput.value = Math.round(parseFloat(oneRmInput.value) * factor);
+
+        const estWInput = document.getElementById('est-weight');
+        if (estWInput.value) estWInput.value = Math.round(parseFloat(estWInput.value) * factor);
+
+        document.querySelectorAll('.set-weight').forEach(inp => {
+            if (inp.value) inp.value = Math.round(parseFloat(inp.value) * factor);
+        });
+
+        if (rmMode === 'est') calculateEstimate();
+        autoCalculate();
+    }
+
+    function updateConvertedDisplay() {
+        const val = parseFloat(document.getElementById('oneRm').value);
+        const el = document.getElementById('oneRmConverted');
+        if (!val) { el.textContent = ''; return; }
+        el.textContent = currentUnit === 'kg'
+            ? `${Math.round(val * 2.2046)} lbs`
+            : `${Math.round(val / 2.2046)} kg`;
+    }
+
+    // ── DOM Rows ──────────────────────────────────────────
+    function addSetRow(exercise = '', weight = '', reps = '', rpe = 8) {
+        const container = document.getElementById('sets-container');
+        const div = document.createElement('div');
+        div.className = 'set-row grid grid-cols-12 gap-2 items-center bg-slate-950 p-2 rounded-xl border border-slate-800';
+
+        const baseInput = 'w-full min-w-0 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm mono text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors';
+
+        div.innerHTML = `
+            <input type="text"   class="col-span-3 ${baseInput} set-exercise" value="${exercise}" placeholder="Exercise" oninput="autoCalculate()">
+            <input type="number" class="col-span-2 ${baseInput} set-weight"   value="${weight}"   placeholder="Wt"       oninput="autoCalculate()">
+            <input type="number" class="col-span-2 ${baseInput} set-reps"     value="${reps}"     placeholder="Reps"     oninput="autoCalculate()">
+            
+            <div class="col-span-2 flex flex-col justify-center px-2">
+                <input type="range" class="w-full set-rpe" min="6" max="10" step="0.5" value="${rpe}"
+                    oninput="this.nextElementSibling.textContent=parseFloat(this.value).toFixed(1); autoCalculate(); updateRpeColor(this)">
+                <span class="text-[10px] font-bold text-center mt-1 text-slate-400 rpe-label">${parseFloat(rpe).toFixed(1)}</span>
+            </div>
+            
+            <div class="col-span-2 text-right set-intensity-badge flex justify-end items-center pr-2"></div>
+            
+            <button onclick="this.closest('.set-row').remove();autoCalculate()"
+                class="col-span-1 flex justify-center items-center w-full h-full text-slate-600 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition">✕</button>
+        `;
+        container.appendChild(div);
+        updateRpeColor(div.querySelector('.set-rpe'));
+        updateIntensityBadge(div);
+    }
+
+    function updateRpeColor(slider) {
+        const val = parseFloat(slider.value);
+        const label = slider.nextElementSibling;
+        if (val >= 9.5) { label.style.color = '#ef4444'; }
+        else if (val >= 8.5) { label.style.color = '#f59e0b'; }
+        else { label.style.color = '#94a3b8'; }
+    }
+
+    function updateIntensityBadge(row) {
+        const oneRm = parseFloat(document.getElementById('oneRm').value);
+        const w     = parseFloat(row.querySelector('.set-weight').value);
+        const badge = row.querySelector('.set-intensity-badge');
+
+        if (!oneRm || !w) {
+            badge.innerHTML = '<span class="text-xs mono font-bold text-slate-700">—</span>';
+            return;
         }
+
+        const pct = (w / oneRm) * 100;
+        let colorCls = pct >= 100 ? 'text-red-500' : pct >= 85 ? 'text-amber-500' : 'text-emerald-500';
         
-        let p1Serves = (servesPassed % 2 === 0) ? (state.initialServer === 1) : (state.initialServer === 2);
+        badge.innerHTML = `<span class="text-xs mono font-black ${colorCls}">${pct.toFixed(0)}%</span>`;
+    }
 
-        serve1El.classList.toggle('invisible', !p1Serves);
-        serve2El.classList.toggle('invisible', p1Serves);
+    function clearSets() {
+        document.getElementById('sets-container').innerHTML = '';
+        autoCalculate();
+    }
 
-        if (swapAt5) {
-             statusEl.innerHTML = '<span class="animate-pulse text-rose-400">🔄 SWAP ENDS 🔄</span>';
-             statusEl.className = 'text-lg sm:text-xl font-bold mb-6 h-10 flex items-center justify-center bg-rose-900/20 rounded-lg border border-rose-500/30 shadow-inner';
-        } else if (isDeuce) {
-             statusEl.innerHTML = '<span class="animate-pulse text-yellow-400">🔥 SUDDEN DEATH DUEL 🔥</span>';
-             statusEl.className = 'text-lg sm:text-xl font-bold mb-6 h-10 flex items-center justify-center bg-yellow-900/20 rounded-lg border border-yellow-500/30 shadow-inner';
-        } else {
-             statusEl.textContent = `Game ${state.gameNum}: First to 11`;
-             statusEl.className = 'text-lg sm:text-xl font-bold text-slate-400 mb-6 h-10 flex items-center justify-center bg-slate-900 rounded-lg border border-transparent transition-all duration-300';
-        }
-      }
-
-      document.getElementById('undoBtn').disabled = currentStep === 0;
-      document.getElementById('redoBtn').disabled = currentStep === matchHistory.length - 1;
-
-      saveData();
+    // ── Presets ───────────────────────────────────────────
+    const PRESETS = {
+        '5x5':       { sets: [[0.85,5,8],[0.85,5,8],[0.85,5,8],[0.85,5,8],[0.85,5,8]], label: '5x5 Base' },
+        '3x3':       { sets: [[0.92,3,9],[0.92,3,9],[0.92,3,9]], label: '3x3 Peak' },
+        '531':       { sets: [[0.65,5,7],[0.75,5,8],[0.85,5,9.5]], label: '5/3/1 Wave' }, 
+        '3x12':      { sets: [[0.67,12,8],[0.67,12,8],[0.67,12,8]], label: '3x12 Pump' },
+        '4x10':      { sets: [[0.70,10,8],[0.70,10,8],[0.70,10,8],[0.70,10,8]], label: '4x10 Volume' },
+        'gvt':       { sets: Array(10).fill([0.60,10,8]), label: 'German Volume' },
+        'mentzer':   { sets: [[0.85,6,10]], label: 'Mentzer HIT' },
+        'dropset':   { sets: [[0.80,8,9.5],[0.65,6,10],[0.50,10,10]], label: 'Drop Set' }, 
+        'restpause': { sets: [[0.80,8,10],[0.80,4,10],[0.80,3,10]], label: 'Rest-Pause' } 
     };
-  </script>
+
+    function loadPreset(key) {
+        const oneRm = parseFloat(document.getElementById('oneRm').value);
+        if (!oneRm) { alert('Enter or Estimate your Target 1RM first to load preset weights.'); return; }
+
+        const preset = PRESETS[key];
+        if (!preset) return;
+
+        document.getElementById('sets-container').innerHTML = '';
+
+        preset.sets.forEach(s => {
+            const w = Math.round(oneRm * s[0]);
+            addSetRow(preset.label, w, s[1], s[2]);
+        });
+
+        autoCalculate();
+    }
+
+    // ── V2 Core Engine ────────────────────────────────────
+    function autoCalculate() {
+        if (rmMode === 'direct') {
+            updateConvertedDisplay();
+        }
+        document.querySelectorAll('.set-row').forEach(updateIntensityBadge);
+        calculateFinal();
+    }
+
+    function calculateFinal() {
+        const oneRm = parseFloat(document.getElementById('oneRm').value);
+        let totalInol = 0;
+        const exerciseMap = {};
+        let supraMaximalDetected = false;
+
+        document.querySelectorAll('.set-row').forEach(row => {
+            const w   = parseFloat(row.querySelector('.set-weight').value);
+            const r   = parseFloat(row.querySelector('.set-reps').value);
+            const rpe = parseFloat(row.querySelector('.set-rpe').value);
+            const ex  = row.querySelector('.set-exercise').value.trim() || 'Unnamed Set';
+            
+            if (!w || !r || !oneRm) return;
+
+            const intensity = (w / oneRm) * 100;
+            if (intensity >= 100) supraMaximalDetected = true;
+            const cappedIntensity = Math.min(intensity, 99);
+            const setInol = (r / (100 - cappedIntensity)) * getRpeMultiplier(rpe);
+            
+            totalInol += setInol;
+            exerciseMap[ex] = (exerciseMap[ex] || 0) + setInol;
+        });
+
+        updateUI(totalInol, exerciseMap);
+
+        const highestExerciseInol = Object.keys(exerciseMap).length > 0 
+            ? Math.max(...Object.values(exerciseMap)) 
+            : 0;
+
+        generatePrescription(totalInol, highestExerciseInol, supraMaximalDetected);
+    }
+
+    function updateUI(totalInol, map) {
+        const display = document.getElementById('totalVal');
+        const pill    = document.getElementById('status-pill');
+        const bar     = document.getElementById('inol-bar');
+        const hasData = Object.keys(map).length > 0;
+
+        if (!hasData) {
+            display.innerText = '—';
+            display.style.color = '';
+            pill.className = 'inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-slate-800 text-slate-500 border border-slate-700';
+            pill.innerText = 'Standby';
+            bar.style.width = '0%';
+            bar.style.background = '#1e293b';
+            renderExerciseBreakdown({});
+            document.getElementById('prescription-engine').classList.add('hidden');
+            return;
+        }
+
+        display.innerText = totalInol.toFixed(2);
+        bar.style.width = Math.min((totalInol / 3.0) * 100, 100) + '%';
+
+        if (totalInol < 0.4) {
+            setStatus('Underloaded', 'bg-slate-800 text-slate-400 border-slate-700', '#64748b', '#94a3b8', display);
+        } else if (totalInol <= 1.0) {
+            setStatus('Productive', 'bg-emerald-900/30 text-emerald-400 border-emerald-800/50', '#10b981', '#34d399', display);
+        } else if (totalInol <= 2.0) {
+            setStatus('High Fatigue', 'bg-amber-900/30 text-amber-400 border-amber-800/50', '#f59e0b', '#fbbf24', display);
+        } else {
+            setStatus('Recovery Debt', 'bg-red-900/30 text-red-400 border-red-800/50', '#ef4444', '#f87171', display);
+        }
+
+        renderExerciseBreakdown(map);
+    }
+
+    function setStatus(label, pillCls, barColor, numColor, numEl) {
+        const pill = document.getElementById('status-pill');
+        const bar  = document.getElementById('inol-bar');
+        pill.className = `inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${pillCls}`;
+        pill.innerText = label;
+        bar.style.background = barColor;
+        numEl.style.color = numColor;
+    }
+
+    function generatePrescription(totalInol, highestExerciseInol, isSupraMaximal) {
+        if (totalInol === 0) return;
+
+        const engineBox = document.getElementById('prescription-engine');
+        const rxRest    = document.getElementById('rx-rest');
+        const rxFreq    = document.getElementById('rx-freq');
+        const rxNote    = document.getElementById('rx-note');
+        
+        engineBox.classList.remove('hidden');
+
+        let freqAdvice = '';
+        let restAdvice = '';
+        let noteHtml = '';
+
+        if (highestExerciseInol < 0.4) {
+            freqAdvice = '24 Hours';
+            noteHtml = 'Tissue damage is minimal. This acts as active recovery or technique practice.';
+        } else if (highestExerciseInol <= 1.0) {
+            freqAdvice = '48–72 Hours';
+            noteHtml = 'Optimal localized stimulus. Muscle protein synthesis will peak safely. Ready to hit this pattern again in 2-3 days.';
+        } else if (highestExerciseInol <= 1.75) {
+            freqAdvice = '72–96 Hours';
+            noteHtml = 'High localized fatigue. You dug deep here; respect the recovery timeline before applying load to these specific structures again.';
+        } else {
+            freqAdvice = '4–7 Days';
+            noteHtml = '<span class="text-amber-400 font-bold">Massive tissue fatigue detected.</span> Do not repeat this specific movement pattern until fully recovered.';
+        }
+
+        if (totalInol > 2.5) {
+            freqAdvice = 'Deload Recommended';
+            noteHtml += '<br><br><span class="text-red-400 font-bold">SYSTEMIC WARNING:</span> Total session volume is creating a heavy recovery debt. Watch for CNS burnout, grip weakness, or sleep disruption.';
+            engineBox.classList.add('border-red-900/50', 'bg-red-950/20');
+        } else {
+            engineBox.classList.remove('border-red-900/50', 'bg-red-950/20');
+        }
+
+        if (isSupraMaximal) {
+            noteHtml = '<span class="bg-red-900/50 text-red-200 px-2 py-1 rounded text-xs font-bold mr-2">SUPRAMAX DETECTED</span> You exceeded your calculated baseline. This generates extreme neural fatigue. Recalibrate if this was a clean PR.<br><br>' + noteHtml;
+        }
+
+        if (totalInol > 1.5 || highestExerciseInol > 1.0) {
+            restAdvice = '3–5 min+'; 
+        } else {
+            restAdvice = 'Auto (1–2 min)'; 
+        }
+
+        rxFreq.innerText = freqAdvice;
+        rxRest.innerText = restAdvice;
+        rxNote.innerHTML = noteHtml;
+    }
+
+    function renderExerciseBreakdown(map) {
+        const el = document.getElementById('exercise-breakdown');
+        const entries = Object.entries(map);
+
+        if (!entries.length) {
+            el.innerHTML = '<p class="text-xs text-slate-600 italic">Name your sets to analyze isolated damage.</p>';
+            return;
+        }
+
+        const maxInol = Math.max(...entries.map(e => e[1]));
+
+        el.innerHTML = entries.map(([name, inol]) => {
+            let color;
+            if      (inol < 0.4)  color = '#64748b'; 
+            else if (inol <= 1.0) color = '#10b981'; 
+            else if (inol <= 1.75) color = '#f59e0b'; 
+            else                  color = '#ef4444'; 
+
+            const pct = Math.min((inol / Math.max(maxInol, 1.0)) * 100, 100);
+            return `
+                <div class="space-y-1.5 bg-slate-950/50 p-3 rounded-xl border border-slate-800">
+                    <div class="flex justify-between items-baseline">
+                        <span class="text-xs font-bold text-slate-300 truncate max-w-[160px] uppercase tracking-wide">${name}</span>
+                        <span class="text-sm mono font-black" style="color:${color}">${inol.toFixed(2)}</span>
+                    </div>
+                    <div class="h-1.5 bg-slate-900 rounded-full overflow-hidden">
+                        <div class="h-full rounded-full transition-all duration-500 ease-out" style="width:${pct}%;background:${color}"></div>
+                    </div>
+                </div>`;
+        }).join('');
+    }
+
+    addSetRow();
+</script>
 </body>
 </html>
