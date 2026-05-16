@@ -1,251 +1,740 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Squash Pulse Pro</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    .squash-gradient {
-      background: radial-gradient(circle at top right, #1e1b4b, #020617);
-    }
-    .amber-glow {
-      text-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
-    }
-    .glass-panel {
-      background: rgba(15, 23, 42, 0.8);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(245, 158, 11, 0.1);
-    }
-  </style>
-</head>
-<body class="squash-gradient text-slate-100 min-h-screen flex flex-col font-sans selection:bg-amber-500/30">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeMax INOL | Unified Engine</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Syne:wght@400;600;700;800&family=Teko:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg: #060a10;
+            --surface: #0d1420;
+            --border: #1a2336;
+            --accent: #f59e0b; /* Amber */
+        }
+        * { box-sizing: border-box; }
+        body { font-family: 'Syne', system-ui, sans-serif; background: var(--bg); color: #e2e8f0; min-height: 100vh; padding-bottom: 120px; }
+        .mono { font-family: 'DM Mono', 'Courier New', monospace; }
+        .brand-font { font-family: 'Teko', sans-serif; }
 
-  <!-- Header -->
-  <div class="w-full py-4 px-6 flex justify-between items-center border-b border-amber-900/30 bg-black/20">
-    <span class="text-amber-500 font-black tracking-tighter text-xl italic">SQUASH<span class="text-white">PULSE</span></span>
-    <button onclick="resetMatch()" class="text-[10px] font-bold text-slate-500 hover:text-rose-400 uppercase tracking-widest transition-colors">Reset Arena</button>
-  </div>
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=range] { accent-color: var(--accent); cursor: pointer; }
+        select { -webkit-appearance: none; appearance: none; }
 
-  <div class="flex-1 flex flex-col items-center justify-center p-4 w-full max-w-lg mx-auto">
-    
-    <!-- Match Settings -->
-    <div class="glass-panel w-full p-4 rounded-2xl mb-4 flex justify-between items-center gap-4">
-      <div class="flex flex-col gap-1">
-        <span class="text-[10px] font-black text-amber-600 uppercase tracking-widest">Scoring System</span>
-        <div class="flex bg-black/40 rounded-lg p-1 p-1 border border-amber-900/20">
-          <button id="parsBtn" onclick="setScoring('PARS')" class="px-3 py-1 text-xs font-bold rounded-md transition-all bg-amber-500 text-black">PARS (11)</button>
-          <button id="hihoBtn" onclick="setScoring('HIHO')" class="px-3 py-1 text-xs font-bold rounded-md transition-all text-slate-400">HIHO (9)</button>
-        </div>
-      </div>
-      <div class="text-right">
-        <span class="text-[10px] font-black text-amber-600 uppercase tracking-widest">Format</span>
-        <select id="matchFormat" onchange="updateUI()" class="bg-transparent text-sm font-bold text-white outline-none block">
-          <option value="3" class="bg-slate-900">Best of 3</option>
-          <option value="5" class="bg-slate-900" selected>Best of 5</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Main Scoreboard -->
-    <div class="glass-panel w-full rounded-[2.5rem] p-6 shadow-2xl relative overflow-hidden">
-      
-      <!-- Status/Notification Bar -->
-      <div id="statusBar" class="h-10 mb-6 flex items-center justify-center rounded-xl bg-amber-950/20 border border-amber-500/20">
-        <span id="statusText" class="text-xs font-black uppercase tracking-[0.2em] text-amber-400">Game 1: Active</span>
-      </div>
-
-      <!-- Service Side Selection (Overlay) -->
-      <div id="sidePicker" class="hidden absolute inset-x-6 top-24 z-10 bg-amber-500 p-4 rounded-2xl shadow-2xl animate-bounce">
-        <p class="text-black text-center font-black text-xs uppercase mb-3">New Server: Choose Side</p>
-        <div class="flex gap-2">
-          <button onclick="pickSide('L')" class="flex-1 bg-black text-white py-3 rounded-xl font-bold hover:bg-slate-800">LEFT</button>
-          <button onclick="pickSide('R')" class="flex-1 bg-black text-white py-3 rounded-xl font-bold hover:bg-slate-800">RIGHT</button>
-        </div>
-      </div>
-
-      <div class="flex justify-between items-center mb-8 gap-4">
-        <!-- Player 1 -->
-        <div class="flex-1 text-center">
-          <input type="text" id="p1Name" value="PLAYER 1" class="bg-transparent w-full text-center text-[10px] font-black tracking-[0.2em] text-slate-500 uppercase focus:text-amber-400 outline-none mb-2">
-          <div id="p1Games" class="text-[10px] font-bold text-amber-500/50 mb-1">SETS: 0</div>
-          <div id="score1" class="text-8xl font-black amber-glow tabular-nums">0</div>
-          <div id="serveIndicator1" class="mt-2 h-6 flex flex-col items-center justify-center">
-            <div id="dot1" class="w-1.5 h-1.5 rounded-full bg-transparent"></div>
-            <span id="sideText1" class="text-[10px] font-bold text-amber-600 uppercase mt-1"></span>
-          </div>
-        </div>
-
-        <div class="h-24 w-px bg-amber-900/30"></div>
-
-        <!-- Player 2 -->
-        <div class="flex-1 text-center">
-          <input type="text" id="p2Name" value="PLAYER 2" class="bg-transparent w-full text-center text-[10px] font-black tracking-[0.2em] text-slate-500 uppercase focus:text-amber-400 outline-none mb-2">
-          <div id="p2Games" class="text-[10px] font-bold text-amber-500/50 mb-1">SETS: 0</div>
-          <div id="score2" class="text-8xl font-black amber-glow tabular-nums">0</div>
-          <div id="serveIndicator2" class="mt-2 h-6 flex flex-col items-center justify-center">
-            <div id="dot2" class="w-1.5 h-1.5 rounded-full bg-transparent"></div>
-            <span id="sideText2" class="text-[10px] font-bold text-amber-600 uppercase mt-1"></span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Point Buttons -->
-      <div class="flex gap-4 mb-6">
-        <button onclick="handlePoint(1)" id="btn1" class="flex-1 bg-amber-500 hover:bg-amber-400 text-black py-5 rounded-2xl font-black text-xl transition-all active:scale-95 disabled:opacity-20">WIN RALLY</button>
-        <button onclick="handlePoint(2)" id="btn2" class="flex-1 bg-amber-500 hover:bg-amber-400 text-black py-5 rounded-2xl font-black text-xl transition-all active:scale-95 disabled:opacity-20">WIN RALLY</button>
-      </div>
-
-      <!-- Next Game Button -->
-      <button onclick="startNextGame()" id="nextGameBtn" class="hidden w-full bg-white text-black py-4 rounded-2xl font-black uppercase tracking-widest mb-6">Start Next Game</button>
-
-      <!-- History Controls -->
-      <div class="grid grid-cols-2 gap-3">
-        <button onclick="undo()" id="undoBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-400 py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest disabled:opacity-10">Undo</button>
-        <button onclick="redo()" id="redoBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-400 py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest disabled:opacity-10">Redo</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    let scoringMode = 'PARS'; // HIHO or PARS
-    let matchHistory = [{
-      p1: 0, p2: 0, 
-      p1Games: 0, p2Games: 0, 
-      server: 1, // 1 or 2
-      serveSide: null, // 'L', 'R', or null (needs picking)
-      gameNum: 1,
-      isGameOver: false
-    }];
-    let currentStep = 0;
-
-    const setScoring = (mode) => {
-      scoringMode = mode;
-      document.getElementById('parsBtn').className = mode === 'PARS' ? 'px-3 py-1 text-xs font-bold rounded-md bg-amber-500 text-black' : 'px-3 py-1 text-xs font-bold text-slate-400';
-      document.getElementById('hihoBtn').className = mode === 'HIHO' ? 'px-3 py-1 text-xs font-bold rounded-md bg-amber-500 text-black' : 'px-3 py-1 text-xs font-bold text-slate-400';
-      resetMatch(true);
-    };
-
-    const handlePoint = (winner) => {
-      const state = matchHistory[currentStep];
-      if (state.isGameOver) return;
-
-      let nextState = JSON.parse(JSON.stringify(state));
-      
-      if (scoringMode === 'PARS') {
-        // PARS: Winner always gets a point
-        if (winner === 1) nextState.p1++; else nextState.p2++;
+        .inol-bar { transition: width 0.5s cubic-bezier(0.4,0,0.2,1), background 0.5s ease; }
+        .score-num { transition: color 0.4s ease; }
         
-        if (winner === nextState.server) {
-          // Keep serve, alternate sides
-          nextState.serveSide = nextState.serveSide === 'L' ? 'R' : 'L';
-        } else {
-          // Hand-out: Change server, must pick side
-          nextState.server = winner;
-          nextState.serveSide = null;
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .pulse-active { animation: pulse-red 2s infinite; }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
-      } else {
-        // HIHO: Only server scores
-        if (winner === nextState.server) {
-          if (winner === 1) nextState.p1++; else nextState.p2++;
-          nextState.serveSide = nextState.serveSide === 'L' ? 'R' : 'L';
-        } else {
-          // Just change server, no point awarded
-          nextState.server = winner;
-          nextState.serveSide = null;
+
+        .vertical-text {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            transform: rotate(180deg);
         }
-      }
 
-      checkGameOver(nextState);
-      pushState(nextState);
-    };
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 32px 32px;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .content { position: relative; z-index: 1; }
+    </style>
+</head>
+<body class="selection:bg-amber-500 selection:text-slate-900">
 
-    const checkGameOver = (state) => {
-      const target = scoringMode === 'PARS' ? 11 : 9;
-      const lead = Math.abs(state.p1 - state.p2);
-      
-      if (scoringMode === 'PARS') {
-        if ((state.p1 >= target || state.p2 >= target) && lead >= 2) state.isGameOver = true;
-      } else {
-        // Traditional HIHO 9-point rule
-        if (state.p1 >= target || state.p2 >= target) state.isGameOver = true;
-      }
-    };
+    <nav class="border-b border-slate-800 bg-slate-900/95 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+           <div class="flex items-center gap-2">
+                <span class="text-2xl">🛡️</span>
+                <h1 class="text-xl font-semibold tracking-wide text-white brand-font uppercase">SafeMax <span class="text-amber-500">INOL</span></h1>
+            </div>
+            <div class="bg-slate-800 p-1 rounded-lg flex text-[10px] sm:text-xs font-bold border border-slate-700">
+                <button onclick="setUnit('kg')" id="btn-kg" class="px-3 py-1 rounded-md transition-all bg-amber-500 text-slate-900 shadow font-bold">KG</button>
+                <button onclick="setUnit('lbs')" id="btn-lbs" class="px-3 py-1 rounded-md transition-all text-slate-400 hover:text-white font-medium">LBS</button>
+            </div>
+        </div>
+    </nav>
 
-    const pickSide = (side) => {
-      let nextState = JSON.parse(JSON.stringify(matchHistory[currentStep]));
-      nextState.serveSide = side;
-      pushState(nextState);
-    };
+<div class="content max-w-7xl mx-auto px-4 mt-6">
 
-    const pushState = (s) => {
-      matchHistory = matchHistory.slice(0, currentStep + 1);
-      matchHistory.push(s);
-      currentStep++;
-      updateUI();
-    };
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-    const startNextGame = () => {
-      const state = matchHistory[currentStep];
-      pushState({
-        p1: 0, p2: 0,
-        p1Games: state.p1Games + (state.p1 > state.p2 ? 1 : 0),
-        p2Games: state.p2Games + (state.p2 > state.p1 ? 1 : 0),
-        server: state.p1 > state.p2 ? 1 : 2,
-        serveSide: null,
-        gameNum: state.gameNum + 1,
-        isGameOver: false
-      });
-    };
+        <!-- LEFT PILLAR: PREPARATION & RAMP-UP -->
+        <div class="space-y-6">
+            
+            <!-- Baseline 1RM Setup -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-white text-lg uppercase tracking-wide brand-font flex items-center gap-2">
+                        <span class="text-amber-500">1.</span> Baseline Stats
+                    </h2>
+                    <div class="flex bg-slate-950 rounded-lg p-1 border border-slate-800">
+                        <button id="mode-direct" onclick="setRmMode('direct')" class="px-2 py-1 text-[9px] font-bold uppercase rounded bg-slate-800 text-slate-300 transition">Direct 1RM</button>
+                        <button id="mode-est" onclick="setRmMode('est')" class="px-2 py-1 text-[9px] font-bold uppercase rounded text-slate-500 hover:text-slate-300 transition">Estimate</button>
+                    </div>
+                </div>
 
-    const updateUI = () => {
-      const state = matchHistory[currentStep];
-      const format = parseInt(document.getElementById('matchFormat').value);
-      
-      document.getElementById('score1').textContent = state.p1;
-      document.getElementById('score2').textContent = state.p2;
-      document.getElementById('p1Games').textContent = `SETS: ${state.p1Games}`;
-      document.getElementById('p2Games').textContent = `SETS: ${state.p2Games}`;
+                <!-- Direct Mode -->
+                <div id="rm-direct-container" class="flex items-center gap-4">
+                    <div class="relative w-full">
+                        <input type="number" id="oneRm" oninput="masterCalculate()"
+                            class="w-full bg-slate-950 border border-slate-700 rounded-xl p-4 text-4xl font-black mono focus:border-amber-500 outline-none transition-all text-white text-center"
+                            placeholder="140">
+                        <span id="unit-label-direct" class="absolute right-4 top-5 text-slate-600 text-xs font-bold uppercase">KG</span>
+                    </div>
+                </div>
 
-      // Handle Service Visibility
-      const needsSide = state.serveSide === null && !state.isGameOver;
-      document.getElementById('sidePicker').classList.toggle('hidden', !needsSide);
-      document.getElementById('btn1').disabled = needsSide || state.isGameOver;
-      document.getElementById('btn2').disabled = needsSide || state.isGameOver;
+                <!-- Estimate Mode -->
+                <div id="rm-est-container" class="hidden gap-3">
+                    <div class="relative flex-1">
+                        <label class="block text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Weight</label>
+                        <input type="number" id="est-weight" oninput="masterCalculate()" placeholder="100" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-2xl font-black mono focus:border-amber-500 outline-none text-white text-center">
+                    </div>
+                    <div class="relative flex-1">
+                        <label class="block text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Reps</label>
+                        <input type="number" id="est-reps" oninput="masterCalculate()" placeholder="5" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-2xl font-black mono focus:border-amber-500 outline-none text-white text-center">
+                    </div>
+                    <div class="flex flex-col items-center justify-center bg-amber-900/10 border border-amber-900/30 rounded-xl px-4 min-w-[100px] mt-4">
+                        <span class="text-[9px] text-amber-500 font-bold uppercase tracking-widest mb-1">Calculated</span>
+                        <span id="est-result" class="text-2xl font-black mono text-amber-400">—</span>
+                    </div>
+                </div>
+                <p id="est-warning" class="hidden mt-3 text-[10px] font-bold uppercase tracking-wide"></p>
+            </div>
 
-      // Service Indicators
-      document.getElementById('dot1').className = (state.server === 1 && !needsSide) ? "w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_10px_#f59e0b]" : "hidden";
-      document.getElementById('dot2').className = (state.server === 2 && !needsSide) ? "w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_10px_#f59e0b]" : "hidden";
-      document.getElementById('sideText1').textContent = (state.server === 1 && state.serveSide) ? (state.serveSide === 'L' ? 'Left Box' : 'Right Box') : '';
-      document.getElementById('sideText2').textContent = (state.server === 2 && state.serveSide) ? (state.serveSide === 'L' ? 'Left Box' : 'Right Box') : '';
+            <!-- Warmup Engine -->
+            <div id="warmup-panel" class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl shadow-black/20 opacity-50 pointer-events-none transition-opacity">
+                <div class="p-4 sm:p-5 bg-slate-950 border-b border-slate-800">
+                    <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+                        <h3 class="text-white font-bold brand-font text-xl flex items-center gap-2">
+                            <span class="text-amber-500">2.</span> Ramp-Up Protocol
+                        </h3>
+                        
+                        <div class="flex flex-wrap items-end gap-2">
+                            <div class="w-20">
+                                <label class="block text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1.5 text-center">Type</label>
+                                <select id="muscle-type" onchange="masterCalculate()" class="w-full bg-slate-900 text-center text-white text-sm font-bold py-2 px-1 rounded-lg border border-slate-700 outline-none focus:border-amber-500">
+                                    <option value="compound" selected>Comp</option>
+                                    <option value="isolation">Iso</option>
+                                </select>
+                            </div>
+                            <div class="w-20">
+                                <label class="block text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1.5 text-center">Target</label>
+                                <select id="warmup-target" onchange="masterCalculate()" class="w-full bg-slate-900 text-center text-white text-sm font-bold py-2 px-1 rounded-lg border border-slate-700 outline-none focus:border-amber-500">
+                                    <option value="1">1RM</option>
+                                    <option value="3">3RM</option>
+                                    <option value="5" selected>5RM</option>
+                                    <option value="8">8RM</option>
+                                    <option value="10">10RM</option>
+                                </select>
+                            </div>
+                            <div class="w-16">
+                                <label class="block text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1.5 text-center">Bar</label>
+                                <input type="number" id="bar-weight" value="20" oninput="masterCalculate()" class="w-full bg-slate-900 text-center text-white text-sm font-bold py-2 px-1 rounded-lg border border-slate-700 outline-none focus:border-amber-500">
+                            </div>
+                            <div class="w-16">
+                                <label class="block text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1.5 text-center">Inc</label>
+                                <select id="rounding-factor" onchange="masterCalculate()" class="w-full bg-slate-900 text-center text-white text-sm font-bold py-2 px-1 rounded-lg border border-slate-700 outline-none focus:border-amber-500">
+                                    <option value="0.5">0.5</option>
+                                    <option value="1">1</option>
+                                    <option value="1.25" selected>1.25</option>
+                                    <option value="2.5">2.5</option>
+                                    <option value="5">5</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col bg-slate-900" id="warmup-container"></div>
+            </div>
 
-      // Game Over Logic
-      const setsToWin = Math.ceil(format / 2);
-      const matchOver = state.p1Games >= setsToWin || state.p2Games >= setsToWin;
+            <!-- Percentage Table -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-lg">
+                <div class="p-3 bg-slate-950 border-b border-slate-800">
+                     <h3 class="text-white text-sm font-bold brand-font tracking-wide">Percentage Reference</h3>
+                </div>
+                <table class="w-full text-left text-slate-400">
+                    <tbody id="percentage-table-body" class="divide-y divide-slate-800/50"></tbody>
+                </table>
+            </div>
 
-      if (state.isGameOver) {
-        document.getElementById('statusText').textContent = matchOver ? "Match Complete" : `Game ${state.gameNum} Finished`;
-        document.getElementById('nextGameBtn').classList.toggle('hidden', matchOver);
-      } else {
-        document.getElementById('statusText').textContent = `Game ${state.gameNum}: ${scoringMode} to ${scoringMode === 'PARS' ? 11 : 9}`;
-        document.getElementById('nextGameBtn').classList.add('hidden');
-      }
+        </div>
 
-      document.getElementById('undoBtn').disabled = currentStep === 0;
-      document.getElementById('redoBtn').disabled = currentStep === matchHistory.length - 1;
-    };
+        <!-- RIGHT PILLAR: WORKING SETS & INOL -->
+        <div class="space-y-6">
 
-    const undo = () => { if (currentStep > 0) { currentStep--; updateUI(); } };
-    const redo = () => { if (currentStep < matchHistory.length - 1) { currentStep++; updateUI(); } };
-    const resetMatch = (silent = false) => {
-      if (silent || confirm("Clear match?")) {
-        matchHistory = [{ p1: 0, p2: 0, p1Games: 0, p2Games: 0, server: 1, serveSide: null, gameNum: 1, isGameOver: false }];
-        currentStep = 0;
-        updateUI();
-      }
-    };
+            <!-- Working Sets Input -->
+            <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl backdrop-blur-sm">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-white text-lg uppercase tracking-wide brand-font flex items-center gap-2">
+                        <span class="text-blue-500">3.</span> Working Sets
+                    </h2>
+                    <button onclick="clearSets()" class="text-[10px] text-slate-600 hover:text-red-400 font-bold transition px-2 py-1 rounded bg-slate-950">Clear all</button>
+                </div>
 
-    updateUI();
-  </script>
+                <div class="grid grid-cols-12 gap-2 mb-3 px-1">
+                    <div class="col-span-3 text-[9px] text-slate-500 uppercase font-bold tracking-wider">Weight</div>
+                    <div class="col-span-3 text-[9px] text-slate-500 uppercase font-bold tracking-wider">Reps</div>
+                    <div class="col-span-3 text-[9px] text-slate-500 uppercase font-bold tracking-wider text-center">RPE</div>
+                    <div class="col-span-2 text-[9px] text-slate-500 uppercase font-bold tracking-wider text-right">Load %</div>
+                    <div class="col-span-1"></div>
+                </div>
+
+                <div id="sets-container" class="space-y-3"></div>
+
+                <button onclick="addSetRow()" class="mt-6 w-full py-3 rounded-xl border border-dashed border-slate-700 text-xs font-bold text-blue-400 hover:text-blue-300 hover:border-blue-500 hover:bg-slate-950 transition">
+                    + Add Working Set
+                </button>
+                
+                <div class="mt-4 flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
+                    <button onclick="loadPreset('5x5')" class="whitespace-nowrap px-3 py-1.5 rounded bg-slate-950 border border-slate-800 text-[10px] font-bold text-slate-400 hover:text-white transition">5x5 Base</button>
+                    <button onclick="loadPreset('3x12')" class="whitespace-nowrap px-3 py-1.5 rounded bg-slate-950 border border-slate-800 text-[10px] font-bold text-slate-400 hover:text-white transition">3x12 Pump</button>
+                    <button onclick="loadPreset('restpause')" class="whitespace-nowrap px-3 py-1.5 rounded bg-slate-950 border border-slate-800 text-[10px] font-bold text-slate-400 hover:text-white transition">Rest-Pause</button>
+                </div>
+            </div>
+
+            <!-- INOL Autoregulation Engine -->
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden">
+                <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="flex justify-between items-center mb-4 relative z-10">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Global CNS Tax</span>
+                </div>
+
+                <div class="flex items-end gap-4 mb-4 relative z-10">
+                    <div id="totalVal" class="text-7xl font-black mono tracking-tighter score-num text-slate-200 leading-none">0.00</div>
+                    <div class="pb-2">
+                        <div id="status-pill" class="inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase bg-slate-800 text-slate-500 tracking-widest border border-slate-700">Standby</div>
+                    </div>
+                </div>
+
+                <div class="mt-6 relative z-10">
+                    <div class="h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+                        <div id="inol-bar" class="h-full rounded-full inol-bar bg-slate-800" style="width:0%"></div>
+                    </div>
+                    <div class="flex justify-between mt-2 px-1">
+                        <span class="text-[9px] font-bold text-slate-600">0.0</span>
+                        <span class="text-[9px] font-bold text-slate-600">1.0</span>
+                        <span class="text-[9px] font-bold text-slate-600">2.0</span>
+                        <span class="text-[9px] font-bold text-slate-600">3.0+</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prescription -->
+            <div id="prescription-engine" class="hidden bg-slate-900/90 border border-blue-900/30 rounded-3xl p-6 shadow-xl transition-all">
+                <h4 class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    Adaptive Prescription
+                </h4>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="bg-slate-950 rounded-2xl p-4 border border-slate-800">
+                        <div class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Target Rest</div>
+                        <div id="rx-rest" class="text-base font-bold text-slate-200 mono">—</div>
+                    </div>
+                    <div class="bg-slate-950 rounded-2xl p-4 border border-slate-800">
+                        <div class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Next Session</div>
+                        <div id="rx-freq" class="text-base font-bold text-slate-200 mono">—</div>
+                    </div>
+                </div>
+                <div class="bg-slate-950 rounded-2xl p-4 border border-slate-800">
+                    <p id="rx-note" class="text-sm text-slate-300 leading-relaxed"></p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- GLOBAL TIMER BAR -->
+<div id="timer-bar" class="fixed bottom-0 left-0 w-full bg-slate-900 border-t border-amber-500/30 p-3 transform translate-y-full transition-transform duration-300 z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+    <div class="max-w-3xl mx-auto flex items-center justify-between">
+        <div class="flex flex-col">
+            <span class="text-[10px] sm:text-xs text-amber-500 uppercase font-bold tracking-widest">Rest Timer</span>
+            <span id="timer-display" class="text-2xl sm:text-3xl font-black text-white brand-font font-mono leading-none mt-1">00:00</span>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="addTime(-30)" class="bg-slate-800 hover:bg-slate-700 text-white text-[10px] sm:text-xs px-3 py-2 rounded border border-slate-700 font-bold transition-colors">-30s</button>
+            <button onclick="addTime(30)" class="bg-slate-800 hover:bg-slate-700 text-white text-[10px] sm:text-xs px-3 py-2 rounded border border-slate-700 font-bold transition-colors">+30s</button>
+            <button onclick="stopTimer()" class="bg-slate-800 hover:bg-red-900/30 hover:border-red-500/50 hover:text-red-400 text-slate-400 text-[10px] sm:text-xs px-4 py-2 rounded border border-slate-700 font-bold uppercase transition-all">Stop</button>
+        </div>
+    </div>
+    <div class="absolute top-0 left-0 h-1 bg-amber-500 transition-all duration-1000 ease-linear" id="timer-progress" style="width: 100%"></div>
+</div>
+
+<script>
+    let currentUnit = 'kg';
+    let rmMode = 'direct';
+    let timerInterval;
+    let totalTime = 0;
+    let remainingTime = 0;
+    let audioCtx;
+    window.activeStep = 0;
+
+    // ----- Core Engine State -----
+    function masterCalculate() {
+        let final1RM = 0;
+        
+        if (rmMode === 'direct') {
+            final1RM = parseFloat(document.getElementById('oneRm').value);
+        } else {
+            const w = parseFloat(document.getElementById('est-weight').value);
+            const r = parseFloat(document.getElementById('est-reps').value);
+            const resultEl = document.getElementById('est-result');
+            const warnEl = document.getElementById('est-warning');
+
+            if (!w || !r) {
+                resultEl.innerText = '—';
+                warnEl.classList.add('hidden');
+                warnEl.classList.remove('block');
+            } else {
+                final1RM = Math.round(w * (1 + (r / 30)));
+                resultEl.innerText = final1RM;
+                
+                if (r > 10) {
+                    warnEl.innerHTML = '🚨 SEVERE ERROR: >10 reps measures local endurance, not CNS strength.';
+                    warnEl.className = 'mt-3 text-[10px] text-red-500 font-bold uppercase tracking-wide block';
+                } else if (r >= 8) {
+                    warnEl.innerHTML = '⚠️ WARNING: Estimating 1RM above 8 reps introduces math errors.';
+                    warnEl.className = 'mt-3 text-[10px] text-amber-500/80 font-bold uppercase tracking-wide block';
+                } else {
+                    warnEl.className = 'hidden';
+                    warnEl.classList.remove('block');
+                }
+            }
+        }
+
+        const warmupPanel = document.getElementById('warmup-panel');
+        if (final1RM > 0) {
+            warmupPanel.classList.remove('opacity-50', 'pointer-events-none');
+            // Execute Warmup Builder
+            const targetReps = parseInt(document.getElementById('warmup-target').value);
+            const rounding = parseFloat(document.getElementById('rounding-factor').value);
+            const muscleType = document.getElementById('muscle-type').value;
+            const standardRounding = currentUnit === 'kg' ? 0.5 : 1.0;
+            
+            renderWarmup(final1RM, targetReps, rounding, muscleType);
+            renderTable(final1RM, standardRounding);
+        } else {
+            warmupPanel.classList.add('opacity-50', 'pointer-events-none');
+            document.getElementById('warmup-container').innerHTML = '';
+            document.getElementById('percentage-table-body').innerHTML = '';
+        }
+
+        // Execute INOL Engine
+        calculateINOL(final1RM);
+    }
+
+    function setRmMode(mode) {
+        rmMode = mode;
+        document.getElementById('mode-direct').className = mode === 'direct' 
+            ? 'px-2 py-1 text-[9px] font-bold uppercase rounded bg-slate-800 text-slate-300 transition' 
+            : 'px-2 py-1 text-[9px] font-bold uppercase rounded text-slate-500 hover:text-slate-300 transition';
+            
+        document.getElementById('mode-est').className = mode === 'est' 
+            ? 'px-2 py-1 text-[9px] font-bold uppercase rounded bg-slate-800 text-slate-300 transition' 
+            : 'px-2 py-1 text-[9px] font-bold uppercase rounded text-slate-500 hover:text-slate-300 transition';
+
+        if (mode === 'direct') {
+            document.getElementById('rm-direct-container').classList.remove('hidden');
+            document.getElementById('rm-direct-container').classList.add('flex');
+            document.getElementById('rm-est-container').classList.add('hidden');
+            document.getElementById('rm-est-container').classList.remove('flex');
+            document.getElementById('est-warning').classList.add('hidden');
+        } else {
+            document.getElementById('rm-direct-container').classList.add('hidden');
+            document.getElementById('rm-direct-container').classList.remove('flex');
+            document.getElementById('rm-est-container').classList.remove('hidden');
+            document.getElementById('rm-est-container').classList.add('flex');
+        }
+        masterCalculate();
+    }
+
+    function setUnit(u) {
+        const old = currentUnit;
+        currentUnit = u;
+        
+        ['kg','lbs'].forEach(type => {
+            const btn = document.getElementById('btn-' + type);
+            btn.className = type === u
+                ? 'px-3 py-1 rounded-md transition-all bg-amber-500 text-slate-900 shadow font-bold'
+                : 'px-3 py-1 rounded-md transition-all text-slate-400 hover:text-white font-medium';
+        });
+
+        document.getElementById('unit-label-direct').innerText = u.toUpperCase();
+
+        const factor = (old === 'kg' && u === 'lbs') ? 2.2046 : (old === 'lbs' && u === 'kg') ? 1/2.2046 : 1;
+
+        const oneRmInput = document.getElementById('oneRm');
+        if (oneRmInput.value) oneRmInput.value = Math.round(parseFloat(oneRmInput.value) * factor);
+
+        const estWInput = document.getElementById('est-weight');
+        if (estWInput.value) estWInput.value = Math.round(parseFloat(estWInput.value) * factor);
+        
+        const barWInput = document.getElementById('bar-weight');
+        if (barWInput.value) barWInput.value = Math.round(parseFloat(barWInput.value) * factor);
+
+        document.querySelectorAll('.set-weight').forEach(inp => {
+            if (inp.value) inp.value = Math.round(parseFloat(inp.value) * factor);
+        });
+
+        masterCalculate();
+    }
+
+    // ----- Warmup UI Logic -----
+    function setActiveStep(index) {
+        window.activeStep = index;
+        masterCalculate();
+    }
+
+    function roundTo(val, step) { return Math.round(val / step) * step; }
+
+    function renderWarmup(oneRM, targetReps, rounding, muscleType) {
+        const container = document.getElementById('warmup-container');
+        container.innerHTML = ''; 
+
+        const header = document.createElement('div');
+        header.className = "flex items-center px-3 sm:px-5 py-3 bg-slate-950/80 border-b border-slate-800 text-[10px] font-bold text-slate-500 uppercase tracking-widest";
+        header.innerHTML = `
+            <div class="w-8 text-center">Set</div>
+            <div class="flex-1 pl-2 text-left">Strategy</div>
+            <div class="w-14 text-center">Side</div>
+            <div class="w-12 text-center">Load</div>
+            <div class="w-10 text-center">Reps</div>
+            <div class="w-16 text-center">Rest</div>
+        `;
+        container.appendChild(header);
+
+        let targetLoad = oneRM / (1 + targetReps / 30);
+        const barWeight = parseFloat(document.getElementById('bar-weight').value) || 0;
+        const restMult = muscleType === 'isolation' ? 0.5 : 1;
+
+        const steps = [
+            { title: "Activation", pct: 0.20, reps: "15", restSec: Math.round(0 * restMult) },
+            { title: "Patterning", pct: 0.50, reps: "5", restSec: Math.round(60 * restMult) },
+            { title: "Acclimation", pct: 0.70, reps: "3", restSec: Math.round(120 * restMult) },
+            { title: "Primer", pct: 0.90, reps: targetReps > 5 ? "2" : "1", restSec: Math.round(180 * restMult) },
+            { title: `TEST ${targetReps}RM`, pct: 1.00, reps: targetReps, restSec: Math.round(240 * restMult) }
+        ];
+
+        steps.forEach((step, index) => {
+            let rawLoad = targetLoad * step.pct;
+            let finalLoad = 0;
+            let sideBoxText = "—";
+
+            if (barWeight === 0) {
+                finalLoad = roundTo(rawLoad, rounding);
+            } else {
+                if (rawLoad <= barWeight) {
+                    finalLoad = barWeight;
+                    sideBoxText = "Bar";
+                } else {
+                    let idealSide = (rawLoad - barWeight) / 2;
+                    let roundedSide = roundTo(idealSide, rounding);
+                    finalLoad = barWeight + (roundedSide * 2);
+                    sideBoxText = roundedSide > 0 ? roundedSide : "Bar";
+                }
+            }
+            
+            let isActive = index === window.activeStep;
+            let isPast = index < window.activeStep;
+
+            let rowBg = "hover:bg-slate-800/30";
+            let badgeBg = "bg-slate-800 text-slate-400 border-slate-700";
+            let badgeContent = index + 1;
+            let titleClass = "text-slate-300";
+            let numColor = "text-white";
+            let opacityClass = "opacity-100";
+            let cursor = "cursor-pointer";
+            let btnClass = "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white border-slate-700";
+            
+            if (isPast) {
+                opacityClass = "opacity-40 grayscale hover:opacity-70";
+            } else if (isActive) {
+                rowBg = "bg-slate-800/40 border border-amber-500/50";
+                badgeBg = "bg-amber-500 text-slate-900 border-amber-400";
+                titleClass = "text-amber-500 font-bold";
+                btnClass = "bg-amber-500/20 text-amber-500 border-amber-500/30 hover:bg-amber-500/30";
+            } else if (step.pct === 1.0) {
+                titleClass = "text-emerald-400 font-bold";
+                numColor = "text-emerald-400";
+            }
+
+            let restLabel = step.restSec === 0 ? "—" : (step.restSec >= 60 && step.restSec % 60 === 0 ? `${step.restSec/60}m` : `${step.restSec}s`);
+            let timerButton = step.restSec > 0 ? 
+                `<button onclick="startTimer(${step.restSec})" class="w-full h-8 rounded-lg flex items-center justify-center font-bold uppercase text-[10px] ${btnClass}">
+                    ${restLabel}
+                </button>` : `<div class="text-slate-500 text-xs text-center">—</div>`;
+
+            const row = document.createElement('div');
+            row.className = `flex items-center px-3 sm:px-5 py-3 transition-all duration-300 border-b border-slate-800/50 ${rowBg} ${opacityClass} ${cursor}`;
+            row.onclick = (e) => { if (!e.target.closest('button')) setActiveStep(index); };
+            
+            row.innerHTML = `
+                <div class="w-8 text-center flex justify-center">
+                    <div class="w-6 h-6 flex items-center justify-center rounded-full text-[10px] border font-bold ${badgeBg}">${badgeContent}</div>
+                </div>
+                <div class="flex-1 pl-2">
+                    <span class="text-sm font-bold ${titleClass}">${step.title}</span>
+                </div>
+                <div class="w-14 flex justify-center">
+                    <div class="bg-slate-950 text-slate-300 font-bold text-xs py-1 px-2 rounded border border-slate-700">${sideBoxText}</div>
+                </div>
+                <div class="w-12 text-center">
+                    <span class="text-lg font-black ${numColor} brand-font">${finalLoad}</span>
+                </div>
+                <div class="w-10 text-center">
+                    <span class="text-lg font-black text-white brand-font">${step.reps}</span>
+                </div>
+                <div class="w-16 pl-2">${timerButton}</div>
+            `;
+            container.appendChild(row);
+        });
+    }
+
+    function renderTable(oneRM, rounding) {
+        const tbody = document.getElementById('percentage-table-body');
+        tbody.innerHTML = '';
+        const data = [
+            { pct: 100, reps: '1', zone: 'PWR', span: 3, color: 'text-amber-500', border: 'border-l-2 border-amber-500' }, 
+            { pct: 90, reps: '3-4', color: 'text-amber-500' },
+            { pct: 85, reps: '5-6', color: 'text-amber-500' }, 
+            { pct: 80, reps: '7-8', zone: 'HYP', span: 3, color: 'text-blue-400', border: 'border-l-2 border-blue-500' }, 
+            { pct: 75, reps: '9-10', color: 'text-blue-400' },
+            { pct: 70, reps: '11-12', color: 'text-blue-400' }, 
+            { pct: 60, reps: '16+', zone: 'END', span: 1, color: 'text-emerald-400', border: 'border-l-2 border-emerald-500' }
+        ];
+
+        data.forEach((row, index) => {
+            let load = roundTo(oneRM * (row.pct / 100), rounding);
+            const tr = document.createElement('tr');
+            tr.className = `hover:bg-slate-800/40 transition-colors ${index%2===0?'bg-slate-800/20':''}`;
+            
+            let zoneHtml = row.zone ? `<td rowspan="${row.span}" class="p-0 text-center bg-slate-900/30 ${row.border}">
+                <div class="vertical-text text-[9px] font-bold tracking-widest uppercase ${row.color}">${row.zone}</div>
+            </td>` : '';
+
+            tr.innerHTML = `${zoneHtml}
+                <td class="px-3 py-2 font-bold ${row.color} text-xs">${row.pct}%</td>
+                <td class="px-3 py-2 ${row.color} brand-font text-xl">${load}</td>
+                <td class="px-3 py-2 text-right text-xs font-bold ${row.color}">${row.reps}</td>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // ----- INOL UI Logic -----
+    function getRpeMultiplier(rpe) {
+        const map = { 6: 0.70, 6.5: 0.76, 7: 0.83, 7.5: 0.91, 8: 1.00, 8.5: 1.12, 9: 1.28, 9.5: 1.48, 10: 1.75 };
+        return map[Math.round(rpe * 2) / 2] || 1.0;
+    }
+
+    function addSetRow(weight = '', reps = '', rpe = 8) {
+        const container = document.getElementById('sets-container');
+        const div = document.createElement('div');
+        div.className = 'set-row grid grid-cols-12 gap-2 items-center bg-slate-950 p-2 rounded-xl border border-slate-800 fade-in';
+        const baseInput = 'w-full min-w-0 bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm mono text-slate-200 focus:outline-none focus:border-amber-500 transition-colors text-center';
+
+        div.innerHTML = `
+            <input type="number" class="col-span-3 ${baseInput} set-weight" value="${weight}" placeholder="Wt" oninput="masterCalculate()">
+            <input type="number" class="col-span-3 ${baseInput} set-reps" value="${reps}" placeholder="Reps" oninput="masterCalculate()">
+            <div class="col-span-3 flex flex-col justify-center px-1">
+                <input type="range" class="w-full set-rpe" min="6" max="10" step="0.5" value="${rpe}" oninput="this.nextElementSibling.textContent=parseFloat(this.value).toFixed(1); masterCalculate(); updateRpeColor(this)">
+                <span class="text-[9px] font-bold text-center mt-1 text-slate-400 rpe-label">${parseFloat(rpe).toFixed(1)}</span>
+            </div>
+            <div class="col-span-2 text-right set-intensity-badge flex justify-end items-center pr-1"></div>
+            <button onclick="this.closest('.set-row').remove();masterCalculate()" class="col-span-1 flex justify-center items-center w-full h-full text-slate-600 hover:text-red-500 transition">✕</button>
+        `;
+        container.appendChild(div);
+        updateRpeColor(div.querySelector('.set-rpe'));
+        masterCalculate();
+    }
+
+    function updateRpeColor(slider) {
+        const val = parseFloat(slider.value);
+        const label = slider.nextElementSibling;
+        label.style.color = val >= 9.5 ? '#ef4444' : val >= 8.5 ? '#f59e0b' : '#94a3b8';
+    }
+
+    function clearSets() { document.getElementById('sets-container').innerHTML = ''; masterCalculate(); }
+
+    function loadPreset(key) {
+        let oneRM = 0;
+        if (rmMode === 'direct') oneRM = parseFloat(document.getElementById('oneRm').value);
+        else oneRM = parseFloat(document.getElementById('est-result').innerText);
+
+        if (!oneRM || isNaN(oneRM)) { alert('Establish a Target 1RM Baseline first.'); return; }
+
+        const presets = {
+            '5x5': [[0.85,5,8],[0.85,5,8],[0.85,5,8],[0.85,5,8],[0.85,5,8]],
+            '3x12': [[0.67,12,8],[0.67,12,8],[0.67,12,8]],
+            'restpause': [[0.80,8,10],[0.80,4,10],[0.80,3,10]]
+        };
+        
+        document.getElementById('sets-container').innerHTML = '';
+        presets[key].forEach(s => addSetRow(Math.round(oneRM * s[0]), s[1], s[2]));
+        masterCalculate();
+    }
+
+    function calculateINOL(oneRm) {
+        let totalInol = 0;
+        let supraMaximalDetected = false;
+        let setDetected = false;
+
+        document.querySelectorAll('.set-row').forEach(row => {
+            const w = parseFloat(row.querySelector('.set-weight').value);
+            const r = parseFloat(row.querySelector('.set-reps').value);
+            const rpe = parseFloat(row.querySelector('.set-rpe').value);
+            const badge = row.querySelector('.set-intensity-badge');
+            
+            if (!w || !r || !oneRm) {
+                badge.innerHTML = '<span class="text-[10px] mono text-slate-700">—</span>';
+                return;
+            }
+
+            setDetected = true;
+            const pct = (w / oneRm) * 100;
+            badge.innerHTML = `<span class="text-[10px] mono font-black ${pct>=100?'text-red-500':pct>=85?'text-amber-500':'text-emerald-500'}">${pct.toFixed(0)}%</span>`;
+
+            if (pct >= 100) supraMaximalDetected = true;
+            const cappedIntensity = Math.min(pct, 99);
+            totalInol += (r / (100 - cappedIntensity)) * getRpeMultiplier(rpe);
+        });
+
+        updateINOLUI(totalInol, setDetected);
+        generatePrescription(totalInol, supraMaximalDetected);
+    }
+
+    function updateINOLUI(totalInol, hasData) {
+        const display = document.getElementById('totalVal');
+        const pill = document.getElementById('status-pill');
+        const bar = document.getElementById('inol-bar');
+
+        if (!hasData || totalInol === 0) {
+            display.innerText = '0.00';
+            display.style.color = '';
+            pill.className = 'inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-slate-800 text-slate-500 border border-slate-700';
+            pill.innerText = 'Standby';
+            bar.style.width = '0%';
+            bar.style.background = '#1e293b';
+            document.getElementById('prescription-engine').classList.add('hidden');
+            return;
+        }
+
+        display.innerText = totalInol.toFixed(2);
+        bar.style.width = Math.min((totalInol / 3.0) * 100, 100) + '%';
+
+        if (totalInol < 0.4) {
+            pill.className = 'inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-slate-800 text-slate-400 border-slate-700';
+            pill.innerText = 'Underloaded';
+            bar.style.background = '#64748b';
+            display.style.color = '#94a3b8';
+        } else if (totalInol <= 1.0) {
+            pill.className = 'inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-emerald-900/30 text-emerald-400 border-emerald-800/50';
+            pill.innerText = 'Productive';
+            bar.style.background = '#10b981';
+            display.style.color = '#34d399';
+        } else if (totalInol <= 2.0) {
+            pill.className = 'inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-amber-900/30 text-amber-400 border-amber-800/50';
+            pill.innerText = 'High Fatigue';
+            bar.style.background = '#f59e0b';
+            display.style.color = '#fbbf24';
+        } else {
+            pill.className = 'inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-red-900/30 text-red-400 border-red-800/50';
+            pill.innerText = 'Recovery Debt';
+            bar.style.background = '#ef4444';
+            display.style.color = '#f87171';
+        }
+    }
+
+    function generatePrescription(totalInol, isSupraMaximal) {
+        if (totalInol === 0) return;
+
+        const engineBox = document.getElementById('prescription-engine');
+        engineBox.classList.remove('hidden');
+
+        let freqAdvice = totalInol < 0.4 ? '1 Day' : totalInol <= 1.0 ? '2–3 Days' : totalInol <= 1.75 ? '3–4 Days' : '4–7 Days';
+        let noteHtml = totalInol < 0.4 ? 'Tissue damage is minimal. This acts as active recovery.' :
+                       totalInol <= 1.0 ? 'Optimal localized stimulus. Ready to hit this pattern again in 2-3 days.' :
+                       totalInol <= 1.75 ? 'High localized fatigue. Respect the recovery timeline.' :
+                       '<span class="text-amber-400 font-bold">Massive tissue fatigue detected.</span> Do not repeat until fully recovered.';
+
+        if (totalInol > 2.5) {
+            freqAdvice = 'Deload';
+            noteHtml += '<br><br><span class="text-red-400 font-bold">SYSTEMIC WARNING:</span> Total session volume is creating a heavy recovery debt.';
+            engineBox.classList.add('border-red-900/50', 'bg-red-950/20');
+        } else {
+            engineBox.classList.remove('border-red-900/50', 'bg-red-950/20');
+        }
+
+        if (isSupraMaximal) noteHtml = '<span class="bg-red-900/50 text-red-200 px-2 py-1 rounded text-xs font-bold mr-2">SUPRAMAX DETECTED</span> You exceeded your calculated baseline.<br><br>' + noteHtml;
+
+        document.getElementById('rx-freq').innerText = freqAdvice;
+        document.getElementById('rx-rest').innerText = totalInol > 1.5 ? '3–5 min+' : 'Auto (1–2 min)';
+        document.getElementById('rx-note').innerHTML = noteHtml;
+    }
+
+    // ----- Timer Logic -----
+    function initAudio() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+    function beep() {
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+        gainNode.gain.value = 0.3; osc.frequency.value = 1000; osc.type = 'square';
+        osc.start(audioCtx.currentTime); osc.stop(audioCtx.currentTime + 0.15);
+    }
+    function playAlarm() {
+        initAudio(); beep(); setTimeout(beep, 300);
+        document.getElementById('timer-display').classList.add('text-red-500', 'pulse-active');
+        setTimeout(() => {
+            document.getElementById('timer-display').classList.remove('text-red-500', 'pulse-active');
+            stopTimer();
+        }, 3000);
+    }
+    function startTimer(seconds) {
+        initAudio(); clearInterval(timerInterval);
+        totalTime = seconds; remainingTime = seconds;
+        document.getElementById('timer-bar').classList.remove('translate-y-full');
+        updateTimerDisplay();
+        timerInterval = setInterval(() => {
+            remainingTime--; updateTimerDisplay();
+            if (remainingTime <= 0) { clearInterval(timerInterval); playAlarm(); }
+        }, 1000);
+    }
+    function addTime(sec) {
+        remainingTime = Math.max(0, remainingTime + sec);
+        if (remainingTime > totalTime) totalTime = remainingTime;
+        updateTimerDisplay();
+    }
+    function stopTimer() {
+        clearInterval(timerInterval);
+        document.getElementById('timer-bar').classList.add('translate-y-full');
+    }
+    function updateTimerDisplay() {
+        document.getElementById('timer-display').innerText = `${Math.floor(remainingTime / 60).toString().padStart(2, '0')}:${(remainingTime % 60).toString().padStart(2, '0')}`;
+        document.getElementById('timer-progress').style.width = `${totalTime > 0 ? (remainingTime / totalTime) * 100 : 0}%`;
+    }
+
+    // Initialize
+    addSetRow();
+</script>
 </body>
 </html>
