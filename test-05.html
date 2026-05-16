@@ -11,7 +11,7 @@
             --bg: #060a10;
             --surface: #0d1420;
             --border: #1a2336;
-            --accent: #f59e0b; /* Amber */
+            --accent: #f59e0b; 
         }
         * { box-sizing: border-box; }
         body { font-family: 'Syne', system-ui, sans-serif; background: var(--bg); color: #e2e8f0; min-height: 100vh; padding-bottom: 120px; }
@@ -77,7 +77,6 @@
         <!-- LEFT PILLAR: PREPARATION & RAMP-UP -->
         <div class="space-y-6">
             
-            <!-- Baseline 1RM Setup -->
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-white text-lg uppercase tracking-wide brand-font flex items-center gap-2">
@@ -89,7 +88,6 @@
                     </div>
                 </div>
 
-                <!-- Direct Mode -->
                 <div id="rm-direct-container" class="flex items-center gap-4">
                     <div class="relative w-full">
                         <input type="number" id="oneRm" oninput="masterCalculate()"
@@ -99,7 +97,6 @@
                     </div>
                 </div>
 
-                <!-- Estimate Mode -->
                 <div id="rm-est-container" class="hidden gap-3">
                     <div class="relative flex-1">
                         <label class="block text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Weight</label>
@@ -117,7 +114,6 @@
                 <p id="est-warning" class="hidden mt-3 text-[10px] font-bold uppercase tracking-wide"></p>
             </div>
 
-            <!-- Warmup Engine -->
             <div id="warmup-panel" class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl shadow-black/20 opacity-50 pointer-events-none transition-opacity">
                 <div class="p-4 sm:p-5 bg-slate-950 border-b border-slate-800">
                     <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
@@ -163,7 +159,6 @@
                 <div class="flex flex-col bg-slate-900" id="warmup-container"></div>
             </div>
 
-            <!-- Percentage Table -->
             <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-lg">
                 <div class="p-3 bg-slate-950 border-b border-slate-800">
                      <h3 class="text-white text-sm font-bold brand-font tracking-wide">Percentage Reference</h3>
@@ -178,7 +173,6 @@
         <!-- RIGHT PILLAR: WORKING SETS & INOL -->
         <div class="space-y-6">
 
-            <!-- Working Sets Input -->
             <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl backdrop-blur-sm">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-white text-lg uppercase tracking-wide brand-font flex items-center gap-2">
@@ -201,14 +195,44 @@
                     + Add Working Set
                 </button>
                 
-                <div class="mt-4 flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
-                    <button onclick="loadPreset('5x5')" class="whitespace-nowrap px-3 py-1.5 rounded bg-slate-950 border border-slate-800 text-[10px] font-bold text-slate-400 hover:text-white transition">5x5 Base</button>
-                    <button onclick="loadPreset('3x12')" class="whitespace-nowrap px-3 py-1.5 rounded bg-slate-950 border border-slate-800 text-[10px] font-bold text-slate-400 hover:text-white transition">3x12 Pump</button>
-                    <button onclick="loadPreset('restpause')" class="whitespace-nowrap px-3 py-1.5 rounded bg-slate-950 border border-slate-800 text-[10px] font-bold text-slate-400 hover:text-white transition">Rest-Pause</button>
+                <!-- DROPDOWN PRESETS -->
+                <div class="mt-5 bg-slate-950 p-1.5 rounded-xl border border-slate-800 relative">
+                    <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+                        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <select id="scheme-dropdown" onchange="handlePresetSelection(this)" class="w-full bg-transparent text-center text-slate-300 text-[11px] font-bold py-2.5 px-4 rounded-lg appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-colors cursor-pointer uppercase tracking-wider">
+                        <option value="">-- Load Programming Structure --</option>
+                        
+                        <optgroup label="Strength Foundation">
+                            <option value="5x5">5×5 — Classic Strength</option>
+                            <option value="3x5">3×5 — Efficient Strength</option>
+                            <option value="6x2">6×2 — Neural Strength</option>
+                            <option value="10x3">10×3 — Explosive Power</option>
+                        </optgroup>
+                        
+                        <optgroup label="Hypertrophy & Bodybuilding">
+                            <option value="3x8">3×8 — Strength + Hypertrophy</option>
+                            <option value="3x10">3×10 — Traditional</option>
+                            <option value="3x12">3×12 — Moderate / Endurance</option>
+                            <option value="4x8">4×8 — Heavy Hypertrophy</option>
+                            <option value="4x12">4×12 — High Volume</option>
+                            <option value="5x10">5×10 — Brutal Volume</option>
+                        </optgroup>
+                        
+                        <optgroup label="Advanced Tactics">
+                            <option value="pyramid">Pyramid Sets (12/10/8/6)</option>
+                            <option value="rpt">Reverse Pyramid (6/8/10)</option>
+                            <option value="top_backoff">Top Set + Back-Offs</option>
+                            <option value="amrap">3×5 + AMRAP</option>
+                            <option value="cluster">Cluster Sets</option>
+                            <option value="restpause">Rest-Pause Training</option>
+                            <option value="dropset">Drop Sets</option>
+                            <option value="20rep">20-Rep Squats</option>
+                        </optgroup>
+                    </select>
                 </div>
             </div>
 
-            <!-- INOL Autoregulation Engine -->
             <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden">
                 <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -236,7 +260,6 @@
                 </div>
             </div>
 
-            <!-- Prescription -->
             <div id="prescription-engine" class="hidden bg-slate-900/90 border border-blue-900/30 rounded-3xl p-6 shadow-xl transition-all">
                 <h4 class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
@@ -261,7 +284,6 @@
     </div>
 </div>
 
-<!-- GLOBAL TIMER BAR -->
 <div id="timer-bar" class="fixed bottom-0 left-0 w-full bg-slate-900 border-t border-amber-500/30 p-3 transform translate-y-full transition-transform duration-300 z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
     <div class="max-w-3xl mx-auto flex items-center justify-between">
         <div class="flex flex-col">
@@ -286,7 +308,6 @@
     let audioCtx;
     window.activeStep = 0;
 
-    // ----- Core Engine State -----
     function masterCalculate() {
         let final1RM = 0;
         
@@ -322,7 +343,6 @@
         const warmupPanel = document.getElementById('warmup-panel');
         if (final1RM > 0) {
             warmupPanel.classList.remove('opacity-50', 'pointer-events-none');
-            // Execute Warmup Builder
             const targetReps = parseInt(document.getElementById('warmup-target').value);
             const rounding = parseFloat(document.getElementById('rounding-factor').value);
             const muscleType = document.getElementById('muscle-type').value;
@@ -336,7 +356,6 @@
             document.getElementById('percentage-table-body').innerHTML = '';
         }
 
-        // Execute INOL Engine
         calculateINOL(final1RM);
     }
 
@@ -396,7 +415,6 @@
         masterCalculate();
     }
 
-    // ----- Warmup UI Logic -----
     function setActiveStep(index) {
         window.activeStep = index;
         masterCalculate();
@@ -537,7 +555,6 @@
         });
     }
 
-    // ----- INOL UI Logic -----
     function getRpeMultiplier(rpe) {
         const map = { 6: 0.70, 6.5: 0.76, 7: 0.83, 7.5: 0.91, 8: 1.00, 8.5: 1.12, 9: 1.28, 9.5: 1.48, 10: 1.75 };
         return map[Math.round(rpe * 2) / 2] || 1.0;
@@ -572,22 +589,46 @@
 
     function clearSets() { document.getElementById('sets-container').innerHTML = ''; masterCalculate(); }
 
-    function loadPreset(key) {
+    const PRESETS = {
+        '5x5': [[0.85, 5, 8], [0.85, 5, 8], [0.85, 5, 8], [0.85, 5, 8], [0.85, 5, 8]],
+        '3x5': [[0.85, 5, 8.5], [0.85, 5, 8.5], [0.85, 5, 8.5]],
+        '3x8': [[0.75, 8, 8], [0.75, 8, 8], [0.75, 8, 8]],
+        '3x10': [[0.70, 10, 8], [0.70, 10, 8], [0.70, 10, 8]],
+        '3x12': [[0.67, 12, 8], [0.67, 12, 8], [0.67, 12, 8]],
+        '4x8': [[0.75, 8, 8], [0.75, 8, 8], [0.75, 8, 8], [0.75, 8, 8]],
+        '4x12': [[0.65, 12, 8], [0.65, 12, 8], [0.65, 12, 8], [0.65, 12, 8]],
+        '5x10': [[0.60, 10, 8], [0.60, 10, 8], [0.60, 10, 8], [0.60, 10, 8], [0.60, 10, 8]],
+        '10x3': Array(10).fill([0.80, 3, 7]),
+        '6x2': Array(6).fill([0.85, 2, 7]),
+        'pyramid': [[0.65, 12, 7.5], [0.70, 10, 8], [0.75, 8, 8.5], [0.80, 6, 9.5]],
+        'rpt': [[0.85, 6, 9.5], [0.75, 8, 9], [0.65, 10, 8.5]],
+        'top_backoff': [[0.85, 5, 9], [0.70, 8, 8], [0.70, 8, 8], [0.70, 8, 8]],
+        'amrap': [[0.80, 5, 8], [0.80, 5, 8], [0.80, 8, 10]],
+        'cluster': [[0.85, 2, 8], [0.85, 2, 8.5]],
+        'restpause': [[0.75, 12, 10], [0.75, 4, 10], [0.75, 3, 10]],
+        'dropset': [[0.75, 12, 10], [0.60, 10, 10], [0.50, 8, 10]],
+        '20rep': [[0.70, 20, 10]]
+    };
+
+    function handlePresetSelection(selectElement) {
+        const key = selectElement.value;
+        if (!key) return;
+        
         let oneRM = 0;
         if (rmMode === 'direct') oneRM = parseFloat(document.getElementById('oneRm').value);
         else oneRM = parseFloat(document.getElementById('est-result').innerText);
 
-        if (!oneRM || isNaN(oneRM)) { alert('Establish a Target 1RM Baseline first.'); return; }
+        if (!oneRM || isNaN(oneRM)) { 
+            alert('Establish a Target 1RM Baseline first to auto-calculate load.'); 
+            selectElement.selectedIndex = 0;
+            return; 
+        }
 
-        const presets = {
-            '5x5': [[0.85,5,8],[0.85,5,8],[0.85,5,8],[0.85,5,8],[0.85,5,8]],
-            '3x12': [[0.67,12,8],[0.67,12,8],[0.67,12,8]],
-            'restpause': [[0.80,8,10],[0.80,4,10],[0.80,3,10]]
-        };
-        
         document.getElementById('sets-container').innerHTML = '';
-        presets[key].forEach(s => addSetRow(Math.round(oneRM * s[0]), s[1], s[2]));
+        PRESETS[key].forEach(s => addSetRow(Math.round(oneRM * s[0]), s[1], s[2]));
         masterCalculate();
+        
+        selectElement.selectedIndex = 0;
     }
 
     function calculateINOL(oneRm) {
@@ -688,7 +729,6 @@
         document.getElementById('rx-note').innerHTML = noteHtml;
     }
 
-    // ----- Timer Logic -----
     function initAudio() {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -733,7 +773,6 @@
         document.getElementById('timer-progress').style.width = `${totalTime > 0 ? (remainingTime / totalTime) * 100 : 0}%`;
     }
 
-    // Initialize
     addSetRow();
 </script>
 </body>
