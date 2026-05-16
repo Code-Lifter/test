@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INOL Lab V2.2 | Autoregulation Engine</title>
+    <title>INOL Lab V2.3 | Autoregulation Engine</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -69,7 +69,7 @@
 
     <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
         <div>
-            <h1 class="text-3xl font-extrabold tracking-tight">INOL <span class="text-blue-500">Lab V2.2</span></h1>
+            <h1 class="text-3xl font-extrabold tracking-tight">INOL <span class="text-blue-500">Lab V2.3</span></h1>
             <p class="text-[10px] text-slate-500 mono mt-1 uppercase tracking-widest">Dynamic Autoregulation Engine</p>
         </div>
         <div class="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl p-1">
@@ -122,10 +122,9 @@
                 </div>
 
                 <div class="grid grid-cols-12 gap-2 mb-3 px-1">
-                    <div class="col-span-3 text-[9px] text-slate-500 uppercase font-bold tracking-wider">Exercise</div>
-                    <div class="col-span-2 text-[9px] text-slate-500 uppercase font-bold tracking-wider">Weight</div>
-                    <div class="col-span-2 text-[9px] text-slate-500 uppercase font-bold tracking-wider">Reps</div>
-                    <div class="col-span-2 text-[9px] text-slate-500 uppercase font-bold tracking-wider text-center">RPE</div>
+                    <div class="col-span-3 text-[9px] text-slate-500 uppercase font-bold tracking-wider">Weight</div>
+                    <div class="col-span-3 text-[9px] text-slate-500 uppercase font-bold tracking-wider">Reps</div>
+                    <div class="col-span-3 text-[9px] text-slate-500 uppercase font-bold tracking-wider text-center">RPE</div>
                     <div class="col-span-2 text-[9px] text-slate-500 uppercase font-bold tracking-wider text-right">Load %</div>
                     <div class="col-span-1"></div>
                 </div>
@@ -254,7 +253,7 @@
             <div class="bg-slate-900/50 border border-slate-800 rounded-3xl p-6">
                 <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Local Tissue Fatigue</h3>
                 <div id="exercise-breakdown" class="space-y-4">
-                    <p class="text-xs text-slate-600 italic">Name your sets to analyze isolated damage.</p>
+                    <p class="text-xs text-slate-600 italic">Add sets to analyze isolated damage.</p>
                 </div>
             </div>
 
@@ -371,7 +370,7 @@
             : `${Math.round(val / 2.2046)} kg`;
     }
 
-    function addSetRow(exercise = '', weight = '', reps = '', rpe = 8) {
+    function addSetRow(weight = '', reps = '', rpe = 8) {
         const container = document.getElementById('sets-container');
         const div = document.createElement('div');
         div.className = 'set-row grid grid-cols-12 gap-2 items-center bg-slate-950 p-2 rounded-xl border border-slate-800';
@@ -379,11 +378,10 @@
         const baseInput = 'w-full min-w-0 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm mono text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors';
 
         div.innerHTML = `
-            <input type="text"   class="col-span-3 ${baseInput} set-exercise" value="${exercise}" placeholder="Exercise" oninput="autoCalculate()">
-            <input type="number" class="col-span-2 ${baseInput} set-weight"   value="${weight}"   placeholder="Wt"       oninput="autoCalculate()">
-            <input type="number" class="col-span-2 ${baseInput} set-reps"     value="${reps}"     placeholder="Reps"     oninput="autoCalculate()">
+            <input type="number" class="col-span-3 ${baseInput} set-weight"   value="${weight}"   placeholder="Wt"       oninput="autoCalculate()">
+            <input type="number" class="col-span-3 ${baseInput} set-reps"     value="${reps}"     placeholder="Reps"     oninput="autoCalculate()">
             
-            <div class="col-span-2 flex flex-col justify-center px-2">
+            <div class="col-span-3 flex flex-col justify-center px-2">
                 <input type="range" class="w-full set-rpe" min="6" max="10" step="0.5" value="${rpe}"
                     oninput="this.nextElementSibling.textContent=parseFloat(this.value).toFixed(1); autoCalculate(); updateRpeColor(this)">
                 <span class="text-[10px] font-bold text-center mt-1 text-slate-400 rpe-label">${parseFloat(rpe).toFixed(1)}</span>
@@ -429,15 +427,15 @@
     }
 
     const PRESETS = {
-        '5x5':       { sets: [[0.85,5,8],[0.85,5,8],[0.85,5,8],[0.85,5,8],[0.85,5,8]], label: '5x5 Base' },
-        '3x3':       { sets: [[0.92,3,9],[0.92,3,9],[0.92,3,9]], label: '3x3 Peak' },
-        '531':       { sets: [[0.65,5,7],[0.75,5,8],[0.85,5,9.5]], label: '5/3/1 Wave' }, 
-        '3x12':      { sets: [[0.67,12,8],[0.67,12,8],[0.67,12,8]], label: '3x12 Pump' },
-        '4x10':      { sets: [[0.70,10,8],[0.70,10,8],[0.70,10,8],[0.70,10,8]], label: '4x10 Volume' },
-        'gvt':       { sets: Array(10).fill([0.60,10,8]), label: 'German Volume' },
-        'mentzer':   { sets: [[0.85,6,10]], label: 'Mentzer HIT' },
-        'dropset':   { sets: [[0.80,8,9.5],[0.65,6,10],[0.50,10,10]], label: 'Drop Set' }, 
-        'restpause': { sets: [[0.80,8,10],[0.80,4,10],[0.80,3,10]], label: 'Rest-Pause' } 
+        '5x5':       { sets: [[0.85,5,8],[0.85,5,8],[0.85,5,8],[0.85,5,8],[0.85,5,8]] },
+        '3x3':       { sets: [[0.92,3,9],[0.92,3,9],[0.92,3,9]] },
+        '531':       { sets: [[0.65,5,7],[0.75,5,8],[0.85,5,9.5]] }, 
+        '3x12':      { sets: [[0.67,12,8],[0.67,12,8],[0.67,12,8]] },
+        '4x10':      { sets: [[0.70,10,8],[0.70,10,8],[0.70,10,8],[0.70,10,8]] },
+        'gvt':       { sets: Array(10).fill([0.60,10,8]) },
+        'mentzer':   { sets: [[0.85,6,10]] },
+        'dropset':   { sets: [[0.80,8,9.5],[0.65,6,10],[0.50,10,10]] }, 
+        'restpause': { sets: [[0.80,8,10],[0.80,4,10],[0.80,3,10]] } 
     };
 
     function loadPreset(key) {
@@ -451,7 +449,7 @@
 
         preset.sets.forEach(s => {
             const w = Math.round(oneRm * s[0]);
-            addSetRow(preset.label, w, s[1], s[2]);
+            addSetRow(w, s[1], s[2]);
         });
 
         autoCalculate();
@@ -475,7 +473,7 @@
             const w   = parseFloat(row.querySelector('.set-weight').value);
             const r   = parseFloat(row.querySelector('.set-reps').value);
             const rpe = parseFloat(row.querySelector('.set-rpe').value);
-            const ex  = row.querySelector('.set-exercise').value.trim() || 'Unnamed Set';
+            const ex  = 'Target Movement';
             
             if (!w || !r || !oneRm) return;
 
@@ -596,7 +594,7 @@
         const entries = Object.entries(map);
 
         if (!entries.length) {
-            el.innerHTML = '<p class="text-xs text-slate-600 italic">Name your sets to analyze isolated damage.</p>';
+            el.innerHTML = '<p class="text-xs text-slate-600 italic">Add sets to analyze isolated damage.</p>';
             return;
         }
 
