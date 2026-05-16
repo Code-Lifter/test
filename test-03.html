@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INOL Lab V2 | Autoregulation Engine</title>
+    <title>INOL Lab V2.1 | Autoregulation Engine</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -51,7 +51,6 @@
         .score-num { transition: color 0.4s ease; }
         select option { background: #0d1420; }
 
-        /* Subtle grid texture */
         body::before {
             content: '';
             position: fixed;
@@ -70,7 +69,7 @@
 
     <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
         <div>
-            <h1 class="text-3xl font-extrabold tracking-tight">INOL <span class="text-blue-500">Lab V2</span></h1>
+            <h1 class="text-3xl font-extrabold tracking-tight">INOL <span class="text-blue-500">Lab V2.1</span></h1>
             <p class="text-[10px] text-slate-500 mono mt-1 uppercase tracking-widest">Dynamic Autoregulation Engine</p>
         </div>
         <div class="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl p-1">
@@ -116,9 +115,7 @@
                         <span id="est-result" class="text-3xl font-black mono text-blue-400">—</span>
                     </div>
                 </div>
-                <p id="est-warning" class="hidden mt-3 text-[10px] text-amber-500/80 font-bold uppercase tracking-wide">
-                    ⚠️ Warning: Estimating 1RM above 8 reps introduces severe compounding data errors.
-                </p>
+                <p id="est-warning" class="hidden mt-3 text-[10px] font-bold uppercase tracking-wide"></p>
             </div>
 
             <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl backdrop-blur-sm">
@@ -272,7 +269,6 @@
     let currentUnit = 'kg';
     let rmMode = 'direct';
 
-    // ── Nonlinear RPE Map (The CNS Reality) ────────────────
     function getRpeMultiplier(rpe) {
         const map = {
             6: 0.70, 6.5: 0.76, 7: 0.83, 7.5: 0.91,
@@ -282,11 +278,9 @@
         return map[roundedRpe] || 1.0;
     }
 
-    // ── 1RM Estimation Logic ──────────────────────────────
     function setRmMode(mode) {
         rmMode = mode;
         
-        // Update Buttons
         document.getElementById('mode-direct').className = mode === 'direct' 
             ? 'px-2 py-1 text-[9px] font-bold uppercase rounded bg-slate-800 text-slate-300 transition' 
             : 'px-2 py-1 text-[9px] font-bold uppercase rounded text-slate-500 hover:text-slate-300 transition';
@@ -295,7 +289,6 @@
             ? 'px-2 py-1 text-[9px] font-bold uppercase rounded bg-slate-800 text-slate-300 transition' 
             : 'px-2 py-1 text-[9px] font-bold uppercase rounded text-slate-500 hover:text-slate-300 transition';
 
-        // Toggle UI
         if (mode === 'direct') {
             document.getElementById('rm-direct-container').classList.remove('hidden');
             document.getElementById('rm-direct-container').classList.add('flex');
@@ -320,26 +313,29 @@
         if (!w || !r) {
             resultEl.innerText = '—';
             warnEl.classList.add('hidden');
+            warnEl.classList.remove('block');
             return;
         }
 
-        // Epley Formula
         let estRm = Math.round(w * (1 + (r / 30)));
         resultEl.innerText = estRm;
         
-        // Feed the invisible direct input to run the engine
         document.getElementById('oneRm').value = estRm;
         
-        if (r >= 8) {
-            warnEl.classList.remove('hidden');
+        if (r > 10) {
+            warnEl.innerHTML = '🚨 SEVERE ERROR: >10 reps measures local endurance, not CNS strength. This prediction is highly inaccurate.';
+            warnEl.className = 'mt-3 text-[10px] text-red-500 font-bold uppercase tracking-wide block';
+        } else if (r >= 8) {
+            warnEl.innerHTML = '⚠️ WARNING: Estimating 1RM above 8 reps introduces compounding mathematical errors.';
+            warnEl.className = 'mt-3 text-[10px] text-amber-500/80 font-bold uppercase tracking-wide block';
         } else {
-            warnEl.classList.add('hidden');
+            warnEl.className = 'hidden';
+            warnEl.classList.remove('block');
         }
         
         autoCalculate();
     }
 
-    // ── Unit System ───────────────────────────────────────
     function setUnit(unit) {
         const old = currentUnit;
         currentUnit = unit;
@@ -378,7 +374,6 @@
             : `${Math.round(val / 2.2046)} kg`;
     }
 
-    // ── DOM Rows ──────────────────────────────────────────
     function addSetRow(exercise = '', weight = '', reps = '', rpe = 8) {
         const container = document.getElementById('sets-container');
         const div = document.createElement('div');
@@ -436,7 +431,6 @@
         autoCalculate();
     }
 
-    // ── Presets ───────────────────────────────────────────
     const PRESETS = {
         '5x5':       { sets: [[0.85,5,8],[0.85,5,8],[0.85,5,8],[0.85,5,8],[0.85,5,8]], label: '5x5 Base' },
         '3x3':       { sets: [[0.92,3,9],[0.92,3,9],[0.92,3,9]], label: '3x3 Peak' },
@@ -466,7 +460,6 @@
         autoCalculate();
     }
 
-    // ── V2 Core Engine ────────────────────────────────────
     function autoCalculate() {
         if (rmMode === 'direct') {
             updateConvertedDisplay();
