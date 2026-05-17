@@ -1,1 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Flooring Guys - The Last Floor You'll Ever Need</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* --- Base Styles --- */
+        html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+        body { font-family: "Inter", sans-serif; line-height: 1.6; color: #333; background-color: #f8f9fa; margin: 0; padding: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .section { padding: 80px 0; }
+        .bg-light { background-color: #ffffff; border-top: 1px solid #e7e7e7; border-bottom: 1px solid #e7e7e7; }
+        .bg-dark { background-color: #2c3e50; color: #ecf0f1; }
+        h1, h2, h3 { font-family: "Poppins", sans-serif; }
+        .section h2 { text-align: center; margin-bottom: 40px; font-size: 2.2rem; color: #2c3e50; }
+        
+        /* --- Header & Nav --- */
+        .header { position: sticky; top: 0; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000; padding: 15px 0; }
+        .header-container { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.5rem; color: #2c3e50; font-weight: 700;}
+        .main-nav ul { list-style: none; display: flex; }
+        .main-nav li { margin-left: 25px; }
+        .main-nav a { text-decoration: none; color: #555; font-weight: 600; transition: color 0.3s ease; }
+        .main-nav a:hover { color: #3498db; }
+        
+        /* --- Hero Section (The Hook & Offer) --- */
+        .hero { position: relative; height: 80vh; display: flex; align-items: center; justify-content: center; text-align: center; color: white; overflow: hidden; }
+        .hero-video { position: absolute; top: 50%; left: 50%; min-width: 100%; min-height: 100%; width: auto; height: auto; transform: translateX(-50%) translateY(-50%); z-index: 1; object-fit: cover; }
+        .hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 62, 80, 0.8); z-index: 2; }
+        .hero-content { position: relative; z-index: 3; max-width: 800px; padding: 20px; }
+        .hero h2 { font-size: 3.5rem; margin-bottom: 20px; color: #fff; line-height: 1.2; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        .hero p { font-size: 1.5rem; margin-bottom: 40px; font-weight: bold; color: #e9f5ff; }
+        
+        /* --- Buttons --- */
+        .cta-button { display: inline-block; padding: 18px 35px; background-color: #e74c3c; color: white; text-decoration: none; font-weight: bold; border-radius: 5px; font-size: 1.2rem; transition: transform 0.2s, background 0.3s; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4); }
+        .cta-button:hover { background-color: #c0392b; transform: translateY(-2px); }
+        
+        /* --- Grand Slam Offer Elements --- */
+        .guarantee-box { background: #e9f5ff; padding: 30px; border-left: 8px solid #3498db; margin-top: 40px; border-radius: 4px; font-size: 1.1rem; }
+        .guarantee-box h3 { color: #2c3e50; margin-bottom: 10px; font-size: 1.5rem; }
+        
+        .scarcity-banner { background-color: #e74c3c; color: #ffffff; font-weight: bold; text-align: center; padding: 12px; border-radius: 5px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); animation: pulse 2s infinite; font-size: 1.1rem;}
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+        
+        /* --- Reviews --- */
+        .review-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        .review-card { background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-top: 4px solid #3498db; }
+        .review-image { width: 100%; height: 220px; border-radius: 5px; margin-bottom: 15px; object-fit: cover; }
+        .reviewer { display: block; margin-top: 15px; font-weight: bold; color: #2c3e50; font-size: 1.1rem; }
+        
+        /* --- Process --- */
+        .process-steps { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px; margin-top: 40px;}
+        .step { flex: 1; min-width: 250px; text-align: center; padding: 30px 20px; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eee;}
+        .step-icon { font-size: 3rem; color: #3498db; margin-bottom: 20px;}
 
+        /* --- Footer & Contact (The Net) --- */
+        .footer { padding: 80px 0 30px; }
+        .footer-container { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+        .contact-form { display: flex; flex-direction: column; gap: 15px; background: white; padding: 30px; border-radius: 8px; }
+        .contact-form input, .contact-form textarea { padding: 15px; border: 1px solid #ccc; border-radius: 5px; font-family: "Inter", sans-serif; font-size: 1rem; width: 100%; }
+        .contact-form input:focus, .contact-form textarea:focus { outline: none; border-color: #3498db; }
+        .footer-bottom { text-align: center; margin-top: 60px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.9rem; color: #bdc3c7;}
+        
+        @media (max-width: 768px) {
+            .hero h2 { font-size: 2.2rem; }
+            .hero p { font-size: 1.2rem; }
+            .main-nav { display: none; } /* Simplified for single file demo */
+            .footer-container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="container header-container">
+            <h1 class="logo">THE FLOORING GUYS</h1>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#process">Process</a></li>
+                    <li><a href="#reviews">Reviews</a></li>
+                    <li><a href="#contact" style="color: #e74c3c; font-weight: 700;">Free Audit</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <video autoplay loop muted playsinline class="hero-video">
+            <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4"> 
+        </video>
+        <div class="hero-overlay"></div> 
+        <div class="container hero-content">
+            <h2>Child-Proof & Pet-Proof Flooring for Busy Auckland Families</h2>
+            <p>The Last Floor You’ll Ever Need to Buy—Guaranteed for Life.</p>
+            <a href="#contact" class="cta-button">Claim Your Free Floor Integrity Audit</a>
+        </div>
+    </section>
+
+    <section id="about" class="section bg-light">
+        <div class="container">
+            <h2>Welcome to The Flooring Guys</h2>
+            <p style="text-align: center; max-width: 800px; margin: 0 auto; font-size: 1.1rem;">We specialize in ultra-durable, family-friendly flooring that stands up to spills, pets, and heavy foot traffic. Enjoy our <strong>Zero-Stress Installation</strong>—we move all your furniture, install the floor, and clean up completely so you don't have to lift a finger.</p>
+            
+            <div class="guarantee-box">
+                <h3><i class="fas fa-shield-alt"></i> Our 100% Iron-Clad Guarantee</h3>
+                <p>If you aren't 100% satisfied with the finish, we will redo the entire section for free. No questions asked. We take all the risk so you don't have to.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="process" class="section">
+        <div class="container">
+            <h2>Our Process</h2>
+            <p style="text-align: center; font-size: 1.3rem; font-weight: bold; margin-bottom: 30px; color: #e74c3c;">Lightning Fast: Consultation to Installation in under 7 days.</p>
+            
+            <div class="process-steps">
+                <div class="step">
+                    <i class="fas fa-clipboard-check step-icon"></i>
+                    <h3>1. Free Audit</h3>
+                    <p>We assess your subfloor and humidity levels on-site to ensure the right fit.</p>
+                </div>
+                <div class="step">
+                    <i class="fas fa-couch step-icon"></i>
+                    <h3>2. Zero-Stress Prep</h3>
+                    <p>Don't lift a finger. We safely move all your furniture out of the way.</p>
+                </div>
+                <div class="step">
+                    <i class="fas fa-hammer step-icon"></i>
+                    <h3>3. Install & Clean</h3>
+                    <p>Perfect installation, furniture put back, and zero dust or mess left behind.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="reviews" class="section bg-light">
+        <div class="container">
+            <h2>What Our Clients Say</h2>
+            <div class="review-grid">
+                <div class="review-card">
+                    <img src="https://placehold.co/400x250/eeeeee/999999?text=Living+Room+Project+Photo" alt="Completed flooring project" class="review-image">
+                    <p><i>"The team was incredible. They moved all our heavy couches and the new floor is completely scratch-proof against our two large dogs!"</i></p>
+                    <span class="reviewer">- Sarah T., Ponsonby</span>
+                </div>
+                <div class="review-card">
+                    <img src="https://placehold.co/400x250/eeeeee/999999?text=Kitchen+Floor+Transformation" alt="Completed flooring project" class="review-image">
+                    <p><i>"A flawless process from start to finish. The guarantee made us feel safe, but the actual quality of the floor blew us away."</i></p>
+                    <span class="reviewer">- Mike R., Grey Lynn</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer id="contact" class="footer bg-dark">
+        <div class="container footer-container">
+            <div class="footer-info">
+                <h2 style="color: white; text-align: left; margin-bottom: 20px; font-size: 2.5rem;">Ready for your Dream Floor?</h2>
+                <p style="font-size: 1.1rem; margin-bottom: 20px;">We are Auckland's premier family flooring experts. Secure your spot now to transform your home with zero hassle and zero risk.</p>
+                <p><i class="fas fa-map-marker-alt"></i> Servicing Greater Auckland</p>
+            </div>
+            
+            <div class="footer-contact">
+                <div id="scarcity-banner" class="scarcity-banner">
+                    Now booking for <span id="current-month">this month</span> - Only 3 slots remaining for full home installs!
+                </div>
+
+                <form action="#" method="post" class="contact-form" id="lead-form"> 
+                     <h3 style="color: #2c3e50; text-align: center; margin-bottom: 10px;">Book Your Free Audit</h3>
+                     <input type="text" name="name" placeholder="Your Name" required>
+                     <input type="email" name="email" placeholder="Your Email" required>
+                     <textarea name="message" placeholder="What are your main flooring concerns?" rows="3" required></textarea>
+                     <button type="submit" class="cta-button" style="width: 100%;">Claim My Free Audit</button>
+                </form>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2025 The Flooring Guys. All Rights Reserved.</p> 
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Smooth Scrolling ---
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetElement = document.querySelector(this.getAttribute('href'));
+                    if (targetElement) {
+                        const headerOffset = document.querySelector('.header').offsetHeight;
+                        const elementPosition = targetElement.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                        window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+                    }
+                });
+            });
+
+            // --- Scarcity Banner Dynamic Month ---
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            const currentMonthElement = document.getElementById('current-month');
+            
+            if (currentMonthElement) {
+                const d = new Date();
+                let monthIndex = d.getMonth();
+                // If past the 25th, promote next month to remain realistic
+                if (d.getDate() > 25) { monthIndex = (monthIndex + 1) % 12; }
+                currentMonthElement.textContent = monthNames[monthIndex];
+            }
+
+            // --- Custom Lead Form Submit Message ---
+            const form = document.getElementById('lead-form');
+            if(form) {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault(); // Prevent page reload for demo
+                    
+                    const messageBox = document.createElement('div');
+                    messageBox.style.cssText = 'position:fixed; top:90px; left:50%; transform:translateX(-50%); padding:20px 30px; background:#2ecc71; color:white; border-radius:5px; z-index:2000; transition:opacity 0.5s ease; opacity:0; box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-weight:bold; font-family:"Inter", sans-serif; text-align: center; font-size: 1.1rem;';
+                    messageBox.innerHTML = "<i class='fas fa-check-circle' style='font-size: 1.5rem; display: block; margin-bottom: 10px;'></i> Success! Your Free Audit request is secured. We'll be in touch within 24 hours.";
+                    
+                    document.body.appendChild(messageBox);
+                    
+                    setTimeout(() => messageBox.style.opacity = '1', 10);
+                    setTimeout(() => {
+                        messageBox.style.opacity = '0';
+                        setTimeout(() => messageBox.remove(), 500);
+                    }, 4500);
+                    
+                    form.reset();
+                });
+            }
+        });
+    </script>
+</body>
+</html>
