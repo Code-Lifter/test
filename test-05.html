@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeMax INOL | System Architecture</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Syne:wght@400;600;700;800&family=Teko:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg: #060a10;
+            --surface: #0d1420;
+            --border: #1a2336;
+            --accent: #f59e0b; 
+        }
+        * { box-sizing: border-box; }
+        body { font-family: 'Syne', system-ui, sans-serif; background: var(--bg); color: #e2e8f0; min-height: 100vh; padding-bottom: 120px; overflow-x: hidden; }
+        .mono { font-family: 'DM Mono', 'Courier New', monospace; }
+        .brand-font { font-family: 'Teko', sans-serif; }
+
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=range] { accent-color: var(--accent); cursor: pointer; }
+        select { -webkit-appearance: none; appearance: none; }
+
+        .inol-bar { transition: width 0.5s cubic-bezier(0.4,0,0.2,1), background 0.5s ease; }
+        .score-num { transition: color 0.4s ease; }
+        
+        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .pulse-active { animation: pulse-red 2s infinite; }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .vertical-text { writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg); }
+        .custom-scrollbar::-webkit-scrollbar { height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
+        body::before {
+            content: ''; position: fixed; inset: 0;
+            background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 32px 32px; pointer-events: none; z-index: 0;
+        }
+        .content { position: relative; z-index: 1; }
+        
+        .program-card { transition: all 0.2s ease; cursor: pointer; }
+        .program-card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.1); }
+        .program-card.active { border-color: var(--accent); background: rgba(15, 23, 42, 0.9); }
+    </style>
+</head>
+<body class="selection:bg-amber-500 selection:text-slate-900">
+
+    <nav class="border-b border-slate-800 bg-slate-900/95 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+           <div class="flex items-center gap-2 cursor-pointer" onclick="switchView('intake')">
+                <span class="text-2xl">🛡️</span>
+                <h1 class="text-xl font-semibold tracking-wide text-white brand-font uppercase">SafeMax <span class="text-amber-500">System</span></h1>
+            </div>
+            <div id="nav-controls" class="hidden bg-slate-800 p-1 rounded-lg flex text-[10px] sm:text-xs font-bold border border-slate-700">
+                <button onclick="setUnit('kg')" id="btn-kg" class="px-3 py-1 rounded-md transition-all bg-amber-500 text-slate-900 shadow font-bold">KG</button>
+                <button onclick="setUnit('lbs')" id="btn-lbs" class="px-3 py-1 rounded-md transition-all text-slate-400 hover:text-white font-medium">LBS</button>
+            </div>
+        </div>
+    </nav>
+
+<!-- ==========================================
+     VIEW 1: THE INTAKE ENGINE
+=========================================== -->
+<div id="view-intake" class="content max-w-5xl mx-auto px-4 mt-8 fade-in">
+    
+    <div class="text-center max-w-3xl mx-auto mb-10">
+        <h2 class="text-4xl md:text-5xl font-extrabold brand-font uppercase tracking-tight text-white mb-4">Choose Your <span class="text-amber-500">Architecture</span></h2>
+        <p class="text-slate-400 text-sm md:text-base leading-relaxed italic border-l-4 border-amber-500 pl-4 text-left">
+            "The best split is the one you'll actually run for 2 years without switching. Zyzz, Arnold, Wendler, Rippetoe... none of them program hopped. They picked a system and beat it into the ground. Pick one, eat well, sleep well, and add weight to the bar. The guy who likes walking is going to walk further than the guy who likes the destination."
+        </p>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex flex-wrap gap-3 mb-8 justify-center">
+        <select id="filter-days" onchange="filterPrograms()" class="bg-slate-900 text-white text-xs font-bold uppercase tracking-wider py-2 px-4 rounded-lg border border-slate-700 focus:border-amber-500 outline-none">
+            <option value="all">Any Schedule</option>
+            <option value="3">3 Days/Week</option>
+            <option value="4">4 Days/Week</option>
+            <option value="5">5 Days/Week</option>
+            <option value="6">6 Days/Week</option>
+        </select>
+        <select id="filter-goal" onchange="filterPrograms()" class="bg-slate-900 text-white text-xs font-bold uppercase tracking-wider py-2 px-4 rounded-lg border border-slate-700 focus:border-amber-500 outline-none">
+            <option value="all">Any Goal</option>
+            <option value="hypertrophy">Hypertrophy (Size)</option>
+            <option value="strength">Strength</option>
+            <option value="hybrid">Hybrid (Size + Strength)</option>
+        </select>
+    </div>
+
+    <!-- Program Grid -->
+    <div id="program-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- JS generates cards here -->
+    </div>
+
+</div>
+
+<!-- ==========================================
+     VIEW 2: THE INOL LAB / CALCULATOR
+=========================================== -->
+<div id="view-engine" class="content max-w-7xl mx-auto px-4 mt-6 hidden fade-in">
+    
+    <div class="mb-4 flex items-center justify-between bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+        <div class="flex items-center gap-3">
+            <button onclick="switchView('intake')" class="text-slate-400 hover:text-white transition flex items-center gap-1 text-xs font-bold uppercase tracking-wider">
+                ← Back
+            </button>
+            <span class="text-slate-600">|</span>
+            <span id="active-split-label" class="text-amber-500 font-bold uppercase text-xs tracking-widest">No Split Selected</span>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- LEFT PILLAR: PREPARATION & RAMP-UP -->
+        <div class="space-y-6">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-white text-lg uppercase tracking-wide brand-font flex items-center gap-2">
+                        <span class="text-amber-500">1.</span> Baseline Stats
+                    </h2>
+                    <div class="flex bg-slate-950 rounded-lg p-1 border border-slate-800">
+                        <button id="mode-direct" onclick="setRmMode('direct')" class="px-2 py-1 text-[9px] font-bold uppercase rounded bg-slate-800 text-slate-300 transition">Direct 1RM</button>
+                        <button id="mode-est" onclick="setRmMode('est')" class="px-2 py-1 text-[9px] font-bold uppercase rounded text-slate-500 hover:text-slate-300 transition">Estimate</button>
+                    </div>
+                </div>
+
+                <div id="rm-direct-container" class="flex items-center gap-4">
+                    <div class="relative w-full">
+                        <input type="number" id="oneRm" oninput="masterCalculate()" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-4 text-4xl font-black mono focus:border-amber-500 outline-none transition-all text-white text-center" placeholder="140">
+                        <span id="unit-label-direct" class="absolute right-4 top-5 text-slate-600 text-xs font-bold uppercase">KG</span>
+                    </div>
+                </div>
+
+                <div id="rm-est-container" class="hidden gap-3">
+                    <div class="relative flex-1">
+                        <label class="block text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Weight</label>
+                        <input type="number" id="est-weight" oninput="masterCalculate()" placeholder="100" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-2xl font-black mono focus:border-amber-500 outline-none text-white text-center">
+                    </div>
+                    <div class="relative flex-1">
+                        <label class="block text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Reps</label>
+                        <input type="number" id="est-reps" oninput="masterCalculate()" placeholder="5" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-2xl font-black mono focus:border-amber-500 outline-none text-white text-center">
+                    </div>
+                    <div class="flex flex-col items-center justify-center bg-amber-900/10 border border-amber-900/30 rounded-xl px-4 min-w-[100px] mt-4">
+                        <span class="text-[9px] text-amber-500 font-bold uppercase tracking-widest mb-1">Calculated</span>
+                        <span id="est-result" class="text-2xl font-black mono text-amber-400">—</span>
+                    </div>
+                </div>
+                <p id="est-warning" class="hidden mt-3 text-[10px] font-bold uppercase tracking-wide"></p>
+            </div>
+
+            <div id="warmup-panel" class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl shadow-black/20 opacity-50 pointer-events-none transition-opacity">
+                <div class="p-4 sm:p-5 bg-slate-950 border-b border-slate-800">
+                    <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+                        <h3 class="text-white font-bold brand-font text-xl flex items-center gap-2">
+                            <span class="text-amber-500">2.</span> Ramp-Up Protocol
+                        </h3>
+                        <div class="flex flex-wrap items-end gap-2">
+                            <div class="w-20">
+                                <label class="block text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1.5 text-center">Type</label>
+                                <select id="muscle-type" onchange="masterCalculate()" class="w-full bg-slate-900 text-center text-white text-sm font-bold py-2 px-1 rounded-lg border border-slate-700 outline-none focus:border-amber-500">
+                                    <option value="compound" selected>Comp</option>
+                                    <option value="isolation">Iso</option>
+                                </select>
+                            </div>
+                            <div class="w-20">
+                                <label class="block text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1.5 text-center">Target</label>
+                                <select id="warmup-target" onchange="masterCalculate()" class="w-full bg-slate-900 text-center text-white text-sm font-bold py-2 px-1 rounded-lg border border-slate-700 outline-none focus:border-amber-500">
+                                    <option value="1">1RM</option>
+                                    <option value="3">3RM</option>
+                                    <option value="5" selected>5RM</option>
+                                    <option value="8">8RM</option>
+                                    <option value="10">10RM</option>
+                                </select>
+                            </div>
+                            <div class="w-16">
+                                <label class="block text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1.5 text-center">Bar</label>
+                                <input type="number" id="bar-weight" value="20" oninput="masterCalculate()" class="w-full bg-slate-900 text-center text-white text-sm font-bold py-2 px-1 rounded-lg border border-slate-700 outline-none focus:border-amber-500">
+                            </div>
+                            <div class="w-16">
+                                <label class="block text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1.5 text-center">Inc</label>
+                                <select id="rounding-factor" onchange="masterCalculate()" class="w-full bg-slate-900 text-center text-white text-sm font-bold py-2 px-1 rounded-lg border border-slate-700 outline-none focus:border-amber-500">
+                                    <option value="0.5">0.5</option>
+                                    <option value="1">1</option>
+                                    <option value="1.25" selected>1.25</option>
+                                    <option value="2.5">2.5</option>
+                                    <option value="5">5</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col bg-slate-900" id="warmup-container"></div>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-lg">
+                <div class="p-3 bg-slate-950 border-b border-slate-800">
+                     <h3 class="text-white text-sm font-bold brand-font tracking-wide">Percentage Reference</h3>
+                </div>
+                <table class="w-full text-left text-slate-400">
+                    <tbody id="percentage-table-body" class="divide-y divide-slate-800/50"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- RIGHT PILLAR: WORKING SETS & INOL -->
+        <div class="space-y-6">
+            <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl backdrop-blur-sm">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-white text-lg uppercase tracking-wide brand-font flex items-center gap-2">
+                        <span class="text-blue-500">3.</span> Working Sets
+                    </h2>
+                    <button onclick="clearSets()" class="text-[10px] text-slate-600 hover:text-red-400 font-bold transition px-2 py-1 rounded bg-slate-950">Clear all</button>
+                </div>
+
+                <div class="grid grid-cols-12 gap-2 mb-3 px-1">
+                    <div class="col-span-3 text-[9px] text-slate-500 uppercase font-bold tracking-wider">Weight</div>
+                    <div class="col-span-3 text-[9px] text-slate-500 uppercase font-bold tracking-wider">Reps</div>
+                    <div class="col-span-3 text-[9px] text-slate-500 uppercase font-bold tracking-wider text-center">RPE</div>
+                    <div class="col-span-2 text-[9px] text-slate-500 uppercase font-bold tracking-wider text-right">Load %</div>
+                    <div class="col-span-1"></div>
+                </div>
+
+                <div id="sets-container" class="space-y-3"></div>
+
+                <button onclick="addSetRow()" class="mt-6 w-full py-3 rounded-xl border border-dashed border-slate-700 text-xs font-bold text-blue-400 hover:text-blue-300 hover:border-blue-500 hover:bg-slate-950 transition">
+                    + Add Working Set
+                </button>
+                
+                <div class="mt-5 bg-slate-950 p-1.5 rounded-xl border border-slate-800 relative">
+                    <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+                        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <select id="scheme-dropdown" onchange="handlePresetSelection(this)" class="w-full bg-transparent text-center text-slate-300 text-[11px] font-bold py-2.5 px-4 rounded-lg appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-colors cursor-pointer uppercase tracking-wider">
+                        <option value="">-- Load Structure Module --</option>
+                        <optgroup label="Strength Foundation">
+                            <option value="5x5">5×5 — Classic Strength</option>
+                            <option value="3x5">3×5 — Efficient Strength</option>
+                            <option value="6x2">6×2 — Neural Strength</option>
+                            <option value="10x3">10×3 — Explosive Power</option>
+                        </optgroup>
+                        <optgroup label="Hypertrophy & Bodybuilding">
+                            <option value="3x8">3×8 — Strength + Hypertrophy</option>
+                            <option value="3x10">3×10 — Traditional</option>
+                            <option value="3x12">3×12 — Moderate / Endurance</option>
+                            <option value="4x8">4×8 — Heavy Hypertrophy</option>
+                            <option value="4x12">4×12 — High Volume</option>
+                            <option value="5x10">5×10 — Brutal Volume</option>
+                        </optgroup>
+                        <optgroup label="Advanced Tactics">
+                            <option value="pyramid">Pyramid Sets (12/10/8/6)</option>
+                            <option value="rpt">Reverse Pyramid (6/8/10)</option>
+                            <option value="top_backoff">Top Set + Back-Offs</option>
+                            <option value="amrap">3×5 + AMRAP</option>
+                            <option value="cluster">Cluster Sets</option>
+                            <option value="restpause">Rest-Pause Training</option>
+                            <option value="dropset">Drop Sets</option>
+                            <option value="20rep">20-Rep Squats</option>
+                        </optgroup>
+                    </select>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden">
+                <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="flex justify-between items-center mb-4 relative z-10">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Global CNS Tax</span>
+                </div>
+                <div class="flex items-end gap-4 mb-4 relative z-10">
+                    <div id="totalVal" class="text-7xl font-black mono tracking-tighter score-num text-slate-200 leading-none">0.00</div>
+                    <div class="pb-2">
+                        <div id="status-pill" class="inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase bg-slate-800 text-slate-500 tracking-widest border border-slate-700">Standby</div>
+                    </div>
+                </div>
+                <div class="mt-6 relative z-10">
+                    <div class="h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+                        <div id="inol-bar" class="h-full rounded-full inol-bar bg-slate-800" style="width:0%"></div>
+                    </div>
+                    <div class="flex justify-between mt-2 px-1">
+                        <span class="text-[9px] font-bold text-slate-600">0.0</span>
+                        <span class="text-[9px] font-bold text-slate-600">1.0</span>
+                        <span class="text-[9px] font-bold text-slate-600">2.0</span>
+                        <span class="text-[9px] font-bold text-slate-600">3.0+</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="prescription-engine" class="hidden bg-slate-900/90 border border-blue-900/30 rounded-3xl p-6 shadow-xl transition-all">
+                <h4 class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    Adaptive Prescription
+                </h4>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="bg-slate-950 rounded-2xl p-4 border border-slate-800">
+                        <div class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Target Rest</div>
+                        <div id="rx-rest" class="text-base font-bold text-slate-200 mono">—</div>
+                    </div>
+                    <div class="bg-slate-950 rounded-2xl p-4 border border-slate-800">
+                        <div class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Next Session</div>
+                        <div id="rx-freq" class="text-base font-bold text-slate-200 mono">—</div>
+                    </div>
+                </div>
+                <div class="bg-slate-950 rounded-2xl p-4 border border-slate-800">
+                    <p id="rx-note" class="text-sm text-slate-300 leading-relaxed"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="timer-bar" class="fixed bottom-0 left-0 w-full bg-slate-900 border-t border-amber-500/30 p-3 transform translate-y-full transition-transform duration-300 z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+    <div class="max-w-3xl mx-auto flex items-center justify-between">
+        <div class="flex flex-col">
+            <span class="text-[10px] sm:text-xs text-amber-500 uppercase font-bold tracking-widest">Rest Timer</span>
+            <span id="timer-display" class="text-2xl sm:text-3xl font-black text-white brand-font font-mono leading-none mt-1">00:00</span>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="addTime(-30)" class="bg-slate-800 hover:bg-slate-700 text-white text-[10px] sm:text-xs px-3 py-2 rounded border border-slate-700 font-bold transition-colors">-30s</button>
+            <button onclick="addTime(30)" class="bg-slate-800 hover:bg-slate-700 text-white text-[10px] sm:text-xs px-3 py-2 rounded border border-slate-700 font-bold transition-colors">+30s</button>
+            <button onclick="stopTimer()" class="bg-slate-800 hover:bg-red-900/30 hover:border-red-500/50 hover:text-red-400 text-slate-400 text-[10px] sm:text-xs px-4 py-2 rounded border border-slate-700 font-bold uppercase transition-all">Stop</button>
+        </div>
+    </div>
+    <div class="absolute top-0 left-0 h-1 bg-amber-500 transition-all duration-1000 ease-linear" id="timer-progress" style="width: 100%"></div>
+</div>
+
+<script>
+    // ==========================================
+    // DATA & INTAKE LOGIC
+    // ==========================================
+    const programs = [
+        {
+            id: 'upper_lower',
+            name: 'Upper / Lower Base',
+            days: 4,
+            goal: 'hybrid',
+            desc: "The guy moves 700 lbs, deadlifts cars, does mobility work that would snap most powerlifters in half, and he's running an upper lower base. Why? Because big lifts go first while fresh. Squat, bench, deadlift, row, and press. Every muscle hit twice a week, but your joints get a break.",
+            truth: "Respects a job, a wife, and a back complaining at 28. You go heavy when you go, recover hard when you don't, and grow. No Instagram aesthetic, just builds a freak over 10 years.",
+            warning: false
+        },
+        {
+            id: 'ppl',
+            name: 'Push Pull Legs (PPL)',
+            days: 6, // or 3
+            goal: 'hypertrophy',
+            desc: "Push day: chest, shoulders, triceps. Pull day: back, biceps, rear delts. Leg day: legs. Grouping them isn't redundant, it's efficient. Your bench press is already smashing your triceps. Hit each muscle twice a week on the 6-day version. This scales, it progresses, it's hard to mess up.",
+            truth: "The only catch: leg day comes around twice a week now. You can't hide.",
+            warning: false
+        },
+        {
+            id: 'full_body',
+            name: 'Full Body (3x/Week)',
+            days: 3,
+            goal: 'hybrid',
+            desc: "Every muscle, every session, 3 days a week. Train movements, not muscles. Hit everything often. Let recovery be the limiter, not session damage. The whole game is frequency. Per session volume is low, but weekly volume stacks up fast.",
+            truth: "People screw it up by trying to do bro-split volume every session. Full body only works if you respect the cap: 6 to 10 hard sets per muscle per session. Best split for busy people or cuts.",
+            warning: false
+        },
+        {
+            id: '531',
+            name: 'Wendler 5/3/1',
+            days: 4,
+            goal: 'strength',
+            desc: "Four lifts: squat, bench, deadlift, OHP. Each gets its own day. Program off 90% of your true max. Run four-week cycles: 5s, 3s, 5/3/1+, and deload. Add 5lbs upper, 10lbs lower, and repeat.",
+            truth: "Slow on purpose. Designed so you're still progressing in year 3, 5, and 10. Most quit because jumps feel too small. Those who don't walk away with numbers nobody else has.",
+            warning: false
+        },
+        {
+            id: 'phul',
+            name: 'PHUL (Power Hypertrophy)',
+            days: 4,
+            goal: 'hybrid',
+            desc: "Two power days, two hypertrophy days. Monday heavy upper, Tuesday heavy lower. Take 2 days off. Thursday upper pump, Friday lower pump. Heavy days drive numbers up, volume days drive size up. They feed each other.",
+            truth: "It's not magic. It's not revolutionary. It's just a well-built program where every component does its job. A predictable workhorse.",
+            warning: false
+        },
+        {
+            id: 'bro_split',
+            name: 'The Bro Split',
+            days: 5,
+            goal: 'hypertrophy',
+            desc: "Monday chest. Tuesday back. Wednesday shoulders. One muscle group per day, beaten into the ground, ignored for 7 days. This is the split Zyzz and Arnold ran. Every Gold's Gym poster ran it.",
+            truth: "Drugs let you grow from anything. If you are natty, muscle protein synthesis spikes for 48 hours then drops. Bro split leaves your chest sitting doing nothing for five days.",
+            warning: true,
+            warningText: "⚠️ THE GEAR TAX: Not optimal for the natural lifter."
+        },
+        {
+            id: 'phat',
+            name: 'PHAT (Layne Norton)',
+            days: 5,
+            goal: 'hypertrophy',
+            desc: "Two power days, three hypertrophy days. The frequency is brutal. Some muscles get hit three times a week. Volume stacks fast. Mixed rep ranges hit every fiber type. On paper, it's beautiful.",
+            truth: "In practice, it eats people alive. Built for advanced naturals who eat 4,000 calories and sleep 9 hours. Run it before you've earned it and it'll bury you.",
+            warning: true,
+            warningText: "⚠️ DANGER: Extreme systemic fatigue accumulation."
+        },
+        {
+            id: 'texas',
+            name: 'Texas Method',
+            days: 3,
+            goal: 'strength',
+            desc: "Bridge the gap after novice gains run out. Monday is volume (5x5 heavy)—this breaks you. Wednesday is recovery (light). Friday is intensity (1 heavy 1x5 PR). Beat Friday's PR by 5lbs next Monday.",
+            truth: "It works until it doesn't. You exist in a constant state of fatigue until Friday. When the Friday PRs stop, the program is done.",
+            warning: false
+        },
+        {
+            id: 'arnold',
+            name: 'The Arnold Split',
+            days: 6,
+            goal: 'hypertrophy',
+            desc: "Chest/Back, Shoulders/Arms, Legs. Repeat. Antagonist pairing is the trick: while your chest works, your back recovers. Blood floods the entire upper body and won't leave. 90 minutes minimum per session.",
+            truth: "Higher frequency, way more weekly volume, but it's 6 days. You miss one day or skip one meal, and the whole rotation collapses. Not for beginners.",
+            warning: true,
+            warningText: "⚠️ HIGH RISK: Requires elite recovery capacity."
+        }
+    ];
+
+    function renderPrograms(list) {
+        const grid = document.getElementById('program-grid');
+        grid.innerHTML = '';
+        list.forEach(p => {
+            const warningHtml = p.warning ? `<div class="bg-red-900/20 border border-red-500/30 text-red-400 text-[10px] font-bold uppercase tracking-widest p-2 rounded mb-3">${p.warningText}</div>` : '';
+            grid.innerHTML += `
+                <div class="program-card bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col h-full relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 font-black text-6xl brand-font text-white group-hover:text-amber-500 transition-colors pointer-events-none">${p.days}D</div>
+                    <div class="flex-1 z-10">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-[9px] uppercase tracking-widest font-bold text-amber-500 border border-amber-500/30 px-2 py-0.5 rounded">${p.goal}</span>
+                        </div>
+                        <h3 class="text-2xl font-bold brand-font text-white mb-2 uppercase tracking-wide">${p.name}</h3>
+                        ${warningHtml}
+                        <p class="text-slate-400 text-sm leading-relaxed mb-4">${p.desc}</p>
+                        <div class="bg-slate-950 p-3 rounded-lg border-l-2 border-blue-500 mb-6">
+                            <span class="block text-[9px] font-bold uppercase text-blue-500 tracking-widest mb-1">The Hard Truth</span>
+                            <p class="text-slate-300 text-xs leading-relaxed italic">${p.truth}</p>
+                        </div>
+                    </div>
+                    <button onclick="deployArchitecture('${p.name}')" class="w-full z-10 bg-slate-800 hover:bg-amber-500 text-slate-300 hover:text-slate-900 font-bold uppercase tracking-widest text-xs py-3 rounded-xl transition-all border border-slate-700 hover:border-amber-500">
+                        Deploy Architecture
+                    </button>
+                </div>
+            `;
+        });
+    }
+
+    function filterPrograms() {
+        const days = document.getElementById('filter-days').value;
+        const goal = document.getElementById('filter-goal').value;
+        let filtered = programs;
+        if (days !== 'all') filtered = filtered.filter(p => p.days == days || (p.id === 'ppl' && (days == 3 || days == 6)));
+        if (goal !== 'all') filtered = filtered.filter(p => p.goal === goal);
+        renderPrograms(filtered);
+    }
+
+    function switchView(view) {
+        if (view === 'engine') {
+            document.getElementById('view-intake').classList.add('hidden');
+            document.getElementById('view-engine').classList.remove('hidden');
+            document.getElementById('nav-controls').classList.remove('hidden');
+            window.scrollTo(0,0);
+        } else {
+            document.getElementById('view-engine').classList.add('hidden');
+            document.getElementById('nav-controls').classList.add('hidden');
+            document.getElementById('view-intake').classList.remove('hidden');
+        }
+    }
+
+    function deployArchitecture(name) {
+        document.getElementById('active-split-label').innerText = name + " ACTIVE";
+        switchView('engine');
+    }
+
+    // Init Grid
+    renderPrograms(programs);
+
+    // ==========================================
+    // INOL ENGINE & CALCULATOR LOGIC
+    // ==========================================
+    let currentUnit = 'kg';
+    let rmMode = 'direct';
+    let timerInterval;
+    let totalTime = 0;
+    let remainingTime = 0;
+    let audioCtx;
+    window.activeStep = 0;
+
+    function masterCalculate() {
+        let final1RM = 0;
+        
+        if (rmMode === 'direct') {
+            final1RM = parseFloat(document.getElementById('oneRm').value);
+        } else {
+            const w = parseFloat(document.getElementById('est-weight').value);
+            const r = parseFloat(document.getElementById('est-reps').value);
+            const resultEl = document.getElementById('est-result');
+            const warnEl = document.getElementById('est-warning');
+
+            if (!w || !r) {
+                resultEl.innerText = '—';
+                warnEl.classList.add('hidden');
+                warnEl.classList.remove('block');
+            } else {
+                final1RM = Math.round(w * (1 + (r / 30)));
+                resultEl.innerText = final1RM;
+                
+                if (r > 10) {
+                    warnEl.innerHTML = '🚨 ERROR: >10 reps measures endurance, not strength.';
+                    warnEl.className = 'mt-3 text-[10px] text-red-500 font-bold uppercase tracking-wide block';
+                } else if (r >= 8) {
+                    warnEl.innerHTML = '⚠️ WARNING: High reps introduce compounding errors.';
+                    warnEl.className = 'mt-3 text-[10px] text-amber-500/80 font-bold uppercase tracking-wide block';
+                } else {
+                    warnEl.className = 'hidden';
+                    warnEl.classList.remove('block');
+                }
+            }
+        }
+
+        const warmupPanel = document.getElementById('warmup-panel');
+        if (final1RM > 0) {
+            warmupPanel.classList.remove('opacity-50', 'pointer-events-none');
+            const targetReps = parseInt(document.getElementById('warmup-target').value);
+            const rounding = parseFloat(document.getElementById('rounding-factor').value);
+            const muscleType = document.getElementById('muscle-type').value;
+            const standardRounding = currentUnit === 'kg' ? 0.5 : 1.0;
+            
+            renderWarmup(final1RM, targetReps, rounding, muscleType);
+            renderTable(final1RM, standardRounding);
+        } else {
+            warmupPanel.classList.add('opacity-50', 'pointer-events-none');
+            document.getElementById('warmup-container').innerHTML = '';
+            document.getElementById('percentage-table-body').innerHTML = '';
+        }
+
+        calculateINOL(final1RM);
+    }
+
+    function setRmMode(mode) {
+        rmMode = mode;
+        document.getElementById('mode-direct').className = mode === 'direct' ? 'px-2 py-1 text-[9px] font-bold uppercase rounded bg-slate-800 text-slate-300 transition' : 'px-2 py-1 text-[9px] font-bold uppercase rounded text-slate-500 hover:text-slate-300 transition';
+        document.getElementById('mode-est').className = mode === 'est' ? 'px-2 py-1 text-[9px] font-bold uppercase rounded bg-slate-800 text-slate-300 transition' : 'px-2 py-1 text-[9px] font-bold uppercase rounded text-slate-500 hover:text-slate-300 transition';
+
+        if (mode === 'direct') {
+            document.getElementById('rm-direct-container').classList.remove('hidden');
+            document.getElementById('rm-direct-container').classList.add('flex');
+            document.getElementById('rm-est-container').classList.add('hidden');
+            document.getElementById('rm-est-container').classList.remove('flex');
+            document.getElementById('est-warning').classList.add('hidden');
+        } else {
+            document.getElementById('rm-direct-container').classList.add('hidden');
+            document.getElementById('rm-direct-container').classList.remove('flex');
+            document.getElementById('rm-est-container').classList.remove('hidden');
+            document.getElementById('rm-est-container').classList.add('flex');
+        }
+        masterCalculate();
+    }
+
+    function setUnit(u) {
+        const old = currentUnit;
+        currentUnit = u;
+        ['kg','lbs'].forEach(type => {
+            document.getElementById('btn-' + type).className = type === u ? 'px-3 py-1 rounded-md transition-all bg-amber-500 text-slate-900 shadow font-bold' : 'px-3 py-1 rounded-md transition-all text-slate-400 hover:text-white font-medium';
+        });
+        document.getElementById('unit-label-direct').innerText = u.toUpperCase();
+
+        const factor = (old === 'kg' && u === 'lbs') ? 2.2046 : (old === 'lbs' && u === 'kg') ? 1/2.2046 : 1;
+        
+        ['oneRm', 'est-weight', 'bar-weight'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el.value) el.value = Math.round(parseFloat(el.value) * factor);
+        });
+        document.querySelectorAll('.set-weight').forEach(inp => {
+            if (inp.value) inp.value = Math.round(parseFloat(inp.value) * factor);
+        });
+        masterCalculate();
+    }
+
+    function setActiveStep(index) { window.activeStep = index; masterCalculate(); }
+    function roundTo(val, step) { return Math.round(val / step) * step; }
+
+    function renderWarmup(oneRM, targetReps, rounding, muscleType) {
+        const container = document.getElementById('warmup-container');
+        container.innerHTML = `<div class="flex items-center px-3 py-3 bg-slate-950/80 border-b border-slate-800 text-[10px] font-bold text-slate-500 uppercase tracking-widest"><div class="w-8 text-center">Set</div><div class="flex-1 pl-2 text-left">Strategy</div><div class="w-14 text-center">Side</div><div class="w-12 text-center">Load</div><div class="w-10 text-center">Reps</div><div class="w-16 text-center">Rest</div></div>`;
+
+        const barWeight = parseFloat(document.getElementById('bar-weight').value) || 0;
+        const restMult = muscleType === 'isolation' ? 0.5 : 1;
+        let targetLoad = oneRM / (1 + targetReps / 30);
+
+        const steps = [
+            { title: "Activation", pct: 0.20, reps: "15", restSec: Math.round(0 * restMult) },
+            { title: "Patterning", pct: 0.50, reps: "5", restSec: Math.round(60 * restMult) },
+            { title: "Acclimation", pct: 0.70, reps: "3", restSec: Math.round(120 * restMult) },
+            { title: "Primer", pct: 0.90, reps: targetReps > 5 ? "2" : "1", restSec: Math.round(180 * restMult) },
+            { title: `TEST ${targetReps}RM`, pct: 1.00, reps: targetReps, restSec: Math.round(240 * restMult) }
+        ];
+
+        steps.forEach((step, index) => {
+            let finalLoad = 0; let sideBoxText = "—";
+            if (barWeight === 0) finalLoad = roundTo(targetLoad * step.pct, rounding);
+            else {
+                if (targetLoad * step.pct <= barWeight) { finalLoad = barWeight; sideBoxText = "Bar"; }
+                else {
+                    let roundedSide = roundTo(((targetLoad * step.pct) - barWeight) / 2, rounding);
+                    finalLoad = barWeight + (roundedSide * 2);
+                    sideBoxText = roundedSide > 0 ? roundedSide : "Bar";
+                }
+            }
+            
+            let isActive = index === window.activeStep;
+            let isPast = index < window.activeStep;
+
+            let rowBg = isActive ? "bg-slate-800/40 border border-amber-500/50" : "hover:bg-slate-800/30";
+            let opacity = isPast ? "opacity-40 grayscale hover:opacity-70" : "opacity-100";
+            let badge = isActive ? "bg-amber-500 text-slate-900 border-amber-400" : "bg-slate-800 text-slate-400 border-slate-700";
+            let titleColor = isActive ? "text-amber-500 font-bold" : step.pct === 1.0 ? "text-emerald-400 font-bold" : "text-slate-300";
+            let numColor = step.pct === 1.0 && !isActive ? "text-emerald-400" : "text-white";
+
+            let restLabel = step.restSec === 0 ? "—" : (step.restSec >= 60 && step.restSec % 60 === 0 ? `${step.restSec/60}m` : `${step.restSec}s`);
+            let timerBtn = step.restSec > 0 ? `<button onclick="startTimer(${step.restSec})" class="w-full h-8 rounded-lg flex items-center justify-center font-bold uppercase text-[10px] bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white">${restLabel}</button>` : `<div class="text-slate-500 text-xs text-center">—</div>`;
+
+            const row = document.createElement('div');
+            row.className = `flex items-center px-3 py-3 transition-all duration-300 border-b border-slate-800/50 ${rowBg} ${opacity} cursor-pointer`;
+            row.onclick = (e) => { if (!e.target.closest('button')) setActiveStep(index); };
+            
+            row.innerHTML = `
+                <div class="w-8 flex justify-center"><div class="w-6 h-6 flex items-center justify-center rounded-full text-[10px] border font-bold ${badge}">${index+1}</div></div>
+                <div class="flex-1 pl-2"><span class="text-sm font-bold ${titleColor}">${step.title}</span></div>
+                <div class="w-14 flex justify-center"><div class="bg-slate-950 text-slate-300 font-bold text-xs py-1 px-2 rounded border border-slate-700">${sideBoxText}</div></div>
+                <div class="w-12 text-center"><span class="text-lg font-black ${numColor} brand-font">${finalLoad}</span></div>
+                <div class="w-10 text-center"><span class="text-lg font-black text-white brand-font">${step.reps}</span></div>
+                <div class="w-16 pl-2">${timerBtn}</div>`;
+            container.appendChild(row);
+        });
+    }
+
+    function renderTable(oneRM, rounding) {
+        const tbody = document.getElementById('percentage-table-body');
+        tbody.innerHTML = '';
+        const data = [
+            { pct: 100, reps: '1', zone: 'PWR', span: 3, color: 'text-amber-500', border: 'border-l-2 border-amber-500' }, 
+            { pct: 90, reps: '3-4', color: 'text-amber-500' }, { pct: 85, reps: '5-6', color: 'text-amber-500' }, 
+            { pct: 80, reps: '7-8', zone: 'HYP', span: 3, color: 'text-blue-400', border: 'border-l-2 border-blue-500' }, 
+            { pct: 75, reps: '9-10', color: 'text-blue-400' }, { pct: 70, reps: '11-12', color: 'text-blue-400' }, 
+            { pct: 60, reps: '16+', zone: 'END', span: 1, color: 'text-emerald-400', border: 'border-l-2 border-emerald-500' }
+        ];
+
+        data.forEach((row, index) => {
+            let load = roundTo(oneRM * (row.pct / 100), rounding);
+            let zoneHtml = row.zone ? `<td rowspan="${row.span}" class="p-0 text-center bg-slate-900/30 ${row.border}"><div class="vertical-text text-[9px] font-bold tracking-widest uppercase ${row.color}">${row.zone}</div></td>` : '';
+            tbody.innerHTML += `<tr class="hover:bg-slate-800/40 ${index%2===0?'bg-slate-800/20':''}">${zoneHtml}<td class="px-3 py-2 font-bold ${row.color} text-xs">${row.pct}%</td><td class="px-3 py-2 ${row.color} brand-font text-xl">${load}</td><td class="px-3 py-2 text-right text-xs font-bold ${row.color}">${row.reps}</td></tr>`;
+        });
+    }
+
+    function addSetRow(weight = '', reps = '', rpe = 8) {
+        const container = document.getElementById('sets-container');
+        const div = document.createElement('div');
+        div.className = 'set-row grid grid-cols-12 gap-2 items-center bg-slate-950 p-2 rounded-xl border border-slate-800 fade-in';
+        div.innerHTML = `
+            <input type="number" class="col-span-3 w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm mono text-slate-200 focus:outline-none focus:border-amber-500 text-center set-weight" value="${weight}" placeholder="Wt" oninput="masterCalculate()">
+            <input type="number" class="col-span-3 w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm mono text-slate-200 focus:outline-none focus:border-amber-500 text-center set-reps" value="${reps}" placeholder="Reps" oninput="masterCalculate()">
+            <div class="col-span-3 flex flex-col justify-center px-1">
+                <input type="range" class="w-full set-rpe" min="6" max="10" step="0.5" value="${rpe}" oninput="this.nextElementSibling.textContent=parseFloat(this.value).toFixed(1); masterCalculate(); updateRpeColor(this)">
+                <span class="text-[9px] font-bold text-center mt-1 text-slate-400 rpe-label">${parseFloat(rpe).toFixed(1)}</span>
+            </div>
+            <div class="col-span-2 text-right set-intensity-badge flex justify-end items-center pr-1"></div>
+            <button onclick="this.closest('.set-row').remove();masterCalculate()" class="col-span-1 flex justify-center items-center w-full h-full text-slate-600 hover:text-red-500 transition">✕</button>
+        `;
+        container.appendChild(div);
+        updateRpeColor(div.querySelector('.set-rpe'));
+        masterCalculate();
+    }
+
+    function updateRpeColor(slider) {
+        const val = parseFloat(slider.value);
+        slider.nextElementSibling.style.color = val >= 9.5 ? '#ef4444' : val >= 8.5 ? '#f59e0b' : '#94a3b8';
+    }
+    function clearSets() { document.getElementById('sets-container').innerHTML = ''; masterCalculate(); }
+
+    const PRESETS = {
+        '5x5': [[0.85, 5, 8], [0.85, 5, 8], [0.85, 5, 8], [0.85, 5, 8], [0.85, 5, 8]],
+        '3x5': [[0.85, 5, 8.5], [0.85, 5, 8.5], [0.85, 5, 8.5]],
+        '3x8': [[0.75, 8, 8], [0.75, 8, 8], [0.75, 8, 8]],
+        '3x10': [[0.70, 10, 8], [0.70, 10, 8], [0.70, 10, 8]],
+        '3x12': [[0.67, 12, 8], [0.67, 12, 8], [0.67, 12, 8]],
+        '4x8': [[0.75, 8, 8], [0.75, 8, 8], [0.75, 8, 8], [0.75, 8, 8]],
+        '4x12': [[0.65, 12, 8], [0.65, 12, 8], [0.65, 12, 8], [0.65, 12, 8]],
+        '5x10': [[0.60, 10, 8], [0.60, 10, 8], [0.60, 10, 8], [0.60, 10, 8], [0.60, 10, 8]],
+        '10x3': Array(10).fill([0.80, 3, 7]),
+        '6x2': Array(6).fill([0.85, 2, 7]),
+        'pyramid': [[0.65, 12, 7.5], [0.70, 10, 8], [0.75, 8, 8.5], [0.80, 6, 9.5]],
+        'rpt': [[0.85, 6, 9.5], [0.75, 8, 9], [0.65, 10, 8.5]],
+        'top_backoff': [[0.85, 5, 9], [0.70, 8, 8], [0.70, 8, 8], [0.70, 8, 8]],
+        'amrap': [[0.80, 5, 8], [0.80, 5, 8], [0.80, 8, 10]],
+        'cluster': [[0.85, 2, 8], [0.85, 2, 8.5]],
+        'restpause': [[0.75, 12, 10], [0.75, 4, 10], [0.75, 3, 10]],
+        'dropset': [[0.75, 12, 10], [0.60, 10, 10], [0.50, 8, 10]],
+        '20rep': [[0.70, 20, 10]]
+    };
+
+    function handlePresetSelection(selectElement) {
+        const key = selectElement.value;
+        if (!key) return;
+        let oneRM = rmMode === 'direct' ? parseFloat(document.getElementById('oneRm').value) : parseFloat(document.getElementById('est-result').innerText);
+        if (!oneRM || isNaN(oneRM)) { alert('Establish a Target Baseline first to auto-calculate load.'); selectElement.selectedIndex = 0; return; }
+        
+        document.getElementById('sets-container').innerHTML = '';
+        PRESETS[key].forEach(s => addSetRow(Math.round(oneRM * s[0]), s[1], s[2]));
+        masterCalculate();
+        selectElement.selectedIndex = 0;
+    }
+
+    function calculateINOL(oneRm) {
+        let totalInol = 0; let supraMaximalDetected = false; let setDetected = false;
+        const rpeMap = { 6: 0.70, 6.5: 0.76, 7: 0.83, 7.5: 0.91, 8: 1.00, 8.5: 1.12, 9: 1.28, 9.5: 1.48, 10: 1.75 };
+
+        document.querySelectorAll('.set-row').forEach(row => {
+            const w = parseFloat(row.querySelector('.set-weight').value);
+            const r = parseFloat(row.querySelector('.set-reps').value);
+            const rpe = parseFloat(row.querySelector('.set-rpe').value);
+            const badge = row.querySelector('.set-intensity-badge');
+            
+            if (!w || !r || !oneRm) { badge.innerHTML = '<span class="text-[10px] mono text-slate-700">—</span>'; return; }
+            setDetected = true;
+            const pct = (w / oneRm) * 100;
+            badge.innerHTML = `<span class="text-[10px] mono font-black ${pct>=100?'text-red-500':pct>=85?'text-amber-500':'text-emerald-500'}">${pct.toFixed(0)}%</span>`;
+
+            if (pct >= 100) supraMaximalDetected = true;
+            totalInol += (r / (100 - Math.min(pct, 99))) * (rpeMap[Math.round(rpe * 2) / 2] || 1.0);
+        });
+
+        const display = document.getElementById('totalVal');
+        const pill = document.getElementById('status-pill');
+        const bar = document.getElementById('inol-bar');
+        const engineBox = document.getElementById('prescription-engine');
+
+        if (!setDetected || totalInol === 0) {
+            display.innerText = '0.00'; display.style.color = '';
+            pill.className = 'inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-slate-800 text-slate-500 border border-slate-700';
+            pill.innerText = 'Standby'; bar.style.width = '0%'; bar.style.background = '#1e293b';
+            engineBox.classList.add('hidden'); return;
+        }
+
+        display.innerText = totalInol.toFixed(2);
+        bar.style.width = Math.min((totalInol / 3.0) * 100, 100) + '%';
+        engineBox.classList.remove('hidden');
+
+        let freqAdvice, noteHtml;
+        if (totalInol < 0.4) {
+            pill.className = 'inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase border bg-slate-800 text-slate-400 border-slate-700'; pill.innerText = 'Underloaded';
+            bar.style.background = '#64748b'; display.style.color = '#94a3b8';
+            freqAdvice = '1 Day'; noteHtml = 'Tissue damage is minimal. This acts as active recovery.';
+        } else if (totalInol <= 1.0) {
+            pill.className = 'inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase border bg-emerald-900/30 text-emerald-400 border-emerald-800/50'; pill.innerText = 'Productive';
+            bar.style.background = '#10b981'; display.style.color = '#34d399';
+            freqAdvice = '2–3 Days'; noteHtml = 'Optimal localized stimulus. Ready to hit this again in 2-3 days.';
+        } else if (totalInol <= 2.0) {
+            pill.className = 'inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase border bg-amber-900/30 text-amber-400 border-amber-800/50'; pill.innerText = 'High Fatigue';
+            bar.style.background = '#f59e0b'; display.style.color = '#fbbf24';
+            freqAdvice = '3–4 Days'; noteHtml = 'High localized fatigue. Respect the recovery timeline.';
+        } else {
+            pill.className = 'inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase border bg-red-900/30 text-red-400 border-red-800/50'; pill.innerText = 'Recovery Debt';
+            bar.style.background = '#ef4444'; display.style.color = '#f87171';
+            freqAdvice = '4–7 Days'; noteHtml = '<span class="text-amber-400 font-bold">Massive tissue fatigue detected.</span> Do not repeat until fully recovered.';
+        }
+
+        if (totalInol > 2.5) {
+            freqAdvice = 'Deload'; noteHtml += '<br><br><span class="text-red-400 font-bold">SYSTEMIC WARNING:</span> Session volume creating heavy recovery debt.';
+            engineBox.classList.add('border-red-900/50', 'bg-red-950/20');
+        } else { engineBox.classList.remove('border-red-900/50', 'bg-red-950/20'); }
+        
+        if (supraMaximalDetected) noteHtml = '<span class="bg-red-900/50 text-red-200 px-2 py-1 rounded text-xs font-bold mr-2">SUPRAMAX DETECTED</span> Exceeded calculated baseline.<br><br>' + noteHtml;
+
+        document.getElementById('rx-freq').innerText = freqAdvice;
+        document.getElementById('rx-rest').innerText = totalInol > 1.5 ? '3–5 min+' : 'Auto (1–2 min)';
+        document.getElementById('rx-note').innerHTML = noteHtml;
+    }
+
+    // Timer Logic
+    function initAudio() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+    function beep() {
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+        gainNode.gain.value = 0.3; osc.frequency.value = 1000; osc.type = 'square';
+        osc.start(audioCtx.currentTime); osc.stop(audioCtx.currentTime + 0.15);
+    }
+    function playAlarm() {
+        initAudio(); beep(); setTimeout(beep, 300);
+        document.getElementById('timer-display').classList.add('text-red-500', 'pulse-active');
+        setTimeout(() => { document.getElementById('timer-display').classList.remove('text-red-500', 'pulse-active'); stopTimer(); }, 3000);
+    }
+    function startTimer(seconds) {
+        initAudio(); clearInterval(timerInterval);
+        totalTime = seconds; remainingTime = seconds;
+        document.getElementById('timer-bar').classList.remove('translate-y-full');
+        updateTimerDisplay();
+        timerInterval = setInterval(() => { remainingTime--; updateTimerDisplay(); if (remainingTime <= 0) { clearInterval(timerInterval); playAlarm(); } }, 1000);
+    }
+    function addTime(sec) { remainingTime = Math.max(0, remainingTime + sec); if (remainingTime > totalTime) totalTime = remainingTime; updateTimerDisplay(); }
+    function stopTimer() { clearInterval(timerInterval); document.getElementById('timer-bar').classList.add('translate-y-full'); }
+    function updateTimerDisplay() {
+        document.getElementById('timer-display').innerText = `${Math.floor(remainingTime / 60).toString().padStart(2, '0')}:${(remainingTime % 60).toString().padStart(2, '0')}`;
+        document.getElementById('timer-progress').style.width = `${totalTime > 0 ? (remainingTime / totalTime) * 100 : 0}%`;
+    }
+
+    addSetRow();
+</script>
+</body>
+</html>
