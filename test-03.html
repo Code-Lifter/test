@@ -174,25 +174,23 @@ Give me just the numbers and the source link.</textarea>
     </div>
 
     <!-- Logic Script -->
-    <script>
+      <script>
         function calculateStress() {
             // 1. Grab DOM Input Values
             const inflation = parseFloat(document.getElementById('inflation').value);
             const interest = parseFloat(document.getElementById('interest').value);
             const currencyPct = parseFloat(document.getElementById('currency').value);
             const jobSecurity = parseFloat(document.getElementById('jobSecurity').value);
-            const annualIncome = parseFloat(document.getElementById('annualIncome').value) || 1; // Prevent div by 0
+            const annualIncome = parseFloat(document.getElementById('annualIncome').value) || 1; 
             const cashInBank = parseFloat(document.getElementById('cashInBank').value) || 0;
             
-            // Fixed Expenses Math
             const fixedExpensesAmount = parseFloat(document.getElementById('fixedExpensesAmount').value) || 0;
             const fixedExpensesFrequency = parseFloat(document.getElementById('fixedExpensesFrequency').value) || 12;
 
             // 2. Core Calculations
             const annualFixedExpenses = fixedExpensesAmount * fixedExpensesFrequency;
             let debtRatio = (annualFixedExpenses / annualIncome) * 100;
-            debtRatio = Math.min(debtRatio, 100); // Cap at 100% so math doesn't break if expenses > income
-
+            
             const monthlyFixedCosts = annualFixedExpenses / 12;
             let savingsMonths = 0;
             if (monthlyFixedCosts > 0) {
@@ -205,7 +203,7 @@ Give me just the numbers and the source link.</textarea>
             document.getElementById('jobVal').innerText = jobSecurity + '%';
             document.getElementById('incomeVal').innerText = '$' + annualIncome.toLocaleString();
             
-            // Dynamic badging for calculated ratios
+            // Dynamic badging
             document.getElementById('calculatedDebtRatioDisplay').innerText = `Equals ~${debtRatio.toFixed(1)}% of your income`;
             document.getElementById('calculatedBufferDisplay').innerText = `Equals ~${savingsMonths.toFixed(1)} months of survival buffer`;
 
@@ -221,31 +219,35 @@ Give me just the numbers and the source link.</textarea>
                 currencyLabelEl.className = "text-indigo-600 font-bold";
             }
 
-            // 4. Mathematical Formula Logic
-            const inflationFactor = inflation * 2.2; 
-            const interestFactor = interest * 2.2;   
-            const currencyMultiplier = 1.0 - (currencyPct / 100); 
+            // 4. THE REBUILT MATH ENGINE (Additive Base + Modifiers)
             
-            const macroSqueeze = (inflationFactor + interestFactor) * currencyMultiplier;
-
-            const debtMultiplier = 0.5 + (debtRatio / 60);       
-            const jobRiskMultiplier = 1.4 - (jobSecurity / 100); 
-
-            let incomeModifier = 1.0;
-            if (annualIncome < 50000) {
-                incomeModifier = 1.5; 
-            } else if (annualIncome < 90000) {
-                incomeModifier = 1.2; 
-            } else if (annualIncome < 150000) {
-                incomeModifier = 0.9; 
-            } else {
-                incomeModifier = 0.7; 
+            // Base pressure from your actual cash flow (Capped slightly above 100 to punish deficits)
+            let baseScore = Math.min(debtRatio, 120); 
+            
+            // Add Macro Pressures as flat points
+            baseScore += (inflation * 1.5);
+            baseScore += (interest * 1.5);
+            if (currencyPct < 0) {
+                baseScore += (Math.abs(currencyPct) * 0.5); // Penalty for weak AUD
             }
 
-            const effectiveMonthsForMath = Math.min(savingsMonths, 12);
-            const savingsDampener = Math.max(0.4, 1.2 - (effectiveMonthsForMath * 0.1));
+            // Modifiers
+            // Job Risk: 1.2x penalty if 0% secure, 0.8x discount if 100% secure
+            const jobRiskMultiplier = 1.2 - (jobSecurity / 250); 
 
-            let rawScore = macroSqueeze * debtMultiplier * jobRiskMultiplier * incomeModifier * savingsDampener;
+            // Income Tier: Less drastic, but still gives breathing room to high earners
+            let incomeModifier = 1.0;
+            if (annualIncome < 50000) incomeModifier = 1.2;
+            else if (annualIncome < 90000) incomeModifier = 1.0;
+            else if (annualIncome < 150000) incomeModifier = 0.9;
+            else incomeModifier = 0.8;
+
+            // Savings Dampener: Caps at 12 months. Ranges from 1.2x penalty (0 saved) to 0.5x discount (12mo saved)
+            const effectiveMonthsForMath = Math.min(savingsMonths, 12);
+            const savingsDampener = 1.2 - (effectiveMonthsForMath * 0.058);
+
+            // Compute Final
+            let rawScore = baseScore * jobRiskMultiplier * incomeModifier * savingsDampener;
             let finalScore = Math.min(Math.max(Math.round(rawScore), 0), 100);
 
             // 5. Dynamic Dashboard UI Rendering
@@ -302,7 +304,6 @@ Based on these exact numbers, what are the three highest-ROI moves I can make th
                 btn.innerText = "Copied!";
                 btn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
                 btn.classList.add('bg-emerald-600', 'hover:bg-emerald-700');
-                
                 setTimeout(() => {
                     btn.innerText = originalText;
                     btn.classList.remove('bg-emerald-600', 'hover:bg-emerald-700');
@@ -316,22 +317,17 @@ Based on these exact numbers, what are the three highest-ROI moves I can make th
             const promptBox = document.getElementById('aiPromptBox');
             navigator.clipboard.writeText(promptBox.value).then(() => {
                 const originalText = btn.innerText;
-                
                 btn.innerText = "Copied!";
                 btn.classList.remove('bg-purple-600', 'hover:bg-purple-700');
                 btn.classList.add('bg-emerald-600', 'hover:bg-emerald-700');
-                
                 setTimeout(() => {
                     btn.innerText = originalText;
                     btn.classList.remove('bg-emerald-600', 'hover:bg-emerald-700');
                     btn.classList.add('bg-purple-600', 'hover:bg-purple-700');
                 }, 2000);
-            }).catch(err => {
-                console.error('Failed to copy text: ', err);
             });
         }
 
-        // Run calculations automatically when page mounts
         window.onload = calculateStress;
     </script>
 </body>
