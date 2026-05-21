@@ -40,7 +40,7 @@ Give me just the numbers and the source link.</textarea>
                 Calculating...
             </div>
             <p id="feedbackDisplay" class="text-sm text-slate-300 max-w-md mx-auto leading-relaxed">
-                Adjust the sliders below to see your real-time economic standing.
+                Adjust the inputs below to see your real-time economic standing.
             </p>
         </div>
 
@@ -74,7 +74,7 @@ Give me just the numbers and the source link.</textarea>
                             <label for="currency" class="text-slate-700">Local Currency Strength</label>
                             <span class="text-indigo-600 font-bold" id="currencyVal">Stable</span>
                         </div>
-                        <p class="text-xs text-slate-400 mb-2">Weakening currencies spike the local cost of fuel and electronics (Imported Inflation).</p>
+                        <p class="text-xs text-slate-400 mb-2">Weakening currencies spike the local cost of fuel and electronics.</p>
                         <input type="range" id="currency" min="-20" max="20" step="1" value="0" 
                             class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                     </div>
@@ -119,24 +119,33 @@ Give me just the numbers and the source link.</textarea>
                             class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-600">
                     </div>
 
+                    <!-- NEW: Raw Cash Input Box -->
                     <div>
-                        <div class="flex justify-between text-sm font-medium mb-1">
-                            <label for="savingsMonths" class="text-slate-700">Emergency Cash Buffer</label>
-                            <span class="text-cyan-600 font-bold" id="savingsVal">3 Months</span>
+                        <label for="cashInBank" class="block text-sm font-medium text-slate-700 mb-1">Liquid Cash in Bank (AUD)</label>
+                        <p class="text-xs text-slate-400 mb-2">Total cash in checking, savings, or offset accounts.</p>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-slate-500 font-bold">$</span>
+                            </div>
+                            <input type="number" id="cashInBank" min="0" step="1000" value="15000" 
+                                class="w-full pl-8 pr-4 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 font-semibold">
                         </div>
-                        <p class="text-xs text-slate-400 mb-2">Liquid cash that can immediately cover your baseline living expenses.</p>
-                        <input type="range" id="savingsMonths" min="0" max="12" step="1" value="3" 
-                            class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-600">
+                        <!-- Dynamic Buffer Readout -->
+                        <div class="mt-2 text-right">
+                            <span id="calculatedBufferDisplay" class="inline-block bg-cyan-50 text-cyan-700 text-xs font-bold px-2 py-1 rounded border border-cyan-100">
+                                Equals ~0.0 months of survival buffer
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Section 4: AI Export (NEW) -->
+            <!-- Section 4: AI Export -->
             <div class="pt-6 border-t border-slate-200 mt-6">
                 <h3 class="text-xs font-bold uppercase tracking-wider text-purple-600 mb-4 border-b border-slate-100 pb-1">4. Generate AI Action Plan</h3>
                 <p class="text-sm text-slate-500 mb-4">Copy this auto-generated prompt and paste it into an AI to get a custom financial strategy based on your exact numbers.</p>
                 <div class="relative">
-                    <textarea id="aiPromptBox" rows="9" readonly class="w-full text-sm bg-slate-50 text-slate-700 p-4 pb-14 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"></textarea>
+                    <textarea id="aiPromptBox" rows="10" readonly class="w-full text-sm bg-slate-50 text-slate-700 p-4 pb-14 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"></textarea>
                     <button type="button" onclick="copyPrompt(this)" class="absolute bottom-4 right-4 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-2 px-4 rounded shadow transition-colors">
                         Copy Prompt
                     </button>
@@ -156,16 +165,25 @@ Give me just the numbers and the source link.</textarea>
             const debtRatio = parseFloat(document.getElementById('debtRatio').value);
             const jobSecurity = parseFloat(document.getElementById('jobSecurity').value);
             const annualIncome = parseFloat(document.getElementById('annualIncome').value); 
-            const savingsMonths = parseFloat(document.getElementById('savingsMonths').value);
+            // NEW: Grab raw cash, fallback to 0 if they delete the number entirely
+            const cashInBank = parseFloat(document.getElementById('cashInBank').value) || 0;
 
-            // 2. Update Slider Labels Text UI
+            // 2. The Burn Rate Math (Calculating months of buffer)
+            const monthlyFixedCosts = (annualIncome * (debtRatio / 100)) / 12;
+            let savingsMonths = 0;
+            if (monthlyFixedCosts > 0) {
+                savingsMonths = cashInBank / monthlyFixedCosts;
+            }
+
+            // 3. Update Slider & Text UI
             document.getElementById('inflationVal').innerText = inflation.toFixed(1) + '%';
             document.getElementById('interestVal').innerText = interest.toFixed(2) + '%';
             document.getElementById('debtVal').innerText = debtRatio + '%';
             document.getElementById('jobVal').innerText = jobSecurity + '%';
-            
             document.getElementById('incomeVal').innerText = '$' + annualIncome.toLocaleString();
-            document.getElementById('savingsVal').innerText = savingsMonths + (savingsMonths === 1 ? ' Month' : ' Months');
+            
+            // NEW: Update the visual badge showing their actual survival runway
+            document.getElementById('calculatedBufferDisplay').innerText = `Equals ~${savingsMonths.toFixed(1)} months of survival buffer`;
 
             const currencyLabelEl = document.getElementById('currencyVal');
             if (currencyPct < 0) {
@@ -179,7 +197,7 @@ Give me just the numbers and the source link.</textarea>
                 currencyLabelEl.className = "text-indigo-600 font-bold";
             }
 
-            // 3. Mathematical Formula Logic
+            // 4. Mathematical Formula Logic
             const inflationFactor = inflation * 2.2; 
             const interestFactor = interest * 2.2;   
             const currencyMultiplier = 1.0 - (currencyPct / 100); 
@@ -200,12 +218,14 @@ Give me just the numbers and the source link.</textarea>
                 incomeModifier = 0.7; 
             }
 
-            const savingsDampener = Math.max(0.4, 1.2 - (savingsMonths * 0.1));
+            // We cap the dampener at 12 months for the formula so billionaires don't break the math to 0
+            const effectiveMonthsForMath = Math.min(savingsMonths, 12);
+            const savingsDampener = Math.max(0.4, 1.2 - (effectiveMonthsForMath * 0.1));
 
             let rawScore = macroSqueeze * debtMultiplier * jobRiskMultiplier * incomeModifier * savingsDampener;
             let finalScore = Math.min(Math.max(Math.round(rawScore), 0), 100);
 
-            // 4. Dynamic Dashboard UI Rendering
+            // 5. Dynamic Dashboard UI Rendering
             const scoreEl = document.getElementById('scoreDisplay');
             const badgeEl = document.getElementById('badgeDisplay');
             const feedbackEl = document.getElementById('feedbackDisplay');
@@ -221,21 +241,21 @@ Give me just the numbers and the source link.</textarea>
                 scoreEl.className = "text-6xl font-black my-2 transition-all text-amber-400";
                 badgeEl.className = "inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3 bg-amber-500/20 text-amber-400";
                 badgeEl.innerText = "Moderate Economic Stress";
-                feedbackEl.innerText = "You're feeling the squeeze. To drop this score, your highest ROI action is to aggressively pad your emergency savings to build a stronger shock absorber against inflation.";
+                feedbackEl.innerText = "You're feeling the squeeze. To drop this score, your highest ROI action is to aggressively pad your cash buffer to build a stronger shock absorber against inflation.";
             } else {
                 scoreEl.className = "text-6xl font-black my-2 transition-all text-rose-500";
                 badgeEl.className = "inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3 bg-rose-500/20 text-rose-400";
                 badgeEl.innerText = "High Economic Stress";
-                feedbackEl.innerText = "Critical exposure zone. A lack of liquid savings combined with macro pressures leaves you vulnerable. Prioritize hoarding cash and slashing non-fixed expenses immediately.";
+                feedbackEl.innerText = "Critical exposure zone. A lack of liquid cash combined with macro pressures leaves you vulnerable. Prioritize hoarding cash and slashing non-fixed expenses immediately.";
             }
 
-            // 5. Generate Dynamic AI Prompt
+            // 6. Generate Dynamic AI Prompt
             const aiPrompt = `Act as a pragmatic, ruthless, but supportive financial mentor. I am using a Personal Economic Stress Calculator and need a tactical action plan.
 
 Here is my current reality:
 - Income: $${annualIncome.toLocaleString()} AUD
 - Fixed Expenses & Debt: ${debtRatio}% of my income
-- Liquid Savings: ${savingsMonths} months of living expenses
+- Liquid Savings: $${cashInBank.toLocaleString()} AUD (which gives me ~${savingsMonths.toFixed(1)} months of survival runway)
 - Perceived Job Security: ${jobSecurity}%
 
 Macro Environment:
@@ -249,7 +269,7 @@ Based on these exact numbers, what are the three highest-ROI moves I can make th
             document.getElementById('aiPromptBox').value = aiPrompt;
         }
 
-        // 6. Copy to Clipboard Functionality - Top Prompt
+        // 7. Copy to Clipboard Functionality - Top Prompt
         function copyMacroPrompt(btn) {
             const promptBox = document.getElementById('macroPromptBox');
             navigator.clipboard.writeText(promptBox.value).then(() => {
@@ -266,7 +286,7 @@ Based on these exact numbers, what are the three highest-ROI moves I can make th
             });
         }
 
-        // 7. Copy to Clipboard Functionality - Bottom Prompt
+        // 8. Copy to Clipboard Functionality - Bottom Prompt
         function copyPrompt(btn) {
             const promptBox = document.getElementById('aiPromptBox');
             navigator.clipboard.writeText(promptBox.value).then(() => {
