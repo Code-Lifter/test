@@ -94,6 +94,34 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Section 3: Liquidity & Buffers -->
+            <div class="pt-2">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-cyan-600 mb-4 border-b border-slate-100 pb-1">3. Liquidity & Buffers</h3>
+                <div class="space-y-5">
+                    <!-- Annual Income Slider -->
+                    <div>
+                        <div class="flex justify-between text-sm font-medium mb-1">
+                            <label for="annualIncome" class="text-slate-700">Annual Income</label>
+                            <span class="text-cyan-600 font-bold" id="incomeVal">$80,000</span>
+                        </div>
+                        <input type="range" id="annualIncome" min="20000" max="250000" step="5000" value="80000" 
+                            class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-600">
+                    </div>
+
+                    <!-- Emergency Savings Slider -->
+                    <div>
+                        <div class="flex justify-between text-sm font-medium mb-1">
+                            <label for="savingsMonths" class="text-slate-700">Emergency Cash Buffer</label>
+                            <span class="text-cyan-600 font-bold" id="savingsVal">3 Months</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-2">Liquid cash that can immediately cover your baseline living expenses.</p>
+                        <input type="range" id="savingsMonths" min="0" max="12" step="1" value="3" 
+                            class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-600">
+                    </div>
+                </div>
+            </div>
+
         </form>
     </div>
 
@@ -106,12 +134,17 @@
             const currencyPct = parseFloat(document.getElementById('currency').value);
             const debtRatio = parseFloat(document.getElementById('debtRatio').value);
             const jobSecurity = parseFloat(document.getElementById('jobSecurity').value);
+            const annualIncome = parseFloat(document.getElementById('annualIncome').value); 
+            const savingsMonths = parseFloat(document.getElementById('savingsMonths').value);
 
             // 2. Update Slider Labels Text UI
             document.getElementById('inflationVal').innerText = inflation.toFixed(1) + '%';
             document.getElementById('interestVal').innerText = interest.toFixed(2) + '%';
             document.getElementById('debtVal').innerText = debtRatio + '%';
             document.getElementById('jobVal').innerText = jobSecurity + '%';
+            
+            document.getElementById('incomeVal').innerText = '$' + annualIncome.toLocaleString();
+            document.getElementById('savingsVal').innerText = savingsMonths + (savingsMonths === 1 ? ' Month' : ' Months');
 
             // Distinct label handling for Currency performance
             const currencyLabelEl = document.getElementById('currencyVal');
@@ -127,21 +160,35 @@
             }
 
             // 3. Mathematical Formula Logic
+            
             // Baseline macroeconomic points
             const inflationFactor = inflation * 2.2; 
             const interestFactor = interest * 2.2;   
-            
-            // Currency Pass-Through Multiplier: 
-            // A weakened currency (-20%) adds an extra burden multiplier, while a stronger currency eases it.
             const currencyMultiplier = 1.0 - (currencyPct / 100); 
+            
+            const macroSqueeze = (inflationFactor + interestFactor) * currencyMultiplier;
 
-            // Personal exposure modifiers act as systemic amplifiers
-            const debtMultiplier = 0.5 + (debtRatio / 60);       // Ranges roughly from 0.66 to 2.0
-            const jobRiskMultiplier = 1.4 - (jobSecurity / 100); // Ranges from 0.4 (secure) to 1.4 (unsecure)
+            // Personal exposure modifiers
+            const debtMultiplier = 0.5 + (debtRatio / 60);       
+            const jobRiskMultiplier = 1.4 - (jobSecurity / 100); 
+
+            // Income Bracket Modifier (Absolute Cash Buffer)
+            let incomeModifier = 1.0;
+            if (annualIncome < 50000) {
+                incomeModifier = 1.5; // High vulnerability
+            } else if (annualIncome < 90000) {
+                incomeModifier = 1.2; // Squeezed middle
+            } else if (annualIncome < 150000) {
+                incomeModifier = 0.9; // Comfortable buffer
+            } else {
+                incomeModifier = 0.7; // Highly insulated
+            }
+
+            // Emergency Savings Dampener (The Shock Absorber)
+            const savingsDampener = Math.max(0.4, 1.2 - (savingsMonths * 0.1));
 
             // Compute composite stress index
-            const macroSqueeze = (inflationFactor + interestFactor) * currencyMultiplier;
-            let rawScore = macroSqueeze * debtMultiplier * jobRiskMultiplier;
+            let rawScore = macroSqueeze * debtMultiplier * jobRiskMultiplier * incomeModifier * savingsDampener;
             
             // Constrain score strictly between 0 and 100 bounds
             let finalScore = Math.min(Math.max(Math.round(rawScore), 0), 100);
@@ -158,19 +205,19 @@
                 scoreEl.className = "text-6xl font-black my-2 transition-all text-emerald-400";
                 badgeEl.className = "inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3 bg-emerald-500/20 text-emerald-400";
                 badgeEl.innerText = "Low Economic Stress";
-                feedbackEl.innerText = "Your personal fundamentals are highly insulated. Low fixed overheads, coupled with strong job stability and currency conditions, leave you with ample financial safety margins.";
+                feedbackEl.innerText = "Your fundamentals are rock solid. Strong income-to-debt margins and a healthy cash buffer mean macroeconomic turbulence is just background noise to you right now.";
             } else if (finalScore >= 45 && finalScore < 75) {
                 // Moderate Stress
                 scoreEl.className = "text-6xl font-black my-2 transition-all text-amber-400";
                 badgeEl.className = "inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3 bg-amber-500/20 text-amber-400";
                 badgeEl.innerText = "Moderate Economic Stress";
-                feedbackEl.innerText = "You are feeling the squeeze. Compounding inflation or rising debt servicing requirements are noticeably trimming your discretionary cash flow. Prune variable subscriptions.";
+                feedbackEl.innerText = "You're feeling the squeeze. To drop this score, your highest ROI action is to aggressively pad your emergency savings to build a stronger shock absorber against inflation.";
             } else {
                 // High Stress
                 scoreEl.className = "text-6xl font-black my-2 transition-all text-rose-500";
                 badgeEl.className = "inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3 bg-rose-500/20 text-rose-400";
                 badgeEl.innerText = "High Economic Stress";
-                feedbackEl.innerText = "Critical exposure zone. High structural fixed costs and unfavorable macroeconomic pressures severely threaten your budget balance. Prioritize eliminating non-fixed expenses immediately.";
+                feedbackEl.innerText = "Critical exposure zone. A lack of liquid savings combined with macro pressures leaves you vulnerable. Prioritize hoarding cash and slashing non-fixed expenses immediately.";
             }
         }
 
