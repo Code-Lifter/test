@@ -22,7 +22,7 @@
             <p class="text-sm text-indigo-900/70 mb-4">Don't know the current economic stats? Copy this prompt into an AI with web-browsing capabilities to get the live numbers for the sliders below.</p>
             <div class="relative">
                 <textarea id="macroPromptBox" rows="4" readonly class="w-full text-sm bg-white text-slate-700 p-3 pb-12 rounded-lg border border-indigo-200 focus:outline-none resize-none">Search the live web and give me the exact current numbers for Australia:
-1. Latest ABS Annual Consumer Price Index (Inflation) rate.
+1. Latest ABS Annual Consumer Price Index (CPI / Inflation) rate.
 2. Current RBA Official Cash Rate.
 3. How the AUD has performed against the USD over the last 6 months (percentage strengthened or weakened).
 Give me just the numbers and the source link.</textarea>
@@ -53,9 +53,10 @@ Give me just the numbers and the source link.</textarea>
                 <div class="space-y-5">
                     <div>
                         <div class="flex justify-between text-sm font-medium mb-1">
-                            <label for="inflation" class="text-slate-700">Annual Inflation Rate</label>
+                            <label for="inflation" class="text-slate-700">Annual Inflation Rate (CPI)</label>
                             <span class="text-indigo-600 font-bold" id="inflationVal">3.5%</span>
                         </div>
+                        <p class="text-xs text-slate-400 mb-2">The Consumer Price Index. How much the average "shopping basket" of food, rent, and petrol has gone up.</p>
                         <input type="range" id="inflation" min="0" max="15" step="0.1" value="3.5" 
                             class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                     </div>
@@ -65,6 +66,7 @@ Give me just the numbers and the source link.</textarea>
                             <label for="interest" class="text-slate-700">Central Bank Interest Rate</label>
                             <span class="text-indigo-600 font-bold" id="interestVal">5.0%</span>
                         </div>
+                        <p class="text-xs text-slate-400 mb-2">The RBA Official Cash Rate.</p>
                         <input type="range" id="interest" min="0" max="12" step="0.25" value="5.0" 
                             class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                     </div>
@@ -74,7 +76,7 @@ Give me just the numbers and the source link.</textarea>
                             <label for="currency" class="text-slate-700">Local Currency Strength</label>
                             <span class="text-indigo-600 font-bold" id="currencyVal">Stable</span>
                         </div>
-                        <p class="text-xs text-slate-400 mb-2">Weakening currencies spike the local cost of fuel and electronics.</p>
+                        <p class="text-xs text-slate-400 mb-2">Weakening currencies spike the local cost of imported goods like fuel and electronics.</p>
                         <input type="range" id="currency" min="-20" max="20" step="1" value="0" 
                             class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                     </div>
@@ -90,7 +92,7 @@ Give me just the numbers and the source link.</textarea>
                             <label for="debtRatio" class="text-slate-700">Fixed Expenses &amp; Debt (% of Income)</label>
                             <span class="text-emerald-600 font-bold" id="debtVal">40%</span>
                         </div>
-                        <p class="text-xs text-slate-400 mb-2">Rent/mortgage, minimum credit card payments, utilities.</p>
+                        <p class="text-xs text-slate-400 mb-2">Your "Gun to the Head" ratio. Rent, minimum debt payments, survival groceries, utilities. <strong>No Netflix, no pub money.</strong></p>
                         <input type="range" id="debtRatio" min="10" max="90" step="1" value="40" 
                             class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600">
                     </div>
@@ -119,10 +121,9 @@ Give me just the numbers and the source link.</textarea>
                             class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-600">
                     </div>
 
-                    <!-- NEW: Raw Cash Input Box -->
                     <div>
                         <label for="cashInBank" class="block text-sm font-medium text-slate-700 mb-1">Liquid Cash in Bank (AUD)</label>
-                        <p class="text-xs text-slate-400 mb-2">Total cash in checking, savings, or offset accounts.</p>
+                        <p class="text-xs text-slate-400 mb-2">Total cash you can access tomorrow to pay bills.</p>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <span class="text-slate-500 font-bold">$</span>
@@ -165,7 +166,6 @@ Give me just the numbers and the source link.</textarea>
             const debtRatio = parseFloat(document.getElementById('debtRatio').value);
             const jobSecurity = parseFloat(document.getElementById('jobSecurity').value);
             const annualIncome = parseFloat(document.getElementById('annualIncome').value); 
-            // NEW: Grab raw cash, fallback to 0 if they delete the number entirely
             const cashInBank = parseFloat(document.getElementById('cashInBank').value) || 0;
 
             // 2. The Burn Rate Math (Calculating months of buffer)
@@ -182,7 +182,6 @@ Give me just the numbers and the source link.</textarea>
             document.getElementById('jobVal').innerText = jobSecurity + '%';
             document.getElementById('incomeVal').innerText = '$' + annualIncome.toLocaleString();
             
-            // NEW: Update the visual badge showing their actual survival runway
             document.getElementById('calculatedBufferDisplay').innerText = `Equals ~${savingsMonths.toFixed(1)} months of survival buffer`;
 
             const currencyLabelEl = document.getElementById('currencyVal');
@@ -218,7 +217,6 @@ Give me just the numbers and the source link.</textarea>
                 incomeModifier = 0.7; 
             }
 
-            // We cap the dampener at 12 months for the formula so billionaires don't break the math to 0
             const effectiveMonthsForMath = Math.min(savingsMonths, 12);
             const savingsDampener = Math.max(0.4, 1.2 - (effectiveMonthsForMath * 0.1));
 
@@ -259,7 +257,7 @@ Here is my current reality:
 - Perceived Job Security: ${jobSecurity}%
 
 Macro Environment:
-- Local Inflation: ${inflation}%
+- Local Inflation (CPI): ${inflation}%
 - Interest Rates: ${interest}%
 
 My calculated Economic Stress Score is ${finalScore}/100 (${badgeEl.innerText}). 
