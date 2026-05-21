@@ -16,6 +16,22 @@
             <p class="text-slate-500 mt-2">See how macroeconomic shifts interact with your personal financial reality.</p>
         </header>
 
+        <!-- Section 0: Get Live Macro Data -->
+        <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-5 mb-8">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-800 mb-2">Step 0: Fetch Today's Macro Data</h3>
+            <p class="text-sm text-indigo-900/70 mb-4">Don't know the current economic stats? Copy this prompt into an AI with web-browsing capabilities to get the live numbers for the sliders below.</p>
+            <div class="relative">
+                <textarea id="macroPromptBox" rows="4" readonly class="w-full text-sm bg-white text-slate-700 p-3 pb-12 rounded-lg border border-indigo-200 focus:outline-none resize-none">Search the live web and give me the exact current numbers for Australia:
+1. Latest ABS Annual Consumer Price Index (Inflation) rate.
+2. Current RBA Official Cash Rate.
+3. How the AUD has performed against the USD over the last 6 months (percentage strengthened or weakened).
+Give me just the numbers and the source link.</textarea>
+                <button type="button" onclick="copyMacroPrompt(this)" class="absolute bottom-3 right-3 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-1.5 px-3 rounded shadow transition-colors">
+                    Copy Prompt
+                </button>
+            </div>
+        </div>
+
         <!-- Main Score Dashboard -->
         <div class="bg-slate-900 rounded-xl p-6 text-white text-center mb-8 shadow-inner">
             <h2 class="text-sm font-semibold tracking-wider uppercase text-slate-400">Your Stress Score</h2>
@@ -96,7 +112,7 @@
                 <div class="space-y-5">
                     <div>
                         <div class="flex justify-between text-sm font-medium mb-1">
-                            <label for="annualIncome" class="text-slate-700">Annual Income</label>
+                            <label for="annualIncome" class="text-slate-700">Annual Income (AUD)</label>
                             <span class="text-cyan-600 font-bold" id="incomeVal">$80,000</span>
                         </div>
                         <input type="range" id="annualIncome" min="20000" max="250000" step="5000" value="80000" 
@@ -233,18 +249,33 @@ Based on these exact numbers, what are the three highest-ROI moves I can make th
             document.getElementById('aiPromptBox').value = aiPrompt;
         }
 
-        // 6. Copy to Clipboard Functionality
+        // 6. Copy to Clipboard Functionality - Top Prompt
+        function copyMacroPrompt(btn) {
+            const promptBox = document.getElementById('macroPromptBox');
+            navigator.clipboard.writeText(promptBox.value).then(() => {
+                const originalText = btn.innerText;
+                btn.innerText = "Copied!";
+                btn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+                btn.classList.add('bg-emerald-600', 'hover:bg-emerald-700');
+                
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.classList.remove('bg-emerald-600', 'hover:bg-emerald-700');
+                    btn.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+                }, 2000);
+            });
+        }
+
+        // 7. Copy to Clipboard Functionality - Bottom Prompt
         function copyPrompt(btn) {
             const promptBox = document.getElementById('aiPromptBox');
             navigator.clipboard.writeText(promptBox.value).then(() => {
                 const originalText = btn.innerText;
                 
-                // Visual feedback
                 btn.innerText = "Copied!";
                 btn.classList.remove('bg-purple-600', 'hover:bg-purple-700');
                 btn.classList.add('bg-emerald-600', 'hover:bg-emerald-700');
                 
-                // Reset after 2 seconds
                 setTimeout(() => {
                     btn.innerText = originalText;
                     btn.classList.remove('bg-emerald-600', 'hover:bg-emerald-700');
