@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personal Economic Stress Index Calculator</title>
-    <!-- Tailwind CSS for clean, modern styling -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen py-12 px-4 flex flex-col items-center">
@@ -44,7 +43,7 @@ Give me just the numbers and the source link.</textarea>
             </p>
         </div>
 
-        <!-- Controls / Sliders -->
+        <!-- Controls / Inputs -->
         <form class="space-y-6" oninput="calculateStress()">
             
             <!-- Section 1: Macro Environment -->
@@ -87,14 +86,32 @@ Give me just the numbers and the source link.</textarea>
             <div class="pt-2">
                 <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-600 mb-4 border-b border-slate-100 pb-1">2. Personal Exposure</h3>
                 <div class="space-y-5">
+                    
+                    <!-- NEW: Raw Expense Input & Frequency -->
                     <div>
-                        <div class="flex justify-between text-sm font-medium mb-1">
-                            <label for="debtRatio" class="text-slate-700">Fixed Expenses &amp; Debt (% of Income)</label>
-                            <span class="text-emerald-600 font-bold" id="debtVal">40%</span>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Fixed Expenses &amp; Debt</label>
+                        <p class="text-xs text-slate-400 mb-2">Your "Gun to the Head" costs. Rent, minimum debt payments, survival groceries, utilities. <strong>No Netflix, no pub money.</strong></p>
+                        <div class="flex space-x-2">
+                            <div class="relative flex-1">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="text-slate-500 font-bold">$</span>
+                                </div>
+                                <input type="number" id="fixedExpensesAmount" min="0" step="50" value="2500" 
+                                    class="w-full pl-8 pr-4 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 font-semibold">
+                            </div>
+                            <select id="fixedExpensesFrequency" class="w-1/3 bg-slate-50 border border-slate-300 rounded-lg text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 font-semibold px-2">
+                                <option value="52">Weekly</option>
+                                <option value="26">Fortnightly</option>
+                                <option value="12" selected>Monthly</option>
+                                <option value="1">Annually</option>
+                            </select>
                         </div>
-                        <p class="text-xs text-slate-400 mb-2">Your "Gun to the Head" ratio. Rent, minimum debt payments, survival groceries, utilities. <strong>No Netflix, no pub money.</strong></p>
-                        <input type="range" id="debtRatio" min="10" max="90" step="1" value="40" 
-                            class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600">
+                        <!-- Dynamic Percentage Readout -->
+                        <div class="mt-2 text-right">
+                            <span id="calculatedDebtRatioDisplay" class="inline-block bg-emerald-50 text-emerald-700 text-xs font-bold px-2 py-1 rounded border border-emerald-100">
+                                Equals ~37.5% of your income
+                            </span>
+                        </div>
                     </div>
 
                     <div>
@@ -163,13 +180,20 @@ Give me just the numbers and the source link.</textarea>
             const inflation = parseFloat(document.getElementById('inflation').value);
             const interest = parseFloat(document.getElementById('interest').value);
             const currencyPct = parseFloat(document.getElementById('currency').value);
-            const debtRatio = parseFloat(document.getElementById('debtRatio').value);
             const jobSecurity = parseFloat(document.getElementById('jobSecurity').value);
-            const annualIncome = parseFloat(document.getElementById('annualIncome').value); 
+            const annualIncome = parseFloat(document.getElementById('annualIncome').value) || 1; // Prevent div by 0
             const cashInBank = parseFloat(document.getElementById('cashInBank').value) || 0;
+            
+            // Fixed Expenses Math
+            const fixedExpensesAmount = parseFloat(document.getElementById('fixedExpensesAmount').value) || 0;
+            const fixedExpensesFrequency = parseFloat(document.getElementById('fixedExpensesFrequency').value) || 12;
 
-            // 2. The Burn Rate Math (Calculating months of buffer)
-            const monthlyFixedCosts = (annualIncome * (debtRatio / 100)) / 12;
+            // 2. Core Calculations
+            const annualFixedExpenses = fixedExpensesAmount * fixedExpensesFrequency;
+            let debtRatio = (annualFixedExpenses / annualIncome) * 100;
+            debtRatio = Math.min(debtRatio, 100); // Cap at 100% so math doesn't break if expenses > income
+
+            const monthlyFixedCosts = annualFixedExpenses / 12;
             let savingsMonths = 0;
             if (monthlyFixedCosts > 0) {
                 savingsMonths = cashInBank / monthlyFixedCosts;
@@ -178,10 +202,11 @@ Give me just the numbers and the source link.</textarea>
             // 3. Update Slider & Text UI
             document.getElementById('inflationVal').innerText = inflation.toFixed(1) + '%';
             document.getElementById('interestVal').innerText = interest.toFixed(2) + '%';
-            document.getElementById('debtVal').innerText = debtRatio + '%';
             document.getElementById('jobVal').innerText = jobSecurity + '%';
             document.getElementById('incomeVal').innerText = '$' + annualIncome.toLocaleString();
             
+            // Dynamic badging for calculated ratios
+            document.getElementById('calculatedDebtRatioDisplay').innerText = `Equals ~${debtRatio.toFixed(1)}% of your income`;
             document.getElementById('calculatedBufferDisplay').innerText = `Equals ~${savingsMonths.toFixed(1)} months of survival buffer`;
 
             const currencyLabelEl = document.getElementById('currencyVal');
@@ -248,11 +273,13 @@ Give me just the numbers and the source link.</textarea>
             }
 
             // 6. Generate Dynamic AI Prompt
+            const frequencyText = document.getElementById('fixedExpensesFrequency').options[document.getElementById('fixedExpensesFrequency').selectedIndex].text.toLowerCase();
+            
             const aiPrompt = `Act as a pragmatic, ruthless, but supportive financial mentor. I am using a Personal Economic Stress Calculator and need a tactical action plan.
 
 Here is my current reality:
-- Income: $${annualIncome.toLocaleString()} AUD
-- Fixed Expenses & Debt: ${debtRatio}% of my income
+- Income: $${annualIncome.toLocaleString()} AUD per year
+- Fixed Expenses & Debt: $${fixedExpensesAmount.toLocaleString()} ${frequencyText} (~${debtRatio.toFixed(1)}% of my income)
 - Liquid Savings: $${cashInBank.toLocaleString()} AUD (which gives me ~${savingsMonths.toFixed(1)} months of survival runway)
 - Perceived Job Security: ${jobSecurity}%
 
