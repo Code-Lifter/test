@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RackMaster Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white font-sans p-6">
+    <div class="max-w-md mx-auto bg-gray-800 p-8 rounded-2xl shadow-2xl">
+        <h1 class="text-3xl font-bold mb-6 text-blue-400">RackMaster</h1>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium mb-1">Target Total Weight</label>
+                <input id="targetWeight" type="number" value="100" class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 outline-none">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium mb-1">Bar Weight</label>
+                <select id="barWeight" class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 outline-none">
+                    <option value="20">20 kg (Standard Olympic)</option>
+                    <option value="15">15 kg (Women's Olympic)</option>
+                    <option value="45">45 lbs</option>
+                    <option value="35">35 lbs</option>
+                </select>
+            </div>
+
+            <button onclick="calculate()" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition">Calculate Racking</button>
+        </div>
+
+        <div id="results" class="mt-8 space-y-4">
+            </div>
+    </div>
+
+    <script>
+        const availablePlates = [25, 20, 15, 10, 5, 2.5, 1.25];
+
+        function calculate() {
+            const target = parseFloat(document.getElementById('targetWeight').value);
+            const bar = parseFloat(document.getElementById('barWeight').value);
+            const sideWeight = (target - bar) / 2;
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+
+            if (sideWeight < 0) {
+                resultsDiv.innerHTML = "<p class='text-red-400'>Target is lighter than the bar, champ.</p>";
+                return;
+            }
+
+            // Simple Greedy approach for Demo
+            let remaining = sideWeight;
+            let setup = [];
+            
+            availablePlates.forEach(plate => {
+                while (remaining >= plate) {
+                    setup.push(plate);
+                    remaining -= plate;
+                }
+            });
+
+            if (remaining === 0) {
+                resultsDiv.innerHTML = `
+                    <div class="p-4 bg-gray-700 rounded-lg border-l-4 border-green-500">
+                        <p class="text-sm text-gray-400">Per side load:</p>
+                        <div class="flex gap-2 mt-2 flex-wrap">
+                            ${setup.map(p => `<span class="px-3 py-1 bg-blue-900 rounded-md font-bold">${p}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+            } else {
+                resultsDiv.innerHTML = "<p class='text-yellow-400'>Can't reach that exact weight with standard plates.</p>";
+            }
+        }
+    </script>
+</body>
+</html>
