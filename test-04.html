@@ -5,73 +5,215 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RackMaster Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .plate-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            min-height: 120px;
+            padding-left: 20px;
+            margin-top: 1rem;
+        }
+        .bar-sleeve {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 24px;
+            width: 100%;
+            background: linear-gradient(to bottom, #9ca3af, #4b5563, #9ca3af);
+            border-radius: 0 4px 4px 0;
+            z-index: 0;
+            border-left: 10px solid #cbd5e1;
+        }
+        .plate {
+            position: relative;
+            z-index: 1;
+            border: 2px solid rgba(0,0,0,0.3);
+            border-radius: 4px;
+            margin-right: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            box-shadow: inset -2px 0 5px rgba(0,0,0,0.2), 2px 0 4px rgba(0,0,0,0.4);
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-size: 0.75rem;
+        }
+        /* Olympic Plate Colors & Proportions */
+        .plate-25 { height: 110px; width: 28px; background: #e11d48; color: white; }
+        .plate-20 { height: 110px; width: 24px; background: #2563eb; color: white; }
+        .plate-15 { height: 95px; width: 22px; background: #eab308; color: black; text-shadow: none; }
+        .plate-10 { height: 80px; width: 20px; background: #16a34a; color: white; }
+        .plate-5 { height: 60px; width: 18px; background: #f8fafc; color: black; text-shadow: none; }
+        .plate-2\.5 { height: 50px; width: 14px; background: #1f2937; color: white; }
+        .plate-1\.25 { height: 40px; width: 12px; background: #4b5563; color: white; font-size: 0.6rem; }
+    </style>
 </head>
-<body class="bg-gray-900 text-white font-sans p-6">
-    <div class="max-w-md mx-auto bg-gray-800 p-8 rounded-2xl shadow-2xl">
-        <h1 class="text-3xl font-bold mb-6 text-blue-400">RackMaster</h1>
+<body class="bg-gray-900 text-white font-sans p-4 md:p-8 min-h-screen">
+    <div class="max-w-xl mx-auto bg-gray-800 p-6 md:p-8 rounded-2xl shadow-2xl">
+        <h1 class="text-3xl font-extrabold mb-2 text-blue-400 tracking-tight">RackMaster</h1>
+        <p class="text-gray-400 mb-8 text-sm">Inventory-Based Plate Calculator</p>
         
-        <div class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium mb-1">Target Total Weight</label>
-                <input id="targetWeight" type="number" value="100" class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 outline-none">
-            </div>
-            
-            <div>
-                <label class="block text-sm font-medium mb-1">Bar Weight</label>
-                <select id="barWeight" class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 outline-none">
-                    <option value="20">20 kg (Standard Olympic)</option>
-                    <option value="15">15 kg (Women's Olympic)</option>
-                    <option value="45">45 lbs</option>
-                    <option value="35">35 lbs</option>
-                </select>
+        <div class="space-y-6">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold mb-2 text-gray-300">Target Total Weight</label>
+                    <input id="targetWeight" type="number" value="100" class="w-full p-3 bg-gray-700 rounded-xl border border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition text-lg font-bold">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-2 text-gray-300">Bar Weight</label>
+                    <select id="barWeight" class="w-full p-3 bg-gray-700 rounded-xl border border-gray-600 focus:border-blue-500 outline-none transition text-lg font-bold">
+                        <option value="20">20 kg</option>
+                        <option value="15">15 kg</option>
+                        <option value="25">25 kg (Squat Bar)</option>
+                    </select>
+                </div>
             </div>
 
-            <button onclick="calculate()" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition">Calculate Racking</button>
+            <div class="bg-gray-700/50 p-4 rounded-xl border border-gray-600">
+                <label class="block text-sm font-semibold mb-3 text-gray-300">Available Plates (Per Side)</label>
+                <div id="inventoryContainer" class="flex flex-wrap gap-3">
+                    </div>
+            </div>
+
+            <button onclick="calculate()" class="w-full bg-blue-600 hover:bg-blue-500 active:bg-blue-700 py-4 rounded-xl font-bold text-lg shadow-lg transition-all transform hover:scale-[1.02]">
+                Calculate Combinations
+            </button>
         </div>
 
-        <div id="results" class="mt-8 space-y-4">
+        <div id="results" class="mt-10 space-y-6">
             </div>
     </div>
 
     <script>
-        const availablePlates = [25, 20, 15, 10, 5, 2.5, 1.25];
+        // Standard plate denominations
+        const allPlates = [25, 20, 15, 10, 5, 2.5, 1.25];
+        
+        // Initialize checkboxes
+        const inventoryContainer = document.getElementById('inventoryContainer');
+        allPlates.forEach(plate => {
+            const id = `plate-${plate}`;
+            inventoryContainer.innerHTML += `
+                <label class="flex items-center space-x-2 bg-gray-700 px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-600 border border-gray-500 transition">
+                    <input type="checkbox" id="${id}" value="${plate}" checked class="w-4 h-4 text-blue-600 bg-gray-800 border-gray-500 rounded focus:ring-blue-500 focus:ring-2">
+                    <span class="font-bold">${plate}</span>
+                </label>
+            `;
+        });
 
         function calculate() {
             const target = parseFloat(document.getElementById('targetWeight').value);
             const bar = parseFloat(document.getElementById('barWeight').value);
-            const sideWeight = (target - bar) / 2;
             const resultsDiv = document.getElementById('results');
+            
+            // Get available plates from checkboxes
+            const availablePlates = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+                                         .map(cb => parseFloat(cb.value))
+                                         .sort((a, b) => b - a);
+
             resultsDiv.innerHTML = '';
 
-            if (sideWeight < 0) {
-                resultsDiv.innerHTML = "<p class='text-red-400'>Target is lighter than the bar, champ.</p>";
+            if (isNaN(target) || target <= 0) {
+                resultsDiv.innerHTML = "<p class='text-red-400 bg-red-900/20 p-4 rounded-xl'>Please enter a valid target weight.</p>";
                 return;
             }
 
-            // Simple Greedy approach for Demo
-            let remaining = sideWeight;
-            let setup = [];
-            
-            availablePlates.forEach(plate => {
-                while (remaining >= plate) {
-                    setup.push(plate);
-                    remaining -= plate;
-                }
-            });
+            const sideWeight = (target - bar) / 2;
 
-            if (remaining === 0) {
+            if (sideWeight < 0) {
+                resultsDiv.innerHTML = "<p class='text-red-400 bg-red-900/20 p-4 rounded-xl'>Target is lighter than the bar itself.</p>";
+                return;
+            }
+
+            if (sideWeight === 0) {
+                resultsDiv.innerHTML = "<p class='text-green-400 bg-green-900/20 p-4 rounded-xl'>Just the empty bar!</p>";
+                return;
+            }
+
+            if (availablePlates.length === 0) {
+                resultsDiv.innerHTML = "<p class='text-yellow-400 bg-yellow-900/20 p-4 rounded-xl'>You need to select at least one available plate size.</p>";
+                return;
+            }
+
+            // Find Combinations logic (Backtracking)
+            let combinations = [];
+            
+            function findCombos(remaining, startIdx, currentCombo) {
+                // Precision fix for floating point math
+                if (Math.abs(remaining) < 0.001) {
+                    combinations.push([...currentCombo]);
+                    return;
+                }
+                
+                // Stop searching if we overshoot, or if we already found 4 setups to save processing
+                if (remaining < 0 || combinations.length >= 4) return;
+
+                for (let i = startIdx; i < availablePlates.length; i++) {
+                    const plate = availablePlates[i];
+                    // Limit to 6 of the same plate per side to keep it realistic
+                    const count = currentCombo.filter(p => p === plate).length;
+                    
+                    if (count < 6) {
+                        currentCombo.push(plate);
+                        findCombos(remaining - plate, i, currentCombo);
+                        currentCombo.pop();
+                    }
+                }
+            }
+
+            findCombos(sideWeight, 0, []);
+
+            // Handle results
+            if (combinations.length === 0) {
                 resultsDiv.innerHTML = `
-                    <div class="p-4 bg-gray-700 rounded-lg border-l-4 border-green-500">
-                        <p class="text-sm text-gray-400">Per side load:</p>
-                        <div class="flex gap-2 mt-2 flex-wrap">
-                            ${setup.map(p => `<span class="px-3 py-1 bg-blue-900 rounded-md font-bold">${p}</span>`).join('')}
+                    <div class="bg-yellow-900/20 border border-yellow-700 p-4 rounded-xl">
+                        <p class="text-yellow-400 font-bold mb-1">Exact match not possible.</p>
+                        <p class="text-sm text-yellow-200">Try adjusting your target weight slightly or enabling more plate sizes.</p>
+                    </div>`;
+                return;
+            }
+
+            // Sort by fewest total plates (Most efficient)
+            combinations.sort((a, b) => a.length - b.length);
+
+            // Render UI
+            resultsDiv.innerHTML = `<h2 class="text-xl font-bold text-gray-200 border-b border-gray-700 pb-2">Ways to load ${sideWeight} kg per side:</h2>`;
+            
+            combinations.forEach((combo, index) => {
+                const label = index === 0 ? "Option 1 (Most Efficient)" : `Option ${index + 1}`;
+                const badgeColor = index === 0 ? "bg-green-600 text-white" : "bg-gray-600 text-gray-200";
+                
+                // Construct the visual plates
+                const visualPlates = combo.map(p => {
+                    // replace decimal point for CSS class naming (e.g., 2.5 -> 2\.5)
+                    const cssClass = p.toString().replace('.', '\\.'); 
+                    return `<div class="plate plate-${cssClass}">${p}</div>`;
+                }).join('');
+
+                const textSummary = combo.map(p => `${p}`).join(' + ');
+
+                resultsDiv.innerHTML += `
+                    <div class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden shadow-lg">
+                        <div class="px-4 py-3 bg-gray-700/50 flex justify-between items-center border-b border-gray-700">
+                            <span class="text-xs font-bold uppercase tracking-wider ${badgeColor} px-2 py-1 rounded-md shadow-sm">${label}</span>
+                            <span class="text-sm text-gray-400 font-mono">${textSummary}</span>
+                        </div>
+                        <div class="p-4 overflow-x-auto">
+                            <div class="plate-container w-full">
+                                <div class="bar-sleeve"></div>
+                                ${visualPlates}
+                            </div>
                         </div>
                     </div>
                 `;
-            } else {
-                resultsDiv.innerHTML = "<p class='text-yellow-400'>Can't reach that exact weight with standard plates.</p>";
-            }
+            });
         }
+
+        // Run calculation on load for default state
+        calculate();
     </script>
 </body>
 </html>
