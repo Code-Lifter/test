@@ -17,49 +17,76 @@
             <p class="text-slate-400">No math. No calculators. Just clear marching orders.</p>
         </header>
 
-        <form id="protocolForm" class="space-y-8 bg-slate-800 p-8 rounded-2xl shadow-xl">
+        <form id="protocolForm" class="space-y-10 bg-slate-800 p-8 rounded-2xl shadow-xl">
             
             <div>
-                <h2 class="text-xl font-bold mb-4 text-white">1. What is the primary mission?</h2>
+                <h2 class="text-2xl font-bold mb-2 text-white border-b border-slate-700 pb-2">1. What is the primary mission?</h2>
+                
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mt-6 mb-3">The Mirror (Aesthetics)</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <label class="cursor-pointer">
                         <input type="radio" name="goal" value="size" checked>
                         <div class="card bg-slate-700 hover:bg-slate-600 rounded-lg p-4 text-center transition-colors border-2 border-blue-500 bg-blue-900/30">
-                            <h3 class="font-bold text-lg">Get Bigger</h3>
+                            <h4 class="font-bold text-lg text-white">Get Bigger</h4>
                             <p class="text-sm text-slate-400">Focus on muscle size</p>
-                        </div>
-                    </label>
-                    <label class="cursor-pointer">
-                        <input type="radio" name="goal" value="power">
-                        <div class="card bg-slate-700 hover:bg-slate-600 rounded-lg p-4 text-center transition-colors border-2 border-transparent">
-                            <h3 class="font-bold text-lg">Get Stronger</h3>
-                            <p class="text-sm text-slate-400">Focus on raw power</p>
                         </div>
                     </label>
                     <label class="cursor-pointer">
                         <input type="radio" name="goal" value="shred">
                         <div class="card bg-slate-700 hover:bg-slate-600 rounded-lg p-4 text-center transition-colors border-2 border-transparent">
-                            <h3 class="font-bold text-lg">Lean Out</h3>
+                            <h4 class="font-bold text-lg text-white">Lean Out</h4>
                             <p class="text-sm text-slate-400">Strip body fat</p>
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="goal" value="recomp">
+                        <div class="card bg-slate-700 hover:bg-slate-600 rounded-lg p-4 text-center transition-colors border-2 border-transparent">
+                            <h4 class="font-bold text-lg text-white">The Recomp</h4>
+                            <p class="text-sm text-slate-400">Burn fat & build muscle</p>
+                        </div>
+                    </label>
+                </div>
+
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mt-6 mb-3">The Engine (Performance)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <label class="cursor-pointer">
+                        <input type="radio" name="goal" value="power">
+                        <div class="card bg-slate-700 hover:bg-slate-600 rounded-lg p-4 text-center transition-colors border-2 border-transparent">
+                            <h4 class="font-bold text-lg text-white">Get Stronger</h4>
+                            <p class="text-sm text-slate-400">Focus on raw power</p>
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="goal" value="athlete">
+                        <div class="card bg-slate-700 hover:bg-slate-600 rounded-lg p-4 text-center transition-colors border-2 border-transparent">
+                            <h4 class="font-bold text-lg text-white">Play to Win</h4>
+                            <p class="text-sm text-slate-400">Athleticism & Speed</p>
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="goal" value="longevity">
+                        <div class="card bg-slate-700 hover:bg-slate-600 rounded-lg p-4 text-center transition-colors border-2 border-transparent">
+                            <h4 class="font-bold text-lg text-white">Bulletproof</h4>
+                            <p class="text-sm text-slate-400">Longevity & Joint Health</p>
                         </div>
                     </label>
                 </div>
             </div>
 
             <div>
-                <h2 class="text-xl font-bold mb-4 text-white">2. What is your experience level?</h2>
+                <h2 class="text-2xl font-bold mb-4 text-white border-b border-slate-700 pb-2">2. What is your experience level?</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <label class="cursor-pointer">
                         <input type="radio" name="experience" value="beginner" checked>
                         <div class="card bg-slate-700 hover:bg-slate-600 rounded-lg p-4 text-center transition-colors border-2 border-blue-500 bg-blue-900/30">
-                            <h3 class="font-bold text-lg">Fresh Start</h3>
+                            <h3 class="font-bold text-lg text-white">Fresh Start</h3>
                             <p class="text-sm text-slate-400">New to lifting</p>
                         </div>
                     </label>
                     <label class="cursor-pointer">
                         <input type="radio" name="experience" value="experienced">
                         <div class="card bg-slate-700 hover:bg-slate-600 rounded-lg p-4 text-center transition-colors border-2 border-transparent">
-                            <h3 class="font-bold text-lg">Experienced</h3>
+                            <h3 class="font-bold text-lg text-white">Experienced</h3>
                             <p class="text-sm text-slate-400">I know my way around</p>
                         </div>
                     </label>
@@ -67,31 +94,31 @@
             </div>
 
             <div>
-                <h2 class="text-xl font-bold mb-4 text-white">3. What is your hardware status?</h2>
+                <h2 class="text-2xl font-bold mb-4 text-white border-b border-slate-700 pb-2">3. What is your hardware status?</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <label class="cursor-pointer">
                         <input type="radio" name="age" value="under40" checked>
                         <div class="card bg-slate-700 hover:bg-slate-600 rounded-lg p-4 text-center transition-colors border-2 border-blue-500 bg-blue-900/30">
-                            <h3 class="font-bold text-lg">Under 40</h3>
+                            <h3 class="font-bold text-lg text-white">Under 40</h3>
                             <p class="text-sm text-slate-400">Young & Durable</p>
                         </div>
                     </label>
                     <label class="cursor-pointer">
                         <input type="radio" name="age" value="over40">
                         <div class="card bg-slate-700 hover:bg-slate-600 rounded-lg p-4 text-center transition-colors border-2 border-transparent">
-                            <h3 class="font-bold text-lg">Over 40</h3>
+                            <h3 class="font-bold text-lg text-white">Over 40</h3>
                             <p class="text-sm text-slate-400">Smart & Recovering</p>
                         </div>
                     </label>
                 </div>
             </div>
 
-            <button type="button" onclick="generatePlan()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-8 rounded-lg shadow-lg transition-all transform hover:scale-[1.01]">
+            <button type="button" onclick="generatePlan()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-8 rounded-lg shadow-lg transition-all transform hover:scale-[1.01] uppercase tracking-wide text-lg">
                 Deploy My Protocol
             </button>
         </form>
 
-        <div id="resultContainer" class="hidden mt-10 space-y-6">
+        <div id="resultContainer" class="hidden mt-12 space-y-6">
             <h2 class="text-3xl font-bold text-white border-b border-slate-700 pb-4">Your Custom Protocol</h2>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -150,24 +177,34 @@
         // --- MODULAR LOGIC ENGINE ---
 
         const buildDiet = (state) => {
-            if (state.goal === "shred") {
-                return { title: "The Cut", text: "Eat less than you usually do. Cut out liquid calories, reduce carbs at dinner, and stop snacking. If you aren't looking tighter in two weeks, trim a bit more." };
-            }
-            return { title: "The Bulk", text: "Eat more than you usually do. Add an extra meal or a shake every day. If the scale isn't moving up after two weeks, eat more." };
+            const protocols = {
+                shred: { title: "The Cut", text: "Eat less than you usually do. Cut out liquid calories, reduce carbs at dinner, and stop snacking." },
+                size: { title: "The Bulk", text: "Eat more than you usually do. Add an extra meal or a shake every day. If the scale isn't moving, eat more." },
+                power: { title: "The Engine Fuel", text: "Eat in a slight caloric surplus. You need raw calories and high protein to recover from heavy neurological load." },
+                recomp: { title: "The Baseline", text: "Eat exactly at maintenance calories, but aggressively push protein to force muscle growth while tapping into fat stores for energy." },
+                athlete: { title: "Performance Macros", text: "Eat at maintenance, but heavily bias your carbohydrates around your training windows to ensure maximum explosive energy." },
+                longevity: { title: "Quality Control", text: "Focus entirely on nutrient density. Think Mediterranean: lean proteins, olive oil, high-fiber greens. Keep systemic inflammation low." }
+            };
+            return protocols[state.goal];
         };
 
         const buildWorkout = (state) => {
             let config = { title: "", text: "", expNote: "" };
 
-            if (state.age === "over40") {
+            if (state.age === "over40" && state.goal !== "longevity") {
                 config.title = "The Calibrated Load";
-                config.text = "You need structural loading for bone density, but without the joint tax. Do your multi-joint free weights (squats/presses), but cap them at 3 sets of 8-10 reps. Auto-regulate: if it hurts the joint, use a dumbbell or machine variation.";
-            } else if (state.goal === "power") {
-                config.title = "The 5x5 Heavy";
-                config.text = "Pick 3 big compound movements per workout. Do 5 sets of 5 reps. Rest 3-5 minutes between sets. Add weight to the bar every single time you train.";
+                config.text = "You need structural loading for bone density, but without the joint tax. Do your multi-joint free weights (squats/presses), but cap them at 3 sets of 8-10 reps. Auto-regulate based on joint feel.";
             } else {
-                config.title = "The 3x10 Pump";
-                config.text = "Pick 4-5 exercises. Hit 3 sets of 10 reps focusing entirely on squeezing the muscle and chasing the pump. Keep rest periods to 60-90 seconds.";
+                const routines = {
+                    shred: { title: "The Metabolic Circuit", text: "Pick 4 compound exercises. Perform them as a circuit with minimal rest to keep heart rate elevated while maintaining muscle mass." },
+                    size: { title: "The 3x10 Pump", text: "Pick 4-5 exercises. Hit 3 sets of 10 reps focusing entirely on squeezing the muscle and time-under-tension. Rest 60-90 seconds." },
+                    power: { title: "The 5x5 Heavy", text: "Pick 3 big compound movements. Do 5 sets of 5 reps. Rest 3-5 minutes between sets. Add weight to the bar every single time." },
+                    recomp: { title: "The Hybrid", text: "Start with one heavy compound lift (3x5) to maintain raw strength, then move into 3 isolated machine movements (3x12) for localized hypertrophy." },
+                    athlete: { title: "The Kinetic", text: "Shift away from fixed-plane bilateral lifts. Focus heavily on unilateral, explosive work: Bulgarian split squats, medicine ball throws, and plyometrics." },
+                    longevity: { title: "The Bulletproof", text: "Heavy emphasis on mobility, stability, and time-under-tension using kettlebells and cables. Train movements, not just muscles." }
+                };
+                config.title = routines[state.goal].title;
+                config.text = routines[state.goal].text;
             }
 
             config.expNote = state.experience === "beginner" 
@@ -178,49 +215,47 @@
         };
 
         const buildCardio = (state) => {
-            if (state.goal === "power") {
-                return { title: "The Aerobic Base", text: "Do 30 minutes of Zone 2 (easy breathing) cardio on your off days. You need an aerobic base to clear metabolic waste and recover your CNS between heavy 5x5 sets." };
-            }
-            if (state.goal === "shred" && state.age === "under40") {
-                return { title: "The HIIT Burner", text: "Do 15 minutes of hard intervals (sprints, rowing, or bike) at the very end of your workout. Empty the tank." };
-            }
+            if (state.goal === "power") return { title: "The Aerobic Base", text: "30 minutes of Zone 2 cardio on off days. You need an aerobic base to clear metabolic waste and recover your CNS between heavy sets." };
+            if (state.goal === "longevity") return { title: "Zone 2 Mandate", text: "Strict Zone 2 cardio (working up a sweat but able to hold a conversation) 3x a week to build extreme mitochondrial density." };
+            if (state.goal === "athlete") return { title: "Energy Systems", text: "Mix it up. One day of long steady-state for the aerobic base, one day of short, violent sprints for the anaerobic threshold." };
+            if (state.goal === "shred" && state.age === "under40") return { title: "The HIIT Burner", text: "15 minutes of hard intervals (sprints, rowing, or bike) at the very end of your workout. Empty the tank." };
+            
             return { title: "The LISS Walk", text: "Go for a 30-minute brisk walk or incline treadmill session on your rest days. Keeps the heart healthy without draining your recovery." };
         };
 
         const buildRecovery = (state) => {
-            if (state.age === "over40") {
-                return { title: "The WD-40", text: "10 minutes of dynamic hip and shoulder openers before you ever touch a weight. Sleep 8 hours minimum—your tissue takes longer to repair now." };
-            }
-            if (state.goal === "power") {
-                return { title: "The CNS Coma", text: "Heavy lifting fries your nervous system. Prioritize a strict 8-hour sleep window and consider 400mg of Magnesium Glycinate before bed to down-regulate your system." };
-            }
+            if (state.age === "over40") return { title: "The WD-40", text: "10 minutes of dynamic hip and shoulder openers before you ever touch a weight. Sleep 8 hours minimum—your tissue takes longer to repair now." };
+            if (state.goal === "power") return { title: "The CNS Coma", text: "Heavy lifting fries your nervous system. Prioritize a strict 8-hour sleep window and consider 400mg of Magnesium Glycinate before bed." };
+            if (state.goal === "athlete") return { title: "Active Release", text: "Spend 10 minutes post-workout on soft tissue work (foam rolling) and active stretching to maintain elasticity for your next session." };
+            
             return { title: "The Primer", text: "Do 5 minutes of core activation (planks/bird-dogs) before lifting to ensure you don't blow out your lower back. Prioritize 7-8 hours of sleep." };
         };
 
         const buildAnchor = (state) => {
-            if (state.goal === "shred") {
-                return { title: "10k Before Dinner", text: "Hit 10,000 steps before you sit down for your evening meal. Non-negotiable." };
-            }
-            return { title: "The Gallon", text: "Drink one full gallon of water every single day. Dehydrated muscle tissue does not grow and joint lubrication plummets. Non-negotiable." };
+            const anchors = {
+                shred: { title: "10k Before Dinner", text: "Hit 10,000 steps before you sit down for your evening meal. Non-negotiable." },
+                recomp: { title: "The Protein Quota", text: "Hit 1 gram of protein per pound of target body weight every day. If you miss this, the recomp fails. Non-negotiable." },
+                athlete: { title: "The Pogo Base", text: "5 minutes of continuous jump rope every single day to build lower-leg elasticity and Achilles resilience. Non-negotiable." },
+                longevity: { title: "The Dead Hang", text: "Accumulate 2 total minutes hanging from a pull-up bar every day to decompress the spine and build grip durability. Non-negotiable." }
+            };
+            // Fallback for Size/Power
+            return anchors[state.goal] || { title: "The Gallon", text: "Drink one full gallon of water every single day. Dehydrated muscle tissue does not grow. Non-negotiable." };
         };
 
         // --- MAIN EXECUTION ---
         function generatePlan() {
-            // 1. Capture State
             const state = {
                 goal: document.querySelector('input[name="goal"]:checked').value,
                 experience: document.querySelector('input[name="experience"]:checked').value,
                 age: document.querySelector('input[name="age"]:checked').value
             };
 
-            // 2. Generate Modules
             const diet = buildDiet(state);
             const workout = buildWorkout(state);
             const cardio = buildCardio(state);
             const recovery = buildRecovery(state);
             const anchor = buildAnchor(state);
 
-            // 3. Inject DOM
             document.getElementById('dietTitle').innerText = diet.title;
             document.getElementById('dietText').innerText = diet.text;
 
@@ -237,7 +272,6 @@
             document.getElementById('anchorTitle').innerText = anchor.title;
             document.getElementById('anchorText').innerText = anchor.text;
 
-            // 4. Reveal
             const resultDiv = document.getElementById('resultContainer');
             resultDiv.classList.remove('hidden');
             resultDiv.scrollIntoView({ behavior: 'smooth' });
