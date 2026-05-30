@@ -3,581 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Physique Architect: Mobile Ready</title>
+    <title>The Protocol Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0F172A; color: #E2E8F0; }
-        h1, h2, h3, .brand-font { font-family: 'Cinzel', serif; }
-        
-        input[type="number"]::-webkit-inner-spin-button, 
-        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        
-        .hidden-panel { display: none; }
-        
-        /* Custom Slider Styling */
-        input[type=range] { -webkit-appearance: none; background: transparent; }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 24px; width: 24px;
-            border-radius: 50%; background: #F59E0B; border: 2px solid #FFF;
-            cursor: pointer; margin-top: -10px; 
-            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
-        }
-        input[type=range]::-webkit-slider-runnable-track {
-            width: 100%; height: 4px; cursor: pointer; background: #334155; border-radius: 2px;
-        }
-
-        /* Marker Animation */
-        .marker-transition { transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        input[type="radio"] { display: none; }
     </style>
 </head>
-<body class="min-h-screen pb-20 selection:bg-amber-500 selection:text-slate-900">
+<body class="bg-slate-900 text-slate-200 font-sans min-h-screen p-6 md:p-12">
 
-    <nav class="border-b border-slate-800 bg-slate-900/95 backdrop-blur-md sticky top-0 z-50">
-        <div class="max-w-4xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-y-2">
+    <div class="max-w-4xl mx-auto">
+        <header class="mb-10 text-center">
+            <h1 class="text-4xl font-extrabold text-white tracking-tight mb-2">The Protocol Generator</h1>
+            <p class="text-slate-400">No math. No calculators. Just clear marching orders.</p>
+        </header>
+
+        <form id="protocolForm" class="space-y-8 bg-slate-800 p-8 rounded-2xl shadow-xl">
             
-<a href="#" class="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer">
-    <span class="text-2xl md:text-3xl">🏛️</span>
-    <div>
-        <h1 class="text-sm md:text-xl font-bold tracking-widest text-white brand-font leading-tight">
-            PHYSIQUE<span class="text-amber-500">ARCHITECT</span>
-        </h1>
-    </div>
-</a>
-            
-            <div class="bg-slate-800 p-1 rounded-lg flex text-[10px] md:text-xs font-bold border border-slate-700 shrink-0">
-                <button onclick="setUnit('cm')" id="btn-cm" class="px-3 py-2 md:py-1.5 rounded-md transition-all bg-amber-500 text-slate-900 shadow active:scale-95">CM/KG</button>
-                <button onclick="setUnit('in')" id="btn-in" class="px-3 py-2 md:py-1.5 rounded-md transition-all text-slate-400 hover:text-white active:scale-95">IN/LBS</button>
-            </div>
-        </div>
-    </nav>
-
-    <div class="max-w-4xl mx-auto px-4 md:px-6 mt-6 space-y-8">
-
-        <div class="grid grid-cols-2 gap-3 md:gap-4 p-1 bg-slate-800 rounded-2xl border border-slate-700">
-            <button onclick="switchMode('classic')" id="tab-classic" class="flex flex-col items-center py-3 md:py-4 rounded-xl transition-all bg-slate-700 border border-slate-600 shadow-lg group">
-                <span class="text-xl md:text-2xl mb-1 group-hover:scale-110 transition-transform">🏛️</span>
-                <span class="font-bold text-white tracking-widest text-xs md:text-sm uppercase brand-font">Proportion Calc</span>
-                <span class="text-[9px] md:text-[10px] text-slate-400">Scale ideal size</span>
-            </button>
-            <button onclick="switchMode('modern')" id="tab-modern" class="flex flex-col items-center py-3 md:py-4 rounded-xl transition-all text-slate-400 border border-transparent hover:bg-slate-700/50 group">
-                <span class="text-xl md:text-2xl mb-1 group-hover:scale-110 transition-transform">🏆</span>
-                <span class="font-bold tracking-widest text-xs md:text-sm uppercase brand-font">Competition Limits</span>
-                <span class="text-[9px] md:text-[10px] opacity-60">IFBB Height/Weight</span>
-            </button>
-        </div>
-
-        <div id="panel-classic" class="mode-panel space-y-8">
-            
-            <div class="bg-slate-800/50 border border-slate-700 rounded-2xl p-5 md:p-6 relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-1 h-full bg-amber-500"></div>
-                
-                <div class="grid md:grid-cols-2 gap-6 md:gap-8 items-start">
-                    <div class="space-y-4">
-                        <h2 class="text-white font-bold flex items-center gap-2 brand-font">
-                            <span class="text-amber-500">1.</span> Bone Anchor
-                        </h2>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-amber-500 text-[10px] font-bold uppercase tracking-widest mb-1">Wrist</label>
-                                <input type="number" inputmode="decimal" step="0.1" id="input-wrist" value="17" oninput="calculateClassic()" class="w-full bg-slate-900 text-white p-3 rounded-xl border border-slate-600 focus:border-amber-500 outline-none font-bold text-lg">
-                            </div>
-                            <div>
-                                <label class="block text-amber-500 text-[10px] font-bold uppercase tracking-widest mb-1">Ankle</label>
-                                <input type="number" inputmode="decimal" step="0.1" id="input-ankle" value="23" oninput="calculateClassic()" class="w-full bg-slate-900 text-white p-3 rounded-xl border border-slate-600 focus:border-amber-500 outline-none font-bold text-lg">
-                            </div>
+            <div>
+                <h2 class="text-xl font-bold mb-4 text-white">1. What is the primary mission?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <label class="cursor-pointer">
+                        <input type="radio" name="goal" value="size" checked>
+                        <div class="card bg-slate-700 hover:bg-slate-600 rounded-lg p-4 text-center transition-colors border-2 border-blue-500 bg-blue-900/30">
+                            <h3 class="font-bold text-lg">Get Bigger</h3>
+                            <p class="text-sm text-slate-400">Focus on muscle size</p>
                         </div>
-                    </div>
-
-                    <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700">
-                        <div class="flex justify-between items-end mb-4">
-                            <div>
-                                <label class="block text-amber-500 text-[10px] font-bold uppercase tracking-widest">Mass Multiplier</label>
-                                <div class="text-xs text-slate-400 mt-1">Scale the proportions up</div>
-                            </div>
-                            <div class="text-right">
-                                <span id="slider-val" class="text-2xl font-bold text-white brand-font">100%</span>
-                            </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="goal" value="power">
+                        <div class="card bg-slate-700 hover:bg-slate-600 rounded-lg p-4 text-center transition-colors border-2 border-transparent">
+                            <h3 class="font-bold text-lg">Get Stronger</h3>
+                            <p class="text-sm text-slate-400">Focus on raw power</p>
                         </div>
-                        <input type="range" id="mass-slider" min="90" max="130" value="100" step="1" oninput="updateSlider(this.value)" class="w-full mb-2 touch-pan-x">
-                        <div class="flex justify-between text-[10px] text-slate-500 uppercase font-bold px-1">
-                            <span>Lean</span>
-                            <span>Classic</span>
-                            <span>Mass</span>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="goal" value="shred">
+                        <div class="card bg-slate-700 hover:bg-slate-600 rounded-lg p-4 text-center transition-colors border-2 border-transparent">
+                            <h3 class="font-bold text-lg">Lean Out</h3>
+                            <p class="text-sm text-slate-400">Strip body fat</p>
                         </div>
-                    </div>
+                    </label>
                 </div>
             </div>
 
             <div>
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-white font-bold flex items-center gap-2 brand-font">
-                        <span class="text-amber-500">2.</span> Current Measurements
-                    </h2>
-                    <span class="text-slate-500 text-xs font-normal cursor-pointer hover:text-white bg-slate-800 px-3 py-1 rounded-full" onclick="toggleCurrentStats()">Toggle Inputs</span>
-                </div>
-                
-                <div id="current-stats-panel" class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <!-- Injected by JS -->
+                <h2 class="text-xl font-bold mb-4 text-white">2. What is your experience level?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <label class="cursor-pointer">
+                        <input type="radio" name="experience" value="beginner" checked>
+                        <div class="card bg-slate-700 hover:bg-slate-600 rounded-lg p-4 text-center transition-colors border-2 border-blue-500 bg-blue-900/30">
+                            <h3 class="font-bold text-lg">Fresh Start</h3>
+                            <p class="text-sm text-slate-400">New to lifting</p>
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="experience" value="experienced">
+                        <div class="card bg-slate-700 hover:bg-slate-600 rounded-lg p-4 text-center transition-colors border-2 border-transparent">
+                            <h3 class="font-bold text-lg">Experienced</h3>
+                            <p class="text-sm text-slate-400">I know my way around</p>
+                        </div>
+                    </label>
                 </div>
             </div>
 
-            <div id="classic-results" class="grid gap-3 md:gap-4">
-                <!-- Injected by JS -->
+            <div>
+                <h2 class="text-xl font-bold mb-4 text-white">3. What is your hardware status?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <label class="cursor-pointer">
+                        <input type="radio" name="age" value="under40" checked>
+                        <div class="card bg-slate-700 hover:bg-slate-600 rounded-lg p-4 text-center transition-colors border-2 border-blue-500 bg-blue-900/30">
+                            <h3 class="font-bold text-lg">Under 40</h3>
+                            <p class="text-sm text-slate-400">Young & Durable</p>
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="age" value="over40">
+                        <div class="card bg-slate-700 hover:bg-slate-600 rounded-lg p-4 text-center transition-colors border-2 border-transparent">
+                            <h3 class="font-bold text-lg">Over 40</h3>
+                            <p class="text-sm text-slate-400">Smart & Recovering</p>
+                        </div>
+                    </label>
+                </div>
             </div>
 
-            <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 mt-8">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-white font-bold brand-font text-lg">📋 Coach's Report</h3>
-                    <button onclick="copyReport()" class="bg-amber-500 hover:bg-amber-400 text-slate-900 text-xs font-bold px-4 py-2 rounded-lg transition shadow-lg active:scale-95">
-                        Copy Report
-                    </button>
+            <button type="button" onclick="generatePlan()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-8 rounded-lg shadow-lg transition-all transform hover:scale-[1.01]">
+                Deploy My Protocol
+            </button>
+        </form>
+
+        <div id="resultContainer" class="hidden mt-10 space-y-6">
+            <h2 class="text-3xl font-bold text-white border-b border-slate-700 pb-4">Your Custom Protocol</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700">
+                    <div class="text-blue-400 text-sm font-bold uppercase tracking-wider mb-1">The Kitchen</div>
+                    <h3 id="dietTitle" class="text-xl font-bold text-white mb-3"></h3>
+                    <p id="dietText" class="text-slate-300 text-sm leading-relaxed"></p>
                 </div>
-                <textarea id="report-output" readonly class="w-full h-64 bg-slate-800 rounded-xl border border-slate-600 p-4 text-slate-300 text-xs font-mono focus:outline-none resize-none"></textarea>
+
+                <div class="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700">
+                    <div class="text-emerald-400 text-sm font-bold uppercase tracking-wider mb-1">The Floor</div>
+                    <h3 id="workoutTitle" class="text-xl font-bold text-white mb-3"></h3>
+                    <p id="workoutText" class="text-slate-300 text-sm leading-relaxed"></p>
+                    <p id="expNote" class="text-xs text-emerald-300 mt-4 italic font-semibold"></p>
+                </div>
+
+                <div class="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700">
+                    <div class="text-rose-400 text-sm font-bold uppercase tracking-wider mb-1">The Engine</div>
+                    <h3 id="cardioTitle" class="text-xl font-bold text-white mb-3"></h3>
+                    <p id="cardioText" class="text-slate-300 text-sm leading-relaxed"></p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700">
+                    <div class="text-purple-400 text-sm font-bold uppercase tracking-wider mb-1">The Armor</div>
+                    <h3 id="recoveryTitle" class="text-xl font-bold text-white mb-3"></h3>
+                    <p id="recoveryText" class="text-slate-300 text-sm leading-relaxed"></p>
+                </div>
+
+                <div class="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700">
+                    <div class="text-amber-400 text-sm font-bold uppercase tracking-wider mb-1">Daily Anchor</div>
+                    <h3 id="anchorTitle" class="text-xl font-bold text-white mb-3"></h3>
+                    <p id="anchorText" class="text-slate-300 text-sm leading-relaxed"></p>
+                </div>
             </div>
         </div>
-
-
-        <div id="panel-modern" class="mode-panel hidden-panel space-y-8">
-             <div class="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 rounded-2xl p-6 md:p-8 relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-                <h2 class="text-white font-bold mb-6 text-center brand-font text-xl md:text-2xl">COMPETITION <span class="text-amber-500">WEIGHT CAP</span></h2>
-                <div class="grid md:grid-cols-2 gap-6 md:gap-8 mb-8">
-                    <div class="relative">
-                        <label class="block text-amber-500 text-[10px] font-bold uppercase tracking-widest mb-2 text-center">Your Height</label>
-                        <div class="relative max-w-[140px] mx-auto">
-                             <input type="number" inputmode="decimal" step="0.1" id="input-height" value="183" oninput="calculateModern()" class="w-full bg-black/30 text-white p-4 rounded-xl border border-slate-600 focus:border-amber-500 outline-none font-bold text-2xl text-center">
-                             <span class="absolute right-3 top-5 text-slate-600 text-xs font-bold unit-dist">cm</span>
-                        </div>
-                    </div>
-                    <div class="relative">
-                        <label class="block text-amber-500 text-[10px] font-bold uppercase tracking-widest mb-2 text-center">Current Weight</label>
-                         <div class="relative max-w-[140px] mx-auto">
-                            <input type="number" inputmode="decimal" step="0.1" id="input-weight" value="80" oninput="calculateModern()" class="w-full bg-black/30 text-white p-4 rounded-xl border border-slate-600 focus:border-amber-500 outline-none font-bold text-2xl text-center">
-                            <span class="absolute right-3 top-5 text-slate-600 text-xs font-bold unit-mass">kg</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-black/40 rounded-xl p-6 border border-slate-600 text-center relative backdrop-blur-sm">
-                    <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-2">Maximum Stage Weight</p>
-                    <div id="modern-result-display" class="text-4xl md:text-6xl font-black text-white brand-font mb-2">-- <span class="text-xl md:text-2xl text-slate-500 unit-mass">kg</span></div>
-                    <div id="modern-status" class="inline-block px-4 py-1 rounded-full text-xs font-bold bg-slate-700 text-slate-300">Enter height</div>
-                </div>
-            </div>
-        </div>
-
     </div>
 
     <script>
-        // --- CONFIG ---
-        let unit = 'cm';
-        let massMultiplier = 1.0; 
-        let currentMode = 'classic';
-        
-        // Internal state is always treated relative to the current unit input, 
-        // but precision drift during conversion is managed by rounding.
-        let currentStats = { shoulders: 0, chest: 0, arm: 0, forearm: 0, waist: 0, thigh: 0, calf: 0, neck: 0 };
-        
-        const parts = [
-            { key: 'shoulders', label: 'Shoulders', sub: 'Circumference' },
-            { key: 'chest', label: 'Chest', sub: 'Armor Plate' },
-            { key: 'arm', label: 'Arms', sub: 'Flexed Bicep' },
-            { key: 'forearm', label: 'Forearms', sub: 'Power Look' },
-            { key: 'waist', label: 'Waist', sub: 'The Pivot' },
-            { key: 'thigh', label: 'Thighs', sub: 'Quadriceps' },
-            { key: 'calf', label: 'Calves', sub: 'Trinity Match' },
-            { key: 'neck', label: 'Neck', sub: 'Trinity Match' }
-        ];
-
-        // --- DOM ---
-        const tabClassic = document.getElementById('tab-classic');
-        const tabModern = document.getElementById('tab-modern');
-        const panelClassic = document.getElementById('panel-classic');
-        const panelModern = document.getElementById('panel-modern');
-        const currentStatsPanel = document.getElementById('current-stats-panel');
-        const reportOutput = document.getElementById('report-output');
-        const sliderValDisplay = document.getElementById('slider-val');
-
-        function init() {
-            loadState(); 
-            renderCurrentStatsInputs(); 
-            updateUIForUnit(); 
-            calculateClassic();
-            calculateModern();
-            switchMode(currentMode, false); 
-        }
-
-        // --- PERSISTENCE ---
-        function saveState() {
-            const state = {
-                unit: unit,
-                massMultiplier: massMultiplier,
-                currentMode: currentMode,
-                currentStats: currentStats,
-                wrist: document.getElementById('input-wrist').value,
-                ankle: document.getElementById('input-ankle').value,
-                height: document.getElementById('input-height').value,
-                weight: document.getElementById('input-weight').value
-            };
-            localStorage.setItem('physiqueArchitectData', JSON.stringify(state));
-        }
-
-        function loadState() {
-            const saved = localStorage.getItem('physiqueArchitectData');
-            if (saved) {
-                try {
-                    const data = JSON.parse(saved);
-                    if(data.unit) unit = data.unit;
-                    if(data.massMultiplier) massMultiplier = parseFloat(data.massMultiplier);
-                    if(data.currentMode) currentMode = data.currentMode;
-                    if(data.currentStats) currentStats = data.currentStats;
-
-                    if(data.wrist) document.getElementById('input-wrist').value = data.wrist;
-                    if(data.ankle) document.getElementById('input-ankle').value = data.ankle;
-                    if(data.height) document.getElementById('input-height').value = data.height;
-                    if(data.weight) document.getElementById('input-weight').value = data.weight;
-
-                    const slider = document.getElementById('mass-slider');
-                    if (slider && data.massMultiplier) {
-                        slider.value = Math.round(data.massMultiplier * 100);
-                        sliderValDisplay.innerText = `${slider.value}%`;
-                    }
-                } catch (e) {
-                    console.error("Failed to load saved data", e);
-                }
-            }
-        }
-
-        // --- SWITCHER ---
-        function switchMode(mode, save = true) {
-            currentMode = mode;
-            if (mode === 'classic') {
-                tabClassic.classList.replace('text-slate-400', 'text-white');
-                tabClassic.classList.replace('border-transparent', 'border-slate-600');
-                tabClassic.classList.add('bg-slate-700', 'shadow-lg');
-                
-                tabModern.classList.replace('text-white', 'text-slate-400');
-                tabModern.classList.replace('border-slate-600', 'border-transparent');
-                tabModern.classList.remove('bg-slate-700', 'shadow-lg');
-
-                panelClassic.classList.remove('hidden-panel');
-                panelModern.classList.add('hidden-panel');
-            } else {
-                tabModern.classList.replace('text-slate-400', 'text-white');
-                tabModern.classList.replace('border-transparent', 'border-slate-600');
-                tabModern.classList.add('bg-slate-700', 'shadow-lg');
-                
-                tabClassic.classList.replace('text-white', 'text-slate-400');
-                tabClassic.classList.replace('border-slate-600', 'border-transparent');
-                tabClassic.classList.remove('bg-slate-700', 'shadow-lg');
-
-                panelModern.classList.remove('hidden-panel');
-                panelClassic.classList.add('hidden-panel');
-            }
-            if(save) saveState();
-        }
-
-        function updateSlider(val) {
-            massMultiplier = val / 100;
-            sliderValDisplay.innerText = `${val}%`;
-            calculateClassic();
-            saveState();
-        }
-
-        function toNearestHalf(num) {
-            return (Math.round(num * 2) / 2).toFixed(1);
-        }
-
-        // --- CLASSIC LOGIC ---
-        function calculateClassic() {
-            const wrist = parseFloat(document.getElementById('input-wrist').value) || 0;
-            saveState();
-
-            if(wrist === 0) return;
-
-            // 1. Calculate Standard Ideals
-            const baseChest = wrist * 6.5;
-            const baseWaist = baseChest * 0.70;
-            const armTarget = wrist * 2.52; 
-            
-            // Trinity of Symmetry Rule included
-            let baseIdeals = {
-                chest: baseChest,
-                waist: baseWaist,
-                shoulders: baseWaist * 1.618, // FIX: Updated from 2.14 to the Golden Ratio 1.618
-                arm: armTarget,
-                forearm: wrist * 1.89,
-                thigh: baseChest * 0.53,
-                calf: armTarget, // Matched to Arm
-                neck: armTarget  // Matched to Arm
-            };
-
-            // 2. Apply Mass Multiplier
-            let scaledIdeals = {};
-            for (let key in baseIdeals) {
-                scaledIdeals[key] = baseIdeals[key] * massMultiplier;
-            }
-
-            // 3. Render
-            const container = document.getElementById('classic-results');
-            container.innerHTML = ''; 
-            let reportLines = [];
-            let deficits = []; 
-
-            parts.forEach(part => {
-                let target = scaledIdeals[part.key];
-                let min = target * 0.975;
-                let max = target * 1.025;
-                let current = currentStats[part.key] || 0;
-
-                renderRangeCard(container, part.label, current, target, part.sub);
-
-                if (current > 0) {
-                    let currFmt = toNearestHalf(current);
-                    let targetFmt = toNearestHalf(target);
-
-                    if (current < min) {
-                        let diff = min - current;
-                        let diffFmt = toNearestHalf(diff);
-                        deficits.push({ label: part.label, diff: diff, unit: unit, diffFmt: diffFmt });
-                        reportLines.push(`[ ] ${part.label}: ${currFmt}${unit} (Perfect: ${targetFmt}) -> Needs +${diffFmt}${unit}`);
-                    } else if (current > max) {
-                        reportLines.push(`[!] ${part.label}: ${currFmt}${unit} (Perfect: ${targetFmt}) -> Exceeds Ratio`);
-                    } else {
-                        reportLines.push(`[x] ${part.label}: ${currFmt}${unit} -> Perfect Match`);
-                    }
-                }
-            });
-
-            // 4. Report Building
-            let prioritySection = "";
-            if (deficits.length > 0) {
-                deficits.sort((a, b) => b.diff - a.diff);
-                let top3 = deficits.slice(0, 3);
-                
-                prioritySection = "🚨 TOP 3 PRIORITIES:\n";
-                top3.forEach((d, i) => {
-                    prioritySection += `${i+1}. ${d.label} (Grow +${d.diffFmt}${d.unit})\n`;
+        // UI Logic for Radio Buttons
+        document.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const groupName = this.name;
+                document.querySelectorAll(`input[name="${groupName}"]`).forEach(input => {
+                    const card = input.nextElementSibling;
+                    card.classList.remove('border-blue-500', 'bg-blue-900/30');
+                    card.classList.add('border-transparent');
                 });
-                prioritySection += "-----------------------------------\n";
-            }
-
-            // Vacuum Rule Logic
-            let vacuumNote = "";
-            let currWaist = currentStats['waist'] || 0;
-            let currChest = currentStats['chest'] || 0;
-            if (currWaist > 0 && currChest > 0 && currWaist > (currChest * 0.75)) {
-                vacuumNote = "\n💡 PRO TIP: Your waist exceeds 75% of your chest measurement. Prioritize stomach vacuums and transverse abdominis training to tighten your silhouette.";
-            }
-
-            const scaleText = (massMultiplier * 100).toFixed(0) + '%';
-            reportOutput.value = `PHYSIQUE REPORT (Scale: ${scaleText})\n-----------------------------------\n${prioritySection}${reportLines.length > 0 ? reportLines.join('\n') : 'Enter measurements to generate report.'}${vacuumNote}`;
-        }
-
-        function renderRangeCard(container, partName, current, target, subtitle) {
-            let statusText = "Pending";
-            let statusColor = "bg-slate-700 text-slate-400";
-            let markerPos = 0; 
-            const pctOfTarget = (current / target);
-            
-            if (current > 0) {
-                if (pctOfTarget < 0.925) {
-                    statusText = "Lagging";
-                    statusColor = "bg-red-500/10 text-red-400 border border-red-500/20";
-                } else if (pctOfTarget < 0.975) {
-                    statusText = "Close";
-                    statusColor = "bg-amber-500/10 text-amber-400 border border-amber-500/20";
-                } else if (pctOfTarget <= 1.025) {
-                    statusText = "Perfect";
-                    statusColor = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
-                } else if (pctOfTarget <= 1.075) {
-                    statusText = "Strong";
-                    statusColor = "bg-amber-500/10 text-amber-400 border border-amber-500/20";
-                } else {
-                    statusText = "Excessive";
-                    statusColor = "bg-red-500/10 text-red-400 border border-red-500/20";
-                }
-
-                markerPos = ((pctOfTarget - 0.8) / 0.4) * 100;
-                if (markerPos < 2) markerPos = 2;
-                if (markerPos > 98) markerPos = 98;
-            }
-
-            const html = `
-                <div class="bg-slate-800 rounded-xl p-4 border border-slate-700 hover:border-slate-600 transition-colors">
-                    <div class="flex justify-between items-end mb-3">
-                        <div>
-                            <div class="font-bold text-white text-sm md:text-base">${partName}</div>
-                            <div class="text-[10px] text-slate-500 uppercase tracking-wider">${subtitle}</div>
-                        </div>
-                        <div class="text-center">
-                             <div class="text-2xl md:text-3xl font-bold text-white leading-none mb-1">${current > 0 ? toNearestHalf(current) : '<span class="text-slate-600">-</span>'}</div>
-                             <div class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${statusColor}">${statusText}</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-amber-500 font-bold text-lg md:text-xl leading-none brand-font">${toNearestHalf(target)}</div>
-                            <div class="text-[9px] text-slate-500 uppercase font-bold mt-1">Target</div>
-                        </div>
-                    </div>
-                    <div class="relative h-5 md:h-6 mt-2 select-none">
-                        <div class="absolute inset-0 flex rounded-md overflow-hidden opacity-90">
-                            <div class="h-full bg-red-900/40 w-[31.25%] border-r border-slate-900/50"></div>
-                            <div class="h-full bg-amber-700/40 w-[12.5%] border-r border-slate-900/50"></div>
-                            <div class="h-full bg-emerald-500/40 w-[12.5%] border-r border-slate-900/50"></div>
-                            <div class="h-full bg-amber-700/40 w-[12.5%] border-r border-slate-900/50"></div>
-                            <div class="h-full bg-red-900/40 w-[31.25%]"></div>
-                        </div>
-                        <div class="absolute top-[-3px] bottom-[-3px] w-1 bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)] z-10 marker-transition rounded-full ${current > 0 ? '' : 'hidden'}" style="left: ${markerPos}%"></div>
-                    </div>
-                    <div class="flex justify-between text-[8px] text-slate-500 mt-1.5 font-bold uppercase tracking-widest px-1 opacity-60">
-                        <span>Under</span>
-                        <span class="pl-4">Close</span>
-                        <span class="text-emerald-400">Perfect</span>
-                        <span class="pr-4">Over</span>
-                        <span>Limit</span>
-                    </div>
-                </div>
-            `;
-            container.innerHTML += html;
-        }
-
-        // --- MODERN LOGIC (IFBB Brackets) ---
-        function getIFBBCapLBS(heightCm) {
-            // Official IFBB/NPC Amateur Height/Weight Brackets
-            const brackets = [
-                { h: 162.56, w: 167 }, { h: 165.10, w: 172 }, { h: 167.64, w: 177 },
-                { h: 170.18, w: 182 }, { h: 172.72, w: 187 }, { h: 175.26, w: 194 },
-                { h: 177.80, w: 202 }, { h: 180.34, w: 209 }, { h: 182.88, w: 217 },
-                { h: 185.42, w: 224 }, { h: 187.96, w: 232 }, { h: 190.50, w: 240 },
-                { h: 193.04, w: 247 }, { h: 195.58, w: 255 }, { h: 198.12, w: 262 },
-                { h: 200.66, w: 270 }
-            ];
-            
-            // Find the proper bracket "Up to and including"
-            const bracket = brackets.find(b => heightCm <= b.h);
-            if (bracket) return bracket.w;
-            
-            // Fallback for extremely tall individuals over bracket limits
-            return brackets[brackets.length - 1].w + 8;
-        }
-
-        function calculateModern() {
-            let height = parseFloat(document.getElementById('input-height').value) || 0;
-            let weight = parseFloat(document.getElementById('input-weight').value) || 0;
-            
-            saveState();
-            if (height === 0) return;
-
-            let heightCm = unit === 'cm' ? height : height * 2.54;
-            
-            // Get limit in LBS based on official bracket, then convert based on user unit
-            let limitLbs = getIFBBCapLBS(heightCm);
-            let displayMax = unit === 'cm' ? limitLbs * 0.453592 : limitLbs;
-            let massUnit = unit === 'cm' ? 'kg' : 'lbs';
-
-            document.getElementById('modern-result-display').innerHTML = `${displayMax.toFixed(1)} <span class="text-2xl text-slate-500">${massUnit}</span>`;
-            
-            if (weight > 0) {
-                let diff = displayMax - weight;
-                let statusEl = document.getElementById('modern-status');
-                
-                if (diff < -0.5) {
-                    statusEl.className = "inline-block px-4 py-1 rounded-full text-xs font-bold bg-red-500/10 text-red-400 border border-red-500/20";
-                    statusEl.innerText = `Over Limit by ${Math.abs(diff).toFixed(1)} ${massUnit}`;
-                } else if (diff > 0.5) {
-                    statusEl.className = "inline-block px-4 py-1 rounded-full text-xs font-bold bg-green-500/10 text-green-400 border border-green-500/20";
-                    statusEl.innerText = `${diff.toFixed(1)} ${massUnit} to Limit`;
-                } else {
-                    statusEl.className = "inline-block px-4 py-1 rounded-full text-xs font-bold bg-amber-500 text-slate-900";
-                    statusEl.innerText = "MAXED OUT";
-                }
-            }
-        }
-
-        // --- UTILS ---
-        function renderCurrentStatsInputs() {
-            currentStatsPanel.innerHTML = parts.map(p => {
-                let val = currentStats[p.key];
-                let displayVal = val > 0 ? val : ''; 
-                return `
-                    <div class="bg-slate-800 p-2 rounded-lg border border-slate-700 focus-within:border-amber-500/50 transition-colors">
-                        <label class="text-[9px] text-slate-400 uppercase font-bold block mb-1 text-center truncate">${p.label}</label>
-                        <input type="number" inputmode="decimal" step="0.1" placeholder="-" value="${displayVal}" oninput="updateCurrent('${p.key}', this.value)" 
-                            class="w-full bg-slate-900 text-white text-center text-sm font-bold p-2 rounded border border-slate-700 focus:border-amber-500 outline-none transition-colors">
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function updateCurrent(key, val) {
-            currentStats[key] = parseFloat(val) || 0;
-            calculateClassic();
-            saveState(); 
-        }
-
-        function toggleCurrentStats() {
-            const isHidden = currentStatsPanel.style.display === 'none';
-            currentStatsPanel.style.display = isHidden ? 'grid' : 'none';
-        }
-
-        function copyReport() {
-            reportOutput.select();
-            document.execCommand('copy');
-            alert("Report copied!");
-        }
-
-        function updateUIForUnit() {
-             if (unit === 'in') {
-                document.querySelectorAll('.unit-dist').forEach(e => e.innerText = 'in');
-                document.querySelectorAll('.unit-mass').forEach(e => e.innerText = 'lbs');
-                document.getElementById('btn-in').className = "px-3 py-2 md:py-1.5 rounded-md transition-all bg-amber-500 text-slate-900 shadow active:scale-95";
-                document.getElementById('btn-cm').className = "px-3 py-2 md:py-1.5 rounded-md transition-all text-slate-400 hover:text-white active:scale-95";
-            } else {
-                document.querySelectorAll('.unit-dist').forEach(e => e.innerText = 'cm');
-                document.querySelectorAll('.unit-mass').forEach(e => e.innerText = 'kg');
-                document.getElementById('btn-cm').className = "px-3 py-2 md:py-1.5 rounded-md transition-all bg-amber-500 text-slate-900 shadow active:scale-95";
-                document.getElementById('btn-in').className = "px-3 py-2 md:py-1.5 rounded-md transition-all text-slate-400 hover:text-white active:scale-95";
-            }
-        }
-
-        function setUnit(newUnit) {
-            if (unit === newUnit) return;
-            const factor = newUnit === 'in' ? 0.393701 : 2.54;
-            
-            const w = document.getElementById('input-wrist');
-            const a = document.getElementById('input-ankle');
-            const h = document.getElementById('input-height');
-            const wt = document.getElementById('input-weight');
-            
-            // To prevent severe float drift during swapping, apply mild rounding
-            if(w.value) w.value = (Math.round(w.value * factor * 10) / 10).toFixed(1);
-            if(a.value) a.value = (Math.round(a.value * factor * 10) / 10).toFixed(1);
-            if(h.value) h.value = (Math.round(h.value * factor * 10) / 10).toFixed(1);
-            
-            // Weight uses a different factor
-            const weightFactor = newUnit === 'in' ? 2.20462 : 0.453592;
-            if(wt.value) wt.value = (Math.round(wt.value * weightFactor * 10) / 10).toFixed(1);
-            
-            unit = newUnit;
-            updateUIForUnit();
-            
-            const inputs = currentStatsPanel.querySelectorAll('input');
-            inputs.forEach((inp, i) => {
-                if(inp.value) {
-                    let val = parseFloat(inp.value);
-                    let newVal = val * factor;
-                    inp.value = (Math.round(newVal * 10) / 10).toFixed(1);
-                    currentStats[parts[i].key] = newVal;
-                }
+                const selectedCard = this.nextElementSibling;
+                selectedCard.classList.remove('border-transparent');
+                selectedCard.classList.add('border-blue-500', 'bg-blue-900/30');
             });
+        });
 
-            calculateClassic();
-            calculateModern();
-            saveState();
+        // --- MODULAR LOGIC ENGINE ---
+
+        const buildDiet = (state) => {
+            if (state.goal === "shred") {
+                return { title: "The Cut", text: "Eat less than you usually do. Cut out liquid calories, reduce carbs at dinner, and stop snacking. If you aren't looking tighter in two weeks, trim a bit more." };
+            }
+            return { title: "The Bulk", text: "Eat more than you usually do. Add an extra meal or a shake every day. If the scale isn't moving up after two weeks, eat more." };
+        };
+
+        const buildWorkout = (state) => {
+            let config = { title: "", text: "", expNote: "" };
+
+            if (state.age === "over40") {
+                config.title = "The Calibrated Load";
+                config.text = "You need structural loading for bone density, but without the joint tax. Do your multi-joint free weights (squats/presses), but cap them at 3 sets of 8-10 reps. Auto-regulate: if it hurts the joint, use a dumbbell or machine variation.";
+            } else if (state.goal === "power") {
+                config.title = "The 5x5 Heavy";
+                config.text = "Pick 3 big compound movements per workout. Do 5 sets of 5 reps. Rest 3-5 minutes between sets. Add weight to the bar every single time you train.";
+            } else {
+                config.title = "The 3x10 Pump";
+                config.text = "Pick 4-5 exercises. Hit 3 sets of 10 reps focusing entirely on squeezing the muscle and chasing the pump. Keep rest periods to 60-90 seconds.";
+            }
+
+            config.expNote = state.experience === "beginner" 
+                ? "Rule #1: Master the form with light weight before you push. Don't ego lift." 
+                : "Since you know your way around, push your final working sets to 1-2 reps shy of absolute failure.";
+                
+            return config;
+        };
+
+        const buildCardio = (state) => {
+            if (state.goal === "power") {
+                return { title: "The Aerobic Base", text: "Do 30 minutes of Zone 2 (easy breathing) cardio on your off days. You need an aerobic base to clear metabolic waste and recover your CNS between heavy 5x5 sets." };
+            }
+            if (state.goal === "shred" && state.age === "under40") {
+                return { title: "The HIIT Burner", text: "Do 15 minutes of hard intervals (sprints, rowing, or bike) at the very end of your workout. Empty the tank." };
+            }
+            return { title: "The LISS Walk", text: "Go for a 30-minute brisk walk or incline treadmill session on your rest days. Keeps the heart healthy without draining your recovery." };
+        };
+
+        const buildRecovery = (state) => {
+            if (state.age === "over40") {
+                return { title: "The WD-40", text: "10 minutes of dynamic hip and shoulder openers before you ever touch a weight. Sleep 8 hours minimum—your tissue takes longer to repair now." };
+            }
+            if (state.goal === "power") {
+                return { title: "The CNS Coma", text: "Heavy lifting fries your nervous system. Prioritize a strict 8-hour sleep window and consider 400mg of Magnesium Glycinate before bed to down-regulate your system." };
+            }
+            return { title: "The Primer", text: "Do 5 minutes of core activation (planks/bird-dogs) before lifting to ensure you don't blow out your lower back. Prioritize 7-8 hours of sleep." };
+        };
+
+        const buildAnchor = (state) => {
+            if (state.goal === "shred") {
+                return { title: "10k Before Dinner", text: "Hit 10,000 steps before you sit down for your evening meal. Non-negotiable." };
+            }
+            return { title: "The Gallon", text: "Drink one full gallon of water every single day. Dehydrated muscle tissue does not grow and joint lubrication plummets. Non-negotiable." };
+        };
+
+        // --- MAIN EXECUTION ---
+        function generatePlan() {
+            // 1. Capture State
+            const state = {
+                goal: document.querySelector('input[name="goal"]:checked').value,
+                experience: document.querySelector('input[name="experience"]:checked').value,
+                age: document.querySelector('input[name="age"]:checked').value
+            };
+
+            // 2. Generate Modules
+            const diet = buildDiet(state);
+            const workout = buildWorkout(state);
+            const cardio = buildCardio(state);
+            const recovery = buildRecovery(state);
+            const anchor = buildAnchor(state);
+
+            // 3. Inject DOM
+            document.getElementById('dietTitle').innerText = diet.title;
+            document.getElementById('dietText').innerText = diet.text;
+
+            document.getElementById('workoutTitle').innerText = workout.title;
+            document.getElementById('workoutText').innerText = workout.text;
+            document.getElementById('expNote').innerText = workout.expNote;
+
+            document.getElementById('cardioTitle').innerText = cardio.title;
+            document.getElementById('cardioText').innerText = cardio.text;
+
+            document.getElementById('recoveryTitle').innerText = recovery.title;
+            document.getElementById('recoveryText').innerText = recovery.text;
+
+            document.getElementById('anchorTitle').innerText = anchor.title;
+            document.getElementById('anchorText').innerText = anchor.text;
+
+            // 4. Reveal
+            const resultDiv = document.getElementById('resultContainer');
+            resultDiv.classList.remove('hidden');
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
         }
-
-        init();
     </script>
 </body>
 </html>
