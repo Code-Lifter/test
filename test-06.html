@@ -31,19 +31,39 @@
 
   <main class="max-w-xl mx-auto p-4 pb-24">
     
-    <section id="setup-screen" class="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-xl mt-4">
-      <h2 class="text-xl font-bold text-amber-400 mb-4 flex items-center gap-2">
+    <section id="setup-screen" class="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-xl mt-4 space-y-5">
+      <h2 class="text-xl font-bold text-amber-400 flex items-center gap-2">
         <i class="fa-solid fa-hourglass-start"></i> New Adventure Setup
       </h2>
-      <div class="space-y-4">
-        <div>
-          <label for="max-days-input" class="block text-sm font-medium text-slate-300 mb-1">Total Scenario Days (Limit):</label>
-          <input type="number" id="max-days-input" value="12" min="1" max="30" class="w-full bg-slate-950 border border-slate-700 rounded p-2.5 text-center text-xl text-amber-400 font-bold focus:outline-none focus:border-amber-500">
-        </div>
-        <button id="start-game-btn" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold py-3 rounded-lg shadow-lg transition transform active:scale-[0.98]">
-          Begin Survival
-        </button>
+      
+      <div>
+        <label for="max-days-input" class="block text-sm font-medium text-slate-300 mb-1">Total Scenario Days (Limit):</label>
+        <input type="number" id="max-days-input" value="12" min="1" max="30" class="w-full bg-slate-950 border border-slate-700 rounded p-2.5 text-center text-xl text-amber-400 font-bold focus:outline-none focus:border-amber-500">
       </div>
+
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-2">Display Mode:</label>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="cursor-pointer">
+            <input type="radio" name="ui-mode" value="normal" checked class="sr-only peer">
+            <div class="p-3 text-center rounded-lg border border-slate-700 bg-slate-900/40 text-sm font-semibold text-slate-400 peer-checked:border-amber-500 peer-checked:bg-amber-500/10 peer-checked:text-amber-400 transition">
+              <i class="fa-solid fa-graduation-cap block text-lg mb-1"></i> Normal Mode
+              <span class="block text-xxs font-normal text-slate-500 mt-0.5">Show all rules & details</span>
+            </div>
+          </label>
+          <label class="cursor-pointer">
+            <input type="radio" name="ui-mode" value="beginner" class="sr-only peer">
+            <div class="p-3 text-center rounded-lg border border-slate-700 bg-slate-900/40 text-sm font-semibold text-slate-400 peer-checked:border-amber-500 peer-checked:bg-amber-500/10 peer-checked:text-amber-400 transition">
+              <i class="fa-solid fa-eye block text-lg mb-1"></i> Beginner Mode
+              <span class="block text-xxs font-normal text-slate-500 mt-0.5">Just tell me the phase</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <button id="start-game-btn" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold py-3 rounded-lg shadow-lg transition transform active:scale-[0.98]">
+        Begin Survival
+      </button>
     </section>
 
     <section id="tracker-screen" class="hidden space-y-4 mt-2">
@@ -89,7 +109,6 @@
   </main>
 
   <script>
-    // --- Data Definition matching the provided sequence reference cheat sheet ---
     const PHASES = [
       {
         name: "1. Event Phase",
@@ -99,10 +118,10 @@
         notes: "Skip Event card execution entirely on Round 1.",
         rules: [
           { label: "Draw Card", detail: "Draw 1 card from the Event Stack." },
-          { label: "IF Event Card", detail: "Resolve book effect OR place '?' token on matching action. (Book effect: see scenario details)." },
+          { label: "IF Event Card", detail: "Resolve book effect OR place '?' token on matching action." },
           { label: "Resolve Effect", detail: "Execute the text specified under the event block." },
-          { label: "IF Adventure Card", detail: "Discard and draw next card immediately (re-start Event phase)." },
-          { label: "Threat Field", detail: "Place card in the right threat field (shifting older cards left). If a card shifts out: resolve its threat effect, then discard it." }
+          { label: "IF Adventure Card", detail: "Discard and draw next card immediately." },
+          { label: "Threat Field", detail: "Place card in right field. If card shifts out: resolve threat, then discard." }
         ]
       },
       {
@@ -112,10 +131,10 @@
         icon: "fa-face-smile",
         notes: "Start Player Only updates tokens first.",
         rules: [
-          { label: "Tokens", detail: "Get or discard Determination tokens based on current Morale track position." },
-          { label: "IF Solo Play", detail: "Gain +1 Morale first before checking your rewards." },
-          { label: "Highest Level", detail: "If morale is already at maximum level: you may choose to heal 1 wound instead." },
-          { label: "Token Shortage", detail: "If you don't have enough Determination tokens to discard: suffer 1 wound per missing token." }
+          { label: "Tokens", detail: "Get or discard Determination tokens based on current track position." },
+          { label: "IF Solo Play", detail: "Gain +1 Morale first before checking rewards." },
+          { label: "Highest Level", detail: "If at maximum level: may choose to heal 1 wound instead." },
+          { label: "Token Shortage", detail: "If not enough tokens to discard: suffer 1 wound per missing token." }
         ]
       },
       {
@@ -125,8 +144,8 @@
         icon: "fa-dolly",
         notes: "Resources are moved directly to available pools.",
         rules: [
-          { label: "Camp Tiles", detail: "Collect exactly 1 resource cube per source icon depicted on the current camp tile." },
-          { label: "IF Shortcut Placed", detail: "Collect 1 extra resource from the specific tile containing the shortcut token." }
+          { label: "Camp Tiles", detail: "Collect exactly 1 resource cube per source icon depicted on the camp tile." },
+          { label: "IF Shortcut Placed", detail: "Collect 1 extra resource from the tile containing the shortcut token." }
         ]
       },
       {
@@ -137,9 +156,9 @@
         notes: "Assign pawns to tasks. Multiple pawns per action allowed. Also assign required resources.",
         rules: [
           { label: "Threat Action", detail: "Pawn(s) as indicated on card text. Max 1x per threat card." },
-          { label: "Hunting", detail: "Requires exactly 2 pawns per hunt. Only 1 hunt action allowed per beast card available in the hunt stack." },
+          { label: "Hunting", detail: "Requires exactly 2 pawns per hunt. Only 1 hunt action allowed per beast card." },
           { label: "Building", detail: "Assign 1 or 2 pawns. Risk if only 1 pawn or '?' token is present." },
-          { label: "Gathering / Exploring", detail: "Gather: Assign to specific resource tile (not on camp tile). Explore: Assign to unrevealed edge. Note: +1 pawn if distance to camp = 2. Each source pays only once per round." },
+          { label: "Gathering / Exploring", detail: "Gather: Assign to specific tile. Explore: Assign to unrevealed edge. Note: +1 pawn if distance = 2." },
           { label: "Arrange Camp / Rest", detail: "Allocate any number of remaining available pawns here." }
         ]
       },
@@ -148,14 +167,14 @@
         color: "border-l-4 border-purple-500",
         bg: "bg-purple-950/20",
         icon: "fa-dice",
-        notes: "Roll dice if working with less than maximum guaranteed pawns. Draw card if '?' token or '?' rolled.",
+        notes: "Roll dice if working with less than max guaranteed pawns.",
         rules: [
-          { label: "Threat Resolution", detail: "Pay required resources, follow card instructions. Gained resources go to future box." },
-          { label: "Hunting Results", detail: "Draw beast card. Get wounds if weapon strength < beast strength. Reduce weapon + palisade strength if required. Gain resources, resolve effects (gained resources to future, affects acting player)." },
-          { label: "Building Actions", detail: "Shelter/roof/palisade/weapon: Pay costs, place/move cube. Roof/palisade upgrades need an existing shelter. Invention/Item: +2 Det. tokens if player invention. Items placed in future res." },
+          { label: "Threat Resolution", detail: "Pay required resources, follow card instructions." },
+          { label: "Hunting Results", detail: "Draw beast card. Get wounds if weapon < beast strength. Gain resources to future box." },
+          { label: "Building Actions", detail: "Shelter/roof/palisade/weapon: Pay costs, place/move cube. Invention/Item: +2 Det. tokens." },
           { label: "Gathering Results", detail: "Take 1 resource per source used. Gained resources go to future box." },
-          { label: "Exploration Results", detail: "Draw + place tile, mark new terrain type on inventions. IF beast: Add 1 beast card to hunt stack. IF mystery icon: Resolve via mystery card. IF discovery symbol: Draw discovery tokens (place in future res)." },
-          { label: "Cleanup Steps", detail: "Discard tokens on action fields when that action resolves. Arrange Camp: Adjust morale if possible, player gets +2 determination. Rest: Player heals 1 wound per pawn. Return pawns to players. Move items/resources from FUTURE to AVAILABLE, resolve new scenario items." }
+          { label: "Exploration Results", detail: "Draw + place tile. IF beast: Add to hunt stack. IF mystery/discovery: Resolve icons." },
+          { label: "Cleanup Steps", detail: "Discard action field tokens. Arrange Camp: Adjust morale, +2 determination. Rest: Heal 1 wound per pawn. Move items from FUTURE to AVAILABLE." }
         ]
       },
       {
@@ -165,26 +184,25 @@
         icon: "fa-cloud-moon",
         notes: "Heal anytime during night phase rules.",
         rules: [
-          { label: "Weather Dice", detail: "Roll weather dice as indicated on scenario card; add clouds from tokens. Pay 1 wood per snow cloud. Pay 1 wood + 1 food per (total # clouds - roof level). Pay once, not per player. Resolve animal die effects (roll max 1x per round). IF storm: Decrease palisade level by 1. IF in camp: Get wounds for unpaid discards." },
+          { label: "Weather Dice", detail: "Roll weather dice; add clouds. Pay 1 wood per snow cloud. Pay 1 wood + 1 food per (total clouds - roof)." },
           { label: "Night Phase", detail: "Discard 1 food per player. Suffer 2 wounds per unpaid food item." },
-          { label: "Camp Relocation", detail: "If desired, relocate camp to adjacent tile. IF built shelter, decrease roof + palisade levels by half (round losses down). IF tile shelter, lose roof + palisade completely. Resource tokens move with camp (≤1 token of each type/tile). IF shortcut placed: remove, must re-build." },
-          { label: "End of Round", detail: "IF no shelter (built or tile), get 1 wound per player. Discard all yellow food/food tokens, remove black markers from player cards. Move round marker to next round, pass 1st player token to left." }
+          { label: "Camp Relocation", detail: "If desired, relocate camp. Built shelter down by half, tile shelter lost completely." },
+          { label: "End of Round", detail: "No shelter = 1 wound per player. Discard yellow food. Move round marker, pass 1st player token." }
         ]
       }
     ];
 
-    // --- State Management ---
     let state = {
       currentDay: 1,
       maxDays: 12,
       currentPhaseIndex: 0,
-      isPlaying: false
+      isPlaying: false,
+      mode: "normal" // "normal" or "beginner"
     };
 
     let undoStack = [];
     let redoStack = [];
 
-    // --- DOM Elements ---
     const setupScreen = document.getElementById('setup-screen');
     const trackerScreen = document.getElementById('tracker-screen');
     const gameOverScreen = document.getElementById('game-over-screen');
@@ -204,23 +222,20 @@
     const resetBtn = document.getElementById('reset-btn');
     const homeBtn = document.getElementById('home-btn');
 
-    // --- Core Functions ---
     function init() {
       const savedState = localStorage.getItem('rc_tracker_state');
       if (savedState) {
         try {
           state = JSON.parse(savedState);
-          // Sync input value just in case they return to setup
           maxDaysInput.value = state.maxDays;
+          const checkedRadio = document.querySelector(`input[name="ui-mode"][value="${state.mode}"]`);
+          if (checkedRadio) checkedRadio.checked = true;
         } catch(e) {
           resetToDefault();
         }
       }
-      
-      // Clear stacks on fresh launch/reload to keep lifecycle clean
       undoStack = [];
       redoStack = [];
-      
       render();
     }
 
@@ -230,7 +245,7 @@
 
     function pushToHistory() {
       undoStack.push(JSON.stringify(state));
-      redoStack = []; // Clear redo on new actions
+      redoStack = [];
       updateHistoryButtons();
     }
 
@@ -240,18 +255,19 @@
     }
 
     function resetToDefault() {
+      const selectedMode = document.querySelector('input[name="ui-mode"]:checked').value;
       state = {
         currentDay: 1,
         maxDays: parseInt(maxDaysInput.value, 10) || 12,
         currentPhaseIndex: 0,
-        isPlaying: false
+        isPlaying: false,
+        mode: selectedMode
       };
       undoStack = [];
       redoStack = [];
       saveToLocalStorage();
     }
 
-    // --- UI Rendering Engine ---
     function render() {
       updateHistoryButtons();
 
@@ -273,41 +289,52 @@
       trackerScreen.classList.remove('hidden');
       gameOverScreen.classList.add('hidden');
 
-      // Update Displays
       currentDayDisplay.textContent = state.currentDay;
       maxDaysDisplay.textContent = state.maxDays;
       phaseProgressDisplay.textContent = `Phase ${state.currentPhaseIndex + 1}/${PHASES.length}`;
 
-      // Build Active Phase Module Card
       const phase = PHASES[state.currentPhaseIndex];
       
-      let rulesHTML = phase.rules.map(rule => `
-        <div class="py-2.5 border-b border-slate-700/60 last:border-none flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-4">
-          <span class="font-bold text-slate-200 text-sm sm:w-1/4 shrink-0 flex items-center gap-1.5">
-            <i class="fa-solid fa-square-caret-right text-amber-500/80 text-xs"></i> ${rule.label}
-          </span>
-          <span class="text-slate-300 text-sm leading-relaxed sm:w-3/4">${rule.detail}</span>
-        </div>
-      `).join('');
-
-      phaseContainer.innerHTML = `
-        <div class="bg-slate-800 rounded-xl shadow-xl overflow-hidden border border-slate-700 transition duration-300 ${phase.color}">
-          <div class="p-4 ${phase.bg} border-b border-slate-700/50 flex items-center gap-3">
-            <div class="w-10 h-10 rounded-lg bg-slate-900/60 flex items-center justify-center text-amber-400">
-              <i class="fa-solid ${phase.icon} text-lg"></i>
+      if (state.mode === 'beginner') {
+        // High impact minimal card layout for Beginner Mode
+        phaseContainer.innerHTML = `
+          <div class="bg-slate-800 rounded-xl shadow-xl overflow-hidden border border-slate-700 text-center py-12 px-6 transition duration-300 ${phase.color}">
+            <div class="w-16 h-16 rounded-full bg-slate-900/80 flex items-center justify-center text-amber-400 mx-auto mb-4 border border-slate-700 shadow-inner">
+              <i class="fa-solid ${phase.icon} text-2xl"></i>
             </div>
-            <div>
-              <h2 class="text-lg font-black tracking-wide text-slate-100">${phase.name}</h2>
-              <p class="text-xs text-amber-400/90 font-medium italic mt-0.5">${phase.notes}</p>
+            <h2 class="text-2xl font-black tracking-wide text-slate-100">${phase.name}</h2>
+            <p class="text-sm text-slate-400 mt-3 max-w-sm mx-auto">${phase.notes}</p>
+          </div>
+        `;
+      } else {
+        // Full text structural breakdown for Normal Mode
+        let rulesHTML = phase.rules.map(rule => `
+          <div class="py-2.5 border-b border-slate-700/60 last:border-none flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-4">
+            <span class="font-bold text-slate-200 text-sm sm:w-1/4 shrink-0 flex items-center gap-1.5">
+              <i class="fa-solid fa-square-caret-right text-amber-500/80 text-xs"></i> ${rule.label}
+            </span>
+            <span class="text-slate-300 text-sm leading-relaxed sm:w-3/4">${rule.detail}</span>
+          </div>
+        `).join('');
+
+        phaseContainer.innerHTML = `
+          <div class="bg-slate-800 rounded-xl shadow-xl overflow-hidden border border-slate-700 transition duration-300 ${phase.color}">
+            <div class="p-4 ${phase.bg} border-b border-slate-700/50 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-slate-900/60 flex items-center justify-center text-amber-400">
+                <i class="fa-solid ${phase.icon} text-lg"></i>
+              </div>
+              <div>
+                <h2 class="text-lg font-black tracking-wide text-slate-100">${phase.name}</h2>
+                <p class="text-xs text-amber-400/90 font-medium italic mt-0.5">${phase.notes}</p>
+              </div>
+            </div>
+            <div class="p-4 divide-y divide-slate-700/40 bg-slate-800/40">
+              ${rulesHTML}
             </div>
           </div>
-          <div class="p-4 divide-y divide-slate-700/40 bg-slate-800/40">
-            ${rulesHTML}
-          </div>
-        </div>
-      `;
+        `;
+      }
 
-      // Navigation button configurations
       prevPhaseBtn.disabled = (state.currentDay === 1 && state.currentPhaseIndex === 0);
       
       if (state.currentPhaseIndex === PHASES.length - 1) {
@@ -323,12 +350,13 @@
       }
     }
 
-    // --- Event Handlers ---
     startGameBtn.addEventListener('click', () => {
       pushToHistory();
+      const selectedMode = document.querySelector('input[name="ui-mode"]:checked').value;
       state.maxDays = parseInt(maxDaysInput.value, 10) || 12;
       state.currentDay = 1;
       state.currentPhaseIndex = 0;
+      state.mode = selectedMode;
       state.isPlaying = true;
       saveToLocalStorage();
       render();
@@ -396,7 +424,6 @@
       render();
     });
 
-    // Run app initialization on load
     init();
   </script>
 </body>
