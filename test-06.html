@@ -1,6 +1,467 @@
 <!DOCTYPE html>
 <html lang="en">
+<head><!DOCTYPE html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Robinson Crusoe Round Tracker</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome for clean icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans antialiased selection:bg-amber-500 selection:text-slate-900">
+
+  <!-- Top Navigation (Not Fixed) -->
+  <header class="bg-slate-800 border-b border-slate-700 px-4 py-3 shadow-md">
+    <div class="max-w-xl mx-auto flex items-center justify-between">
+      <a href="#" id="home-btn" class="flex items-center gap-2 text-amber-400 hover:text-amber-300 font-bold tracking-wide transition">
+        <i class="fa-solid fa-island-tropical text-xl"></i>
+        <span>RC Tracker</span>
+      </a>
+      <div class="flex items-center gap-2">
+        <button id="undo-btn" class="p-2 rounded bg-slate-700 hover:bg-slate-600 disabled:opacity-40 disabled:hover:bg-slate-700 transition" title="Undo">
+          <i class="fa-solid fa-arrow-rotate-left"></i>
+        </button>
+        <button id="redo-btn" class="p-2 rounded bg-slate-700 hover:bg-slate-600 disabled:opacity-40 disabled:hover:bg-slate-700 transition" title="Redo">
+          <i class="fa-solid fa-arrow-rotate-right"></i>
+        </button>
+        <button id="reset-btn" class="ml-2 px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-sm font-semibold rounded shadow transition flex items-center gap-1">
+          <i class="fa-solid fa-trash-can"></i> Reset
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-xl mx-auto p-4 pb-24">
+    
+    <!-- Setup Screen -->
+    <section id="setup-screen" class="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-xl mt-4 space-y-5">
+      <h2 class="text-xl font-bold text-amber-400 flex items-center gap-2">
+        <i class="fa-solid fa-hourglass-start"></i> New Adventure Setup
+      </h2>
+      
+      <div>
+        <label for="max-days-input" class="block text-sm font-medium text-slate-300 mb-1">Total Scenario Days (Limit):</label>
+        <input type="number" id="max-days-input" value="12" min="1" max="30" class="w-full bg-slate-950 border border-slate-700 rounded p-2.5 text-center text-xl text-amber-400 font-bold focus:outline-none focus:border-amber-500">
+      </div>
+
+      <!-- Layout Mode Selector -->
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-2">Display Mode:</label>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="cursor-pointer">
+            <input type="radio" name="ui-mode" value="normal" checked class="sr-only peer">
+            <div class="p-3 text-center rounded-lg border border-slate-700 bg-slate-900/40 text-sm font-semibold text-slate-400 peer-checked:border-amber-500 peer-checked:bg-amber-500/10 peer-checked:text-amber-400 transition">
+              <i class="fa-solid fa-graduation-cap block text-lg mb-1"></i> Normal Mode
+              <span class="block text-xxs font-normal text-slate-500 mt-0.5">Show all checklist details</span>
+            </div>
+          </label>
+          <label class="cursor-pointer">
+            <input type="radio" name="ui-mode" value="beginner" class="sr-only peer">
+            <div class="p-3 text-center rounded-lg border border-slate-700 bg-slate-900/40 text-sm font-semibold text-slate-400 peer-checked:border-amber-500 peer-checked:bg-amber-500/10 peer-checked:text-amber-400 transition">
+              <i class="fa-solid fa-eye block text-lg mb-1"></i> Beginner Mode
+              <span class="block text-xxs font-normal text-slate-500 mt-0.5">Just tell me the phase name</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <button id="start-game-btn" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold py-3 rounded-lg shadow-lg transition transform active:scale-[0.98]">
+        Begin Survival
+      </button>
+    </section>
+
+    <!-- Main Tracker Screen -->
+    <section id="tracker-screen" class="hidden space-y-4 mt-2">
+      
+      <!-- Day Status Bar -->
+      <div class="bg-slate-800 rounded-xl p-4 border border-slate-700 shadow flex items-center justify-between sticky top-2 z-10 backdrop-blur-md bg-opacity-95">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 block">Current Timeline</span>
+          <span class="text-2xl font-black text-amber-400">Day <span id="current-day-display">1</span><span class="text-slate-500 text-lg font-normal">/<span id="max-days-display">12</span></span></span>
+        </div>
+        <div class="text-right">
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 block">Active Steps</span>
+          <span id="phase-progress-display" class="text-sm font-bold text-slate-300">Phase 1/7</span>
+        </div>
+      </div>
+
+      <!-- Phase Container -->
+      <div id="phase-container" class="space-y-4">
+        <!-- Injected dynamically -->
+      </div>
+
+      <!-- Phase Navigation Footer Buttons -->
+      <div class="flex justify-between items-center gap-4 pt-2">
+        <button id="prev-phase-btn" class="flex-1 bg-slate-700 hover:bg-slate-600 disabled:opacity-40 disabled:hover:bg-slate-700 py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-chevron-left"></i> Back
+        </button>
+        <button id="next-phase-btn" class="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-900 py-3 rounded-lg font-bold transition flex items-center justify-center gap-2 shadow-lg">
+          Next Step <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>
+
+    </section>
+
+    <!-- Game Over Screen -->
+    <section id="game-over-screen" class="hidden bg-slate-800 rounded-xl p-8 border border-slate-700 text-center shadow-xl mt-4 space-y-6">
+      <div class="text-6xl text-rose-500 animate-bounce">
+        <i class="fa-solid fa-skull-crossbones"></i>
+      </div>
+      <div>
+        <h2 class="text-2xl font-extrabold text-slate-100">Time Has Expired!</h2>
+        <p class="text-slate-400 mt-2 text-sm">You have reached the maximum allowed days for this scenario.</p>
+      </div>
+      <button id="restart-game-btn" class="px-6 py-3 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold rounded-lg transition shadow-md">
+        Start New Game
+      </button>
+    </section>
+
+  </main>
+
+  <script>
+    const PHASES = [
+      {
+        name: "1. Event Phase",
+        color: "border-l-4 border-red-500",
+        bg: "bg-red-950/20",
+        icon: "fa-card-diamond",
+        notes: "CRITICAL: Skip Phase entirely in Round 1.",
+        rules: [
+          { label: "Draw Card", detail: "Draw 1 card from the top of the Event Stack." },
+          { label: "IF Event Card", detail: "Resolve book effect OR place '?' token. (Book effect: see explicit scenario rules text)." },
+          { label: "Any Card Type", detail: "Resolve active event effect text immediately as described in card text layout." },
+          { label: "IF Adventure Card", detail: "Discard and draw next immediately (i.e., completely re-start Event phase tracking)." },
+          { label: "Threat Field", detail: "Place card in right threat field (shifting older cards left). If a card shifts out completely: resolve its explicit threat effect, then discard it." }
+        ]
+      },
+      {
+        name: "2. Morale Phase",
+        color: "border-l-4 border-amber-500",
+        bg: "bg-amber-950/20",
+        icon: "fa-face-smile",
+        notes: "Applies to Start Player Only.",
+        rules: [
+          { label: "Track Adjustment", detail: "Get or discard Determination tokens based completely on current Morale track position layout." },
+          { label: "IF Solo Play", detail: "Gain exactly +1 Morale value first before executing or checking your status rewards." },
+          { label: "Highest Level", detail: "If morale stands at maximum track level: you can choose to heal 1 wound instead." },
+          { label: "Token Shortage", detail: "If you don't possess enough tokens to discard: suffer exactly 1 wound per missing token." }
+        ]
+      },
+      {
+        name: "3. Production Phase",
+        color: "border-l-4 border-orange-500",
+        bg: "bg-orange-950/20",
+        icon: "fa-dolly",
+        notes: "Resources move straight to the Available Resources pool.",
+        rules: [
+          { label: "Camp Tiles", detail: "Collect exactly 1 resource cube per physical source icon depicted on your current camp tile." },
+          { label: "IF Shortcut Placed", detail: "Collect 1 extra resource from the specific terrain tile containing the shortcut token marker." }
+        ]
+      },
+      {
+        name: "4. Plan Actions Phase",
+        color: "border-l-4 border-pink-500",
+        bg: "bg-pink-950/20",
+        icon: "fa-map",
+        notes: "Also assign required resource costs alongside your pawns.",
+        rules: [
+          { label: "Assign Pawns", detail: "Allocate pawns to specific tasks (decide which exact pawn is acting / which is supporting). Multiple pawns per action space allowed." },
+          { label: "Threat Action", detail: "Pawn(s) allocated as indicated on card text layout. Maximum of 1x execution per threat card." },
+          { label: "Hunting Tasks", detail: "Requires exactly 2 pawns per hunt operation. Only 1 hunt action allowed per beast card available inside the hunt stack!" },
+          { label: "Building Tasks", detail: "Assign 1 or 2 pawns. Risk factor applies if only 1 pawn or a '?' token is present on the space." },
+          { label: "Gather & Explore", detail: "Gather: Not on camp tile, assign to specific resource. Explore: Assign to unrevealed map edge. Note: +1 pawn if distance to camp = 2. Each unique source pays only once per round." },
+          { label: "Camp / Rest", detail: "Arrange Camp / Rest: Allocate any preferred number of remaining available pawns here." }
+        ]
+      },
+      {
+        name: "5. Resolve Actions Phase",
+        color: "border-l-4 border-purple-500",
+        bg: "bg-purple-950/20",
+        icon: "fa-dice",
+        notes: "CRITICAL CONDITION: Roll action dice if working with less than max guaranteed pawns. Draw card if '?' token or '?' icon is rolled.",
+        rules: [
+          { label: "Threat Action", detail: "Pay required resource costs, follow card instructions. Gained items go straight to FUTURE box." },
+          { label: "Hunting Results", detail: "Draw beast card. Suffer wounds if weapon strength < beast strength. Reduce weapon + palisade strength if required. Gain resources (goes to FUTURE, affects acting player)." },
+          { label: "Building Actions", detail: "Shelter / roof / palisade / weapon: Pay costs, place/move cube. Roof/palisade upgrades require an existing shelter. Invention/Item: +2 Det. tokens if player invention. Place item in FUTURE resource box." },
+          { label: "Gathering Results", detail: "Take exactly 1 resource item per source layer used. Gained resources go directly to FUTURE box." },
+          { label: "Exploration", detail: "Draw + place tile, mark new terrain type on inventions. IF beast icon: Add 1 beast card to hunt stack. IF mystery icon: See scenario card. IF discovery symbol: Draw discovery tokens (place in FUTURE res)." },
+          { label: "Cleanup Steps", detail: "Discard tokens on action fields when that action finishes resolving. Arrange Camp: Adjust morale tracker, player gets +2 determination. Rest: Player heals 1 wound per pawn. Return pawns to players (discard additional or place back on card). Finally, move ALL items/resources from FUTURE to AVAILABLE box, then resolve new scenario items." }
+        ]
+      },
+      {
+        name: "6. Weather Phase",
+        color: "border-l-4 border-sky-500",
+        bg: "bg-sky-950/20",
+        icon: "fa-cloud-showers-heavy",
+        notes: "Roll dice based completely on the current scenario conditions.",
+        rules: [
+          { label: "Weather Dice", detail: "Roll weather dice as indicated on scenario card; add clouds from tokens." },
+          { label: "Snow Clouds", detail: "Pay exactly 1 wood resource per active snow cloud." },
+          { label: "Rain Clouds", detail: "Pay 1 wood + 1 food per (total # clouds - current roof level). Note: Pay once, not per individual player." },
+          { label: "Animal Die", detail: "Resolve animal die effects if present (roll maximum of 1x per round total)." },
+          { label: "Storm", detail: "IF storm occurs: Decrease palisade level marker down by 1." },
+          { label: "Camp Sufferings", detail: "IF in camp (as usual): Get wounds for unpaid discards (outside of camp utilizes card effects instead)." },
+          { label: "Clear Space", detail: "Completely clear and remove all temporary weather tokens from the weather board space." }
+        ]
+      },
+      {
+        name: "7. Night Phase",
+        color: "border-l-4 border-indigo-500",
+        bg: "bg-indigo-950/20",
+        icon: "fa-moon",
+        notes: "CRITICAL SIDE-NOTE: You are allowed to heal anytime at night.",
+        rules: [
+          { label: "Food Consumption", detail: "Discard exactly 1 food item per player. Suffer exactly 2 wounds per unpaid food item!" },
+          { label: "Camp Relocation", detail: "If desired, relocate camp to an adjacent map tile." },
+          { label: "Built Shelter Shift", detail: "IF built shelter: decrease roof + palisade levels by half (always round losses down)." },
+          { label: "Tile Shelter Shift", detail: "IF tile shelter: completely lose roof + palisade value tracks." },
+          { label: "Resource Tokens", detail: "Resource tokens derived from items move with camp (≤1 token of each unique type per tile)." },
+          { label: "Shortcut Removal", detail: "IF a shortcut was placed on the map: remove from board, must re-build completely." },
+          { label: "No Shelter Penalty", detail: "IF no shelter (built or tile) is present: get 1 wound per player directly." },
+          { label: "End of Turn Clean", detail: "Discard all yellow food / food tokens completely. Remove black markers from player cards." },
+          { label: "Pass Turn Markers", detail: "Move physical round marker to next round layout, then pass 1st player token to the left." }
+        ]
+      }
+    ];
+
+    let state = {
+      currentDay: 1,
+      maxDays: 12,
+      currentPhaseIndex: 0,
+      isPlaying: false,
+      mode: "normal"
+    };
+
+    let undoStack = [];
+    let redoStack = [];
+
+    const setupScreen = document.getElementById('setup-screen');
+    const trackerScreen = document.getElementById('tracker-screen');
+    const gameOverScreen = document.getElementById('game-over-screen');
+    const maxDaysInput = document.getElementById('max-days-input');
+    const startGameBtn = document.getElementById('start-game-btn');
+    const restartGameBtn = document.getElementById('restart-game-btn');
+    
+    const currentDayDisplay = document.getElementById('current-day-display');
+    const maxDaysDisplay = document.getElementById('max-days-display');
+    const phaseProgressDisplay = document.getElementById('phase-progress-display');
+    const phaseContainer = document.getElementById('phase-container');
+    
+    const prevPhaseBtn = document.getElementById('prev-phase-btn');
+    const nextPhaseBtn = document.getElementById('next-phase-btn');
+    const undoBtn = document.getElementById('undo-btn');
+    const redoBtn = document.getElementById('redo-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const homeBtn = document.getElementById('home-btn');
+
+    function init() {
+      const savedState = localStorage.getItem('rc_tracker_state');
+      if (savedState) {
+        try {
+          state = JSON.parse(savedState);
+          maxDaysInput.value = state.maxDays;
+          const checkedRadio = document.querySelector(`input[name="ui-mode"][value="${state.mode}"]`);
+          if (checkedRadio) checkedRadio.checked = true;
+        } catch(e) {
+          resetToDefault();
+        }
+      }
+      undoStack = [];
+      redoStack = [];
+      render();
+    }
+
+    function saveToLocalStorage() {
+      localStorage.setItem('rc_tracker_state', JSON.stringify(state));
+    }
+
+    function pushToHistory() {
+      undoStack.push(JSON.stringify(state));
+      redoStack = [];
+      updateHistoryButtons();
+    }
+
+    function updateHistoryButtons() {
+      undoBtn.disabled = undoStack.length === 0;
+      redoBtn.disabled = redoStack.length === 0;
+    }
+
+    function resetToDefault() {
+      const selectedMode = document.querySelector('input[name="ui-mode"]:checked').value;
+      state = {
+        currentDay: 1,
+        maxDays: parseInt(maxDaysInput.value, 10) || 12,
+        currentPhaseIndex: 0,
+        isPlaying: false,
+        mode: selectedMode
+      };
+      undoStack = [];
+      redoStack = [];
+      saveToLocalStorage();
+    }
+
+    function render() {
+      updateHistoryButtons();
+
+      if (!state.isPlaying) {
+        setupScreen.classList.remove('hidden');
+        trackerScreen.classList.add('hidden');
+        gameOverScreen.classList.add('hidden');
+        return;
+      }
+
+      if (state.currentDay > state.maxDays) {
+        setupScreen.classList.add('hidden');
+        trackerScreen.classList.add('hidden');
+        gameOverScreen.classList.remove('hidden');
+        return;
+      }
+
+      setupScreen.classList.add('hidden');
+      trackerScreen.classList.remove('hidden');
+      gameOverScreen.classList.add('hidden');
+
+      currentDayDisplay.textContent = state.currentDay;
+      maxDaysDisplay.textContent = state.maxDays;
+      phaseProgressDisplay.textContent = `Phase ${state.currentPhaseIndex + 1}/${PHASES.length}`;
+
+      const phase = PHASES[state.currentPhaseIndex];
+      
+      if (state.mode === 'beginner') {
+        phaseContainer.innerHTML = `
+          <div class="bg-slate-800 rounded-xl shadow-xl overflow-hidden border border-slate-700 text-center py-12 px-6 transition duration-300 ${phase.color}">
+            <div class="w-16 h-16 rounded-full bg-slate-900/80 flex items-center justify-center text-amber-400 mx-auto mb-4 border border-slate-700 shadow-inner">
+              <i class="fa-solid ${phase.icon} text-2xl"></i>
+            </div>
+            <h2 class="text-2xl font-black tracking-wide text-slate-100">${phase.name}</h2>
+            <p class="text-sm text-slate-400 mt-3 max-w-sm mx-auto">${phase.notes}</p>
+          </div>
+        `;
+      } else {
+        let rulesHTML = phase.rules.map(rule => `
+          <div class="py-2.5 border-b border-slate-700/60 last:border-none flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-4">
+            <span class="font-bold text-slate-200 text-sm sm:w-1/4 shrink-0 flex items-center gap-1.5">
+              <i class="fa-solid fa-square-caret-right text-amber-500/80 text-xs"></i> ${rule.label}
+            </span>
+            <span class="text-slate-300 text-sm leading-relaxed sm:w-3/4">${rule.detail}</span>
+          </div>
+        `).join('');
+
+        phaseContainer.innerHTML = `
+          <div class="bg-slate-800 rounded-xl shadow-xl overflow-hidden border border-slate-700 transition duration-300 ${phase.color}">
+            <div class="p-4 ${phase.bg} border-b border-slate-700/50 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-slate-900/60 flex items-center justify-center text-amber-400">
+                <i class="fa-solid ${phase.icon} text-lg"></i>
+              </div>
+              <div>
+                <h2 class="text-lg font-black tracking-wide text-slate-100">${phase.name}</h2>
+                <p class="text-xs text-amber-400/90 font-medium italic mt-0.5">${phase.notes}</p>
+              </div>
+            </div>
+            <div class="p-4 divide-y divide-slate-700/40 bg-slate-800/40">
+              ${rulesHTML}
+            </div>
+          </div>
+        `;
+      }
+
+      prevPhaseBtn.disabled = (state.currentDay === 1 && state.currentPhaseIndex === 0);
+      
+      if (state.currentPhaseIndex === PHASES.length - 1) {
+        nextPhaseBtn.innerHTML = `Next Day <i class="fa-solid fa-sun ml-1"></i>`;
+        nextPhaseBtn.classList.replace('bg-amber-500', 'bg-emerald-600');
+        nextPhaseBtn.classList.replace('hover:bg-amber-400', 'hover:bg-emerald-500');
+        nextPhaseBtn.classList.replace('text-slate-900', 'text-white');
+      } else {
+        nextPhaseBtn.innerHTML = `Next Step <i class="fa-solid fa-chevron-right ml-1"></i>`;
+        nextPhaseBtn.classList.replace('bg-emerald-600', 'bg-amber-500');
+        nextPhaseBtn.classList.replace('hover:bg-emerald-500', 'hover:bg-amber-400');
+        nextPhaseBtn.classList.replace('text-white', 'text-slate-900');
+      }
+    }
+
+    startGameBtn.addEventListener('click', () => {
+      pushToHistory();
+      const selectedMode = document.querySelector('input[name="ui-mode"]:checked').value;
+      state.maxDays = parseInt(maxDaysInput.value, 10) || 12;
+      state.currentDay = 1;
+      state.currentPhaseIndex = 0;
+      state.mode = selectedMode;
+      state.isPlaying = true;
+      saveToLocalStorage();
+      render();
+    });
+
+    nextPhaseBtn.addEventListener('click', () => {
+      pushToHistory();
+      if (state.currentPhaseIndex < PHASES.length - 1) {
+        state.currentPhaseIndex++;
+      } else {
+        state.currentDay++;
+        state.currentPhaseIndex = 0;
+      }
+      saveToLocalStorage();
+      render();
+    });
+
+    prevPhaseBtn.addEventListener('click', () => {
+      pushToHistory();
+      if (state.currentPhaseIndex > 0) {
+        state.currentPhaseIndex--;
+      } else if (state.currentDay > 1) {
+        state.currentDay--;
+        state.currentPhaseIndex = PHASES.length - 1;
+      }
+      saveToLocalStorage();
+      render();
+    });
+
+    undoBtn.addEventListener('click', () => {
+      if (undoStack.length > 0) {
+        redoStack.push(JSON.stringify(state));
+        state = JSON.parse(undoStack.pop());
+        saveToLocalStorage();
+        render();
+      }
+    });
+
+    redoBtn.addEventListener('click', () => {
+      if (redoStack.length > 0) {
+        undoStack.push(JSON.stringify(state));
+        state = JSON.parse(redoStack.pop());
+        saveToLocalStorage();
+        render();
+      }
+    });
+
+    resetBtn.addEventListener('click', () => {
+      if(confirm("Are you sure you want to reset this session? All progress will be lost.")) {
+        resetToDefault();
+        render();
+      }
+    });
+
+    restartGameBtn.addEventListener('click', () => {
+      resetToDefault();
+      render();
+    });
+
+    homeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      pushToHistory();
+      state.isPlaying = false;
+      saveToLocalStorage();
+      render();
+    });
+
+    init();
+  </script>
+</body>
+</html>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Robinson Crusoe Round Tracker</title>
