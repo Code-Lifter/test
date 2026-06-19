@@ -82,7 +82,7 @@
         </div>
         <div class="text-right">
           <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 block">Active Steps</span>
-          <span id="phase-progress-display" class="text-sm font-bold text-slate-300">Phase 1/7</span>
+          <span id="phase-progress-display" class="text-sm font-bold text-slate-300">Phase 1/6</span>
         </div>
       </div>
 
@@ -123,8 +123,9 @@
     const PHASES = [
       {
         name: "1. Event Phase",
-        color: "border-l-4 border-red-500",
-        bg: "bg-red-950/20",
+        color: "border-l-4 border-emerald-500",
+        bg: "bg-emerald-950/40",
+        textTheme: "text-emerald-400",
         icon: "fa-card-diamond",
         notes: "CRITICAL: Skip Phase entirely in Round 1.",
         rules: [
@@ -137,8 +138,9 @@
       },
       {
         name: "2. Morale Phase",
-        color: "border-l-4 border-amber-500",
-        bg: "bg-amber-950/20",
+        color: "border-l-4 border-yellow-600",
+        bg: "bg-yellow-950/30",
+        textTheme: "text-yellow-400",
         icon: "fa-face-smile",
         notes: "Applies to Start Player Only.",
         rules: [
@@ -150,8 +152,9 @@
       },
       {
         name: "3. Production Phase",
-        color: "border-l-4 border-orange-500",
-        bg: "bg-orange-950/20",
+        color: "border-l-4 border-orange-400",
+        bg: "bg-orange-950/40",
+        textTheme: "text-orange-400",
         icon: "fa-dolly",
         notes: "Resources move straight to the Available Resources pool.",
         rules: [
@@ -160,9 +163,10 @@
         ]
       },
       {
-        name: "4. Plan Actions Phase",
+        name: "4.0 Plan Actions Phase",
         color: "border-l-4 border-pink-500",
-        bg: "bg-pink-950/20",
+        bg: "bg-pink-950/40",
+        textTheme: "text-pink-400",
         icon: "fa-map",
         notes: "Also assign required resource costs alongside your pawns.",
         rules: [
@@ -175,11 +179,12 @@
         ]
       },
       {
-        name: "5. Resolve Actions Phase",
-        color: "border-l-4 border-purple-500",
-        bg: "bg-purple-950/20",
+        name: "4.1 Resolve Actions Phase",
+        color: "border-l-4 border-pink-600",
+        bg: "bg-pink-950/50",
+        textTheme: "text-pink-300",
         icon: "fa-dice",
-        notes: "CRITICAL CONDITION: Roll action dice if working with less than max guaranteed pawns. Draw card if '?' token or '?' icon is rolled.",
+        notes: "CRITICAL: Roll action dice if working with less than max guaranteed pawns. Draw card if '?' token or '?' icon is rolled.",
         rules: [
           { label: "Threat Action", detail: "Pay required resource costs, follow card instructions. Gained items go straight to FUTURE box." },
           { label: "Hunting Results", detail: "Draw beast card. Suffer wounds if weapon strength < beast strength. Reduce weapon + palisade strength if required. Gain resources (goes to FUTURE, affects acting player)." },
@@ -190,9 +195,10 @@
         ]
       },
       {
-        name: "6. Weather Phase",
-        color: "border-l-4 border-sky-500",
-        bg: "bg-sky-950/20",
+        name: "5. Weather Phase",
+        color: "border-l-4 border-sky-400",
+        bg: "bg-sky-950/40",
+        textTheme: "text-sky-400",
         icon: "fa-cloud-showers-heavy",
         notes: "Roll dice based completely on the current scenario conditions.",
         rules: [
@@ -201,14 +207,14 @@
           { label: "Rain Clouds", detail: "Pay 1 wood + 1 food per (total # clouds - current roof level). Note: Pay once, not per individual player." },
           { label: "Animal Die", detail: "Resolve animal die effects if present (roll maximum of 1x per round total)." },
           { label: "Storm", detail: "IF storm occurs: Decrease palisade level marker down by 1." },
-          { label: "Camp Sufferings", detail: "IF in camp (as usual): Get wounds for unpaid discards (outside of camp utilizes card effects instead)." },
-          { label: "Clear Space", detail: "Completely clear and remove all temporary weather tokens from the weather board space." }
+          { label: "Camp Sufferings", detail: "IF in camp (as usual): Get wounds for unpaid discards (outside of camp utilizes card effects instead). Clear and remove all weather tokens." }
         ]
       },
       {
-        name: "7. Night Phase",
-        color: "border-l-4 border-indigo-500",
-        bg: "bg-indigo-950/20",
+        name: "6. Night Phase",
+        color: "border-l-4 border-amber-800",
+        bg: "bg-amber-950/30",
+        textTheme: "text-amber-500",
         icon: "fa-moon",
         notes: "CRITICAL SIDE-NOTE: You are allowed to heal anytime at night.",
         rules: [
@@ -324,14 +330,15 @@
 
       currentDayDisplay.textContent = state.currentDay;
       maxDaysDisplay.textContent = state.maxDays;
-      phaseProgressDisplay.textContent = `Phase ${state.currentPhaseIndex + 1}/${PHASES.length}`;
-
-      const phase = PHASES[state.currentPhaseIndex];
       
+      const phase = PHASES[state.currentPhaseIndex];
+      let displayPhaseString = phase.name.split('.')[0];
+      phaseProgressDisplay.textContent = `Phase ${displayPhaseString}/6`;
+
       if (state.mode === 'beginner') {
         phaseContainer.innerHTML = `
           <div class="bg-slate-800 rounded-xl shadow-xl overflow-hidden border border-slate-700 text-center py-12 px-6 transition duration-300 ${phase.color}">
-            <div class="w-16 h-16 rounded-full bg-slate-900/80 flex items-center justify-center text-amber-400 mx-auto mb-4 border border-slate-700 shadow-inner">
+            <div class="w-16 h-16 rounded-full bg-slate-900/80 flex items-center justify-center ${phase.textTheme} mx-auto mb-4 border border-slate-700 shadow-inner">
               <i class="fa-solid ${phase.icon} text-2xl"></i>
             </div>
             <h2 class="text-2xl font-black tracking-wide text-slate-100">${phase.name}</h2>
@@ -342,7 +349,7 @@
         let rulesHTML = phase.rules.map(rule => `
           <div class="py-2.5 border-b border-slate-700/60 last:border-none flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-4">
             <span class="font-bold text-slate-200 text-sm sm:w-1/4 shrink-0 flex items-center gap-1.5">
-              <i class="fa-solid fa-square-caret-right text-amber-500/80 text-xs"></i> ${rule.label}
+              <i class="fa-solid fa-square-caret-right ${phase.textTheme} text-xs"></i> ${rule.label}
             </span>
             <span class="text-slate-300 text-sm leading-relaxed sm:w-3/4">${rule.detail}</span>
           </div>
@@ -351,12 +358,12 @@
         phaseContainer.innerHTML = `
           <div class="bg-slate-800 rounded-xl shadow-xl overflow-hidden border border-slate-700 transition duration-300 ${phase.color}">
             <div class="p-4 ${phase.bg} border-b border-slate-700/50 flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-slate-900/60 flex items-center justify-center text-amber-400">
+              <div class="w-10 h-10 rounded-lg bg-slate-900/60 flex items-center justify-center ${phase.textTheme}">
                 <i class="fa-solid ${phase.icon} text-lg"></i>
               </div>
               <div>
                 <h2 class="text-lg font-black tracking-wide text-slate-100">${phase.name}</h2>
-                <p class="text-xs text-amber-400/90 font-medium italic mt-0.5">${phase.notes}</p>
+                <p class="text-xs ${phase.textTheme} opacity-90 font-medium italic mt-0.5">${phase.notes}</p>
               </div>
             </div>
             <div class="p-4 divide-y divide-slate-700/40 bg-slate-800/40">
