@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Full Routine Drop Set Calculator</title>
+  <title>Extended Drop Set Calculator</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-900 min-h-screen p-4 md:p-8 font-sans antialiased text-slate-200">
 
-  <div class="max-w-5xl mx-auto space-y-8">
+  <div class="max-w-6xl mx-auto space-y-8">
     
     <!-- Header -->
     <div class="text-center space-y-2">
-      <h1 class="text-3xl font-bold text-white tracking-tight">Full Routine Drop Set Calculator</h1>
-      <p class="text-slate-400">Enter your 5RM weight for each exercise. The calculator will generate your 20% drop set progression for the entire workout, ordered from compound to isolation.</p>
+      <h1 class="text-3xl font-bold text-white tracking-tight">Extended Drop Set Calculator</h1>
+      <p class="text-slate-400">Enter your 5RM weight. The calculator will generate continuous 20% drops until the weight reaches 1kg.</p>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -35,17 +35,16 @@
       <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl lg:col-span-2 hidden" id="resultsPanel">
         <div class="flex justify-between items-end mb-6 border-b border-slate-700 pb-2">
           <h2 class="text-xl font-semibold text-white">Your Drop Set Protocol</h2>
-          <span class="text-xs text-indigo-400 font-medium bg-indigo-400/10 px-2 py-1 rounded">20% Weight Reductions</span>
+          <span class="text-xs text-indigo-400 font-medium bg-indigo-400/10 px-2 py-1 rounded">-20% Until 1kg</span>
         </div>
 
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="text-slate-400 text-sm border-b border-slate-700">
-                <th class="pb-3 font-medium">Exercise</th>
-                <th class="pb-3 font-medium text-center">Initial (5RM)</th>
-                <th class="pb-3 font-medium text-center">Drop 1 (-20%)</th>
-                <th class="pb-3 font-medium text-center">Drop 2 (-20%)</th>
+                <th class="pb-3 font-medium min-w-[200px]">Exercise</th>
+                <th class="pb-3 font-medium text-center w-24">Initial (5RM)</th>
+                <th class="pb-3 font-medium pl-6">Continuous Drops (-20%)</th>
               </tr>
             </thead>
             <tbody id="resultsTableBody" class="divide-y divide-slate-700/50">
@@ -59,7 +58,7 @@
   </div>
 
   <script>
-    // The exercises ordered from Compound to Isolation as discussed previously
+    // The exercises ordered from Compound to Isolation
     const exercises = [
       { id: "hackSquat", name: "Hack squat (Plate loaded)", type: "Lower Body Compound" },
       { id: "legPress", name: "Pin loaded leg press", type: "Lower Body Compound" },
@@ -91,45 +90,63 @@
 
     // 2. Calculate and Display Results
     document.getElementById('calcBtn').addEventListener('click', () => {
-      resultsTableBody.innerHTML = ''; // Clear previous results
+      resultsTableBody.innerHTML = ''; 
       let hasValidInput = false;
 
       exercises.forEach(ex => {
         const inputVal = parseFloat(document.getElementById(ex.id).value);
-        
-        // Default to 0 if empty or invalid, but flag if we have at least one valid input
         const initialWeight = (!isNaN(inputVal) && inputVal > 0) ? inputVal : 0;
+        
         if (initialWeight > 0) hasValidInput = true;
 
-        // Drop Set Math (20% reduction per drop)
-        const drop1 = initialWeight > 0 ? initialWeight * 0.80 : 0;
-        const drop2 = drop1 > 0 ? drop1 * 0.80 : 0;
+        // Calculate all drops down to 1kg
+        let dropsHTML = '';
+        if (initialWeight > 0) {
+          let currentWeight = initialWeight * 0.80;
+          let dropCounter = 1;
+          
+          dropsHTML += `<div class="flex flex-wrap gap-2">`;
+          
+          while (currentWeight >= 1) {
+            // Highlighting the first couple drops differently just for visual hierarchy
+            let badgeClass = dropCounter <= 2 
+              ? "bg-indigo-900/50 text-indigo-300 border-indigo-700/50" 
+              : "bg-slate-700/50 text-slate-300 border-slate-600";
+
+            dropsHTML += `<span class="text-xs px-2.5 py-1 rounded border ${badgeClass}">
+                            Drop ${dropCounter}: <span class="font-bold">${currentWeight.toFixed(1)}</span>
+                          </span>`;
+            
+            currentWeight *= 0.80; // Reduce by 20%
+            dropCounter++;
+          }
+          
+          dropsHTML += `</div>`;
+        } else {
+          dropsHTML = `<span class="text-slate-500">-</span>`;
+        }
 
         // Create Table Row
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-700/20 transition-colors";
         tr.innerHTML = `
-          <td class="py-4 pr-4">
+          <td class="py-4 pr-4 align-top">
             <div class="font-medium text-slate-200">${ex.name}</div>
             <div class="text-xs text-slate-500">${ex.type}</div>
           </td>
-          <td class="py-4 text-center font-semibold text-white">
+          <td class="py-4 text-center font-semibold text-white align-top">
             ${initialWeight > 0 ? initialWeight.toFixed(1) : '-'}
           </td>
-          <td class="py-4 text-center font-semibold text-yellow-400">
-            ${drop1 > 0 ? drop1.toFixed(1) : '-'}
-          </td>
-          <td class="py-4 text-center font-semibold text-red-400">
-            ${drop2 > 0 ? drop2.toFixed(1) : '-'}
+          <td class="py-4 pl-6 align-top">
+            ${dropsHTML}
           </td>
         `;
         resultsTableBody.appendChild(tr);
       });
 
-      // Show results panel only if at least one weight was entered
+      // Show results panel only if valid input exists
       if (hasValidInput) {
         resultsPanel.classList.remove('hidden');
-        // Scroll to results on mobile
         if(window.innerWidth < 1024) {
            resultsPanel.scrollIntoView({ behavior: 'smooth' });
         }
