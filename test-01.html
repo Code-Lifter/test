@@ -3,23 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>1RM Calculator & Set Logger</title>
+  <title>1RM Calculator & Drop Set Tracker</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8 font-sans">
-  <div class="max-w-4xl mx-auto space-y-8">
+  <div class="max-w-4xl mx-auto space-y-6">
     
     <!-- Header -->
     <header class="border-b border-slate-800 pb-4">
-      <h1 class="text-3xl font-bold tracking-tight text-emerald-400">1RM Calculator & Set Tracker</h1>
-      <p class="text-slate-400 text-sm mt-1">Estimate your absolute 1RM using the Epley formula and track workout performance.</p>
+      <h1 class="text-3xl font-bold tracking-tight text-emerald-400">1RM & Drop Set Planner</h1>
+      <p class="text-slate-400 text-sm mt-1">Estimate 1RM, structure progressive weight steps, and log sets with form control.</p>
     </header>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <!-- Tempo Callout Box -->
+    <div class="bg-slate-800/90 border-l-4 border-emerald-500 rounded-r-xl p-4 shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+      <div>
+        <span class="text-xs uppercase tracking-wider text-emerald-400 font-bold block">Execution Tempo Rule</span>
+        <span class="text-xl font-extrabold text-slate-100 font-mono">3 - 0 - 1 - 0</span>
+      </div>
+      <p class="text-xs text-slate-300 max-w-md">
+        <strong class="text-slate-100">3s</strong> lowering (eccentric) &bull; 
+        <strong class="text-slate-100">0s</strong> pause bottom &bull; 
+        <strong class="text-slate-100">1s</strong> press (concentric) &bull; 
+        <strong class="text-slate-100">0s</strong> pause top (no lockout)
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       
       <!-- Input Panel -->
       <section class="bg-slate-800 border border-slate-700/60 rounded-xl p-6 shadow-xl space-y-4">
-        <h2 class="text-xl font-semibold text-slate-200 mb-2">Estimate 1RM</h2>
+        <h2 class="text-xl font-semibold text-slate-200 mb-2">1RM Calculator & Logger</h2>
         
         <div>
           <label class="block text-sm font-medium text-slate-300 mb-1">Weight Lifted (kg)</label>
@@ -42,16 +56,16 @@
       <!-- Output Display -->
       <section class="bg-slate-800 border border-slate-700/60 rounded-xl p-6 shadow-xl flex flex-col justify-between">
         <div>
-          <h2 class="text-xl font-semibold text-slate-200 mb-2">Calculated Results</h2>
-          <div class="mt-4 p-4 bg-slate-900/80 rounded-lg border border-slate-700/50 text-center">
+          <h2 class="text-xl font-semibold text-slate-200 mb-2">Est. Max Results</h2>
+          <div class="mt-2 p-4 bg-slate-900/80 rounded-lg border border-slate-700/50 text-center">
             <span class="text-xs uppercase tracking-wider text-slate-400 block mb-1">Estimated 1RM</span>
             <span id="oneRmResult" class="text-4xl font-extrabold text-emerald-400">0.0 kg</span>
           </div>
         </div>
 
-        <!-- Working Weight Percentages breakdown -->
-        <div class="mt-6 pt-4 border-t border-slate-700/50">
-          <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-3">Load Projections</span>
+        <!-- Working Weight Percentages -->
+        <div class="mt-4 pt-4 border-t border-slate-700/50">
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-2">Target Load Ranges</span>
           <div class="grid grid-cols-3 gap-2 text-center text-xs">
             <div class="bg-slate-900 p-2 rounded border border-slate-800">
               <span class="block text-slate-400">85% (3-5RM)</span>
@@ -70,6 +84,41 @@
       </section>
 
     </div>
+
+    <!-- NEW: Custom Weight Steps & Intervals Section -->
+    <section class="bg-slate-800 border border-slate-700/60 rounded-xl p-6 shadow-xl space-y-4">
+      <h2 class="text-xl font-semibold text-slate-200">Weight Step Generator</h2>
+      <p class="text-xs text-slate-400">Set your starting load and stack/plate interval to project progressive set weights.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1">Starting Weight (kg)</label>
+          <input type="number" id="startWeight" placeholder="e.g. 30" step="1" value="30" oninput="generateWeightSteps()"
+            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1">Step Interval (kg)</label>
+          <input type="number" id="stepInterval" placeholder="e.g. 5" step="0.5" value="5" oninput="generateWeightSteps()"
+            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500">
+        </div>
+      </div>
+
+      <div class="overflow-x-auto mt-2">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-slate-700 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <th class="py-2 px-3">Step #</th>
+              <th class="py-2 px-3">Weight (kg)</th>
+              <th class="py-2 px-3">Drop 1 (-20%)</th>
+              <th class="py-2 px-3">Drop 2 (-20%)</th>
+            </tr>
+          </thead>
+          <tbody id="intervalTableBody" class="divide-y divide-slate-700/50 text-sm text-slate-300">
+            <!-- Dynamically generated rows -->
+          </tbody>
+        </table>
+      </div>
+    </section>
 
     <!-- Workout Set History Log -->
     <section class="bg-slate-800 border border-slate-700/60 rounded-xl p-6 shadow-xl">
@@ -102,6 +151,9 @@
   <script>
     let setCounter = 0;
 
+    // Initialize interval table on load
+    document.addEventListener('DOMContentLoaded', generateWeightSteps);
+
     function calculateAndLog() {
       const weightInput = parseFloat(document.getElementById('weight').value);
       const repsInput = parseInt(document.getElementById('reps').value);
@@ -111,26 +163,45 @@
         return;
       }
 
-      // Epley Formula: 1RM = Weight * (1 + Reps / 30)
-      // For 1 rep, 1RM equals weight lifted
       const oneRm = repsInput === 1 ? weightInput : weightInput * (1 + repsInput / 30);
 
-      // Update UI outputs
       document.getElementById('oneRmResult').innerText = `${oneRm.toFixed(1)} kg`;
       document.getElementById('pct85').innerText = `${(oneRm * 0.85).toFixed(1)} kg`;
       document.getElementById('pct75').innerText = `${(oneRm * 0.75).toFixed(1)} kg`;
       document.getElementById('pct65').innerText = `${(oneRm * 0.65).toFixed(1)} kg`;
 
-      // Log the set to table
       logSet(weightInput, repsInput, oneRm);
+    }
+
+    function generateWeightSteps() {
+      const startWeight = parseFloat(document.getElementById('startWeight').value) || 0;
+      const interval = parseFloat(document.getElementById('stepInterval').value) || 0;
+      const tbody = document.getElementById('intervalTableBody');
+      
+      tbody.innerHTML = '';
+
+      if (startWeight <= 0 || interval <= 0) return;
+
+      for (let i = 0; i < 8; i++) {
+        const currentWeight = startWeight + (i * interval);
+        const drop1 = currentWeight * 0.80;
+        const drop2 = drop1 * 0.80;
+
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-slate-700/30 transition-colors';
+        row.innerHTML = `
+          <td class="py-2 px-3 font-semibold text-slate-400">Step ${i + 1}</td>
+          <td class="py-2 px-3 font-bold text-slate-100">${currentWeight.toFixed(1)} kg</td>
+          <td class="py-2 px-3 text-emerald-400 font-medium">${drop1.toFixed(1)} kg</td>
+          <td class="py-2 px-3 text-emerald-400/80 font-medium">${drop2.toFixed(1)} kg</td>
+        `;
+        tbody.appendChild(row);
+      }
     }
 
     function logSet(weight, reps, oneRm) {
       const tbody = document.getElementById('logTableBody');
-      
-      if (setCounter === 0) {
-        tbody.innerHTML = ''; // Clear empty state on first entry
-      }
+      if (setCounter === 0) tbody.innerHTML = '';
 
       setCounter++;
 
