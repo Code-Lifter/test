@@ -1,295 +1,210 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>1RM & Drop Set Engine</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabata Workout & Weight Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8 font-sans">
-  <div class="max-w-4xl mx-auto space-y-6">
-    
-    <!-- Header -->
-    <header class="border-b border-slate-800 pb-4">
-      <h1 class="text-3xl font-bold tracking-tight text-emerald-400">1RM & Drop Set Engine</h1>
-      <p class="text-slate-400 text-sm mt-1">Smart weight snapping, dynamic rep targets, and focused drop sets.</p>
-    </header>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen pb-10">
 
-    <!-- Tempo Callout Banner -->
-    <div class="bg-slate-800/90 border-l-4 border-emerald-500 rounded-r-xl p-4 shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-      <div>
-        <span class="text-xs uppercase tracking-wider text-emerald-400 font-bold block">Execution Tempo Rule</span>
-        <span class="text-xl font-extrabold text-slate-100 font-mono">3 - 0 - 1 - 0</span>
-      </div>
-      <p class="text-xs text-slate-300 max-w-md">
-        <strong class="text-slate-100">3s</strong> lowering &bull; 
-        <strong class="text-slate-100">0s</strong> pause bottom &bull; 
-        <strong class="text-slate-100">1s</strong> press &bull; 
-        <strong class="text-slate-100">0s</strong> pause top
-      </p>
-    </div>
+    <nav class="w-full p-4 border-b border-gray-700 mb-6">
+        <a href="/" class="text-blue-400 hover:text-blue-300 flex items-center font-semibold max-w-md mx-auto">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+            Home
+        </a>
+    </nav>
 
-    <!-- Machine Hardware Settings (Interval Snapping) -->
-    <section class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-4 shadow-md space-y-3">
-      <div class="flex items-center justify-between">
-        <span class="text-xs font-semibold uppercase tracking-wider text-slate-300">Gym Hardware Settings</span>
-        <span class="text-xs text-slate-400">Snap ideal math to real machine pin steps</span>
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-xs text-slate-400 mb-1">Stack Step Interval (kg)</label>
-          <input type="number" id="stackInterval" value="5" step="0.5" oninput="runCalculation()"
-            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
-        </div>
-        <div class="flex items-center pt-5">
-          <label class="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" id="snapToggle" checked onchange="runCalculation()" class="sr-only peer">
-            <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
-            <span class="ml-3 text-xs font-medium text-slate-300">Snap outputs to nearest step</span>
-          </label>
-        </div>
-      </div>
-    </section>
-
-    <!-- Calculation Engine Main Card -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      
-      <!-- Dynamic Input Panel -->
-      <section class="bg-slate-800 border border-slate-700/60 rounded-xl p-6 shadow-xl space-y-4 flex flex-col">
+    <main class="max-w-md mx-auto px-4 space-y-8">
         
-        <!-- Mode Switch Toggle (Moved here) -->
-        <div class="bg-slate-900 p-1.5 rounded-xl border border-slate-700/80 flex items-center justify-between mb-2">
-          <button id="mode1rmBtn" onclick="setMode('1rm')" 
-            class="flex-1 px-4 py-2 rounded-lg text-xs font-bold transition-all bg-emerald-600 text-slate-950 shadow">
-            1RM Input
-          </button>
-          <button id="modeRepsBtn" onclick="setMode('reps')" 
-            class="flex-1 px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-200">
-            Reps + Weight
-          </button>
-        </div>
+        <section class="bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-700 text-center">
+            <h1 class="text-2xl font-bold mb-2">Tabata Timer</h1>
+            
+            <div class="my-6">
+                <p id="phaseDisplay" class="text-xl font-medium text-green-400 uppercase tracking-widest mb-2">Work</p>
+                <div id="timeDisplay" class="text-7xl font-bold tabular-nums">20</div>
+                <p class="text-gray-400 mt-3 text-lg">Round <span id="roundDisplay" class="font-bold text-white">1</span> / 8</p>
+            </div>
 
-        <!-- Mode A: Direct 1RM -->
-        <div id="panel1RM" class="space-y-4 flex-grow">
-          <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Your 1RM Baseline (kg)</label>
-            <input type="number" id="direct1RM" placeholder="e.g. 70" step="0.5" oninput="runCalculation()"
-              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500 text-lg font-semibold">
-          </div>
-        </div>
+            <div class="flex gap-3 justify-center mt-6">
+                <button id="startBtn" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded-lg transition">
+                    Start
+                </button>
+                <button id="pauseBtn" class="flex-1 bg-yellow-600 hover:bg-yellow-500 text-white font-bold py-3 px-4 rounded-lg transition hidden">
+                    Pause
+                </button>
+                <button id="resetBtn" class="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-4 rounded-lg transition">
+                    Reset
+                </button>
+            </div>
+        </section>
 
-        <!-- Mode B: Reps & Weight Calc -->
-        <div id="panelReps" class="space-y-4 hidden flex-grow">
-          <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Weight Lifted (kg)</label>
-            <input type="number" id="inputWeight" placeholder="e.g. 55" step="0.5" oninput="runCalculation()"
-              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Reps Completed</label>
-            <input type="number" id="inputReps" placeholder="e.g. 8" step="1" oninput="runCalculation()"
-              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500">
-          </div>
-        </div>
+        <section class="bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-700">
+            <h2 class="text-xl font-bold mb-4">Tabata Weight Calculator</h2>
+            <p class="text-sm text-gray-400 mb-4">Enter your 1-Rep Max (1RM) for an exercise to find your ideal Tabata weight (50-60%).</p>
+            
+            <div class="flex flex-col gap-3">
+                <label for="weightInput" class="text-sm font-medium">Your 1-Rep Max (lbs/kg)</label>
+                <input type="number" id="weightInput" placeholder="e.g., 100" class="bg-gray-700 border border-gray-600 text-white rounded-lg p-3 focus:outline-none focus:border-blue-500">
+                
+                <div id="calcResult" class="mt-4 hidden bg-gray-900 p-4 rounded-lg border border-gray-600">
+                    <p class="text-sm text-gray-400">Target Weight Range:</p>
+                    <p id="weightRangeText" class="text-2xl font-bold text-blue-400 mt-1">--</p>
+                </div>
+            </div>
+        </section>
 
-        <button onclick="logCurrentSet()" 
-          class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-2.5 rounded-lg transition-colors shadow-lg mt-auto">
-          Log Performance Set
-        </button>
-      </section>
+    </main>
 
-      <!-- Dynamic Focused Output Display -->
-      <section class="bg-slate-800 border border-slate-700/60 rounded-xl p-6 shadow-xl flex flex-col justify-between">
+    <script>
+        let timerInterval;
+        let isRunning = false;
         
-        <div>
-          <div class="flex justify-between items-end mb-3">
-            <h2 class="text-xl font-semibold text-slate-200">Focused Working Target</h2>
-            <span id="display1RM" class="text-xs font-semibold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded">1RM: 0.0 kg</span>
-          </div>
-          
-          <!-- Zone Pill Slider -->
-          <div class="bg-slate-900 p-1.5 rounded-xl border border-slate-700/80 flex items-center justify-between mb-4">
-            <button id="zone85Btn" onclick="setZone('85')" 
-              class="flex-1 px-2 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-200">
-              Heavy (85%)
-            </button>
-            <button id="zone75Btn" onclick="setZone('75')" 
-              class="flex-1 px-2 py-1.5 rounded-lg text-xs font-bold transition-all bg-emerald-600 text-slate-950 shadow">
-              Hypertrophy (75%)
-            </button>
-            <button id="zone65Btn" onclick="setZone('65')" 
-              class="flex-1 px-2 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-200">
-              Endurance (65%)
-            </button>
-          </div>
+        let timeRemaining = 20;
+        let currentRound = 1;
+        let phase = 'Work'; 
+        let maxRounds = 8;
 
-          <!-- Master Target Display -->
-          <div class="mt-2 p-6 bg-slate-900/80 rounded-lg border border-slate-700/50 text-center shadow-inner">
-            <span id="activeZoneLabel" class="text-xs uppercase tracking-wider text-slate-400 block mb-2">Hypertrophy Target Load</span>
-            <span id="masterTargetWeight" class="text-5xl font-extrabold text-emerald-400 block mb-2">0.0 kg</span>
-            <span id="masterTargetReps" class="text-sm font-semibold text-slate-300">Target: ~8 reps</span>
-          </div>
-        </div>
-      </section>
+        const timeDisplay = document.getElementById('timeDisplay');
+        const phaseDisplay = document.getElementById('phaseDisplay');
+        const roundDisplay = document.getElementById('roundDisplay');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const weightInput = document.getElementById('weightInput');
+        const calcResult = document.getElementById('calcResult');
+        const weightRangeText = document.getElementById('weightRangeText');
 
-    </div>
-
-    <!-- Drop Set Sequence Generator -->
-    <section class="bg-slate-800 border border-slate-700/60 rounded-xl p-6 shadow-xl space-y-3">
-      <div class="flex justify-between items-end">
-        <h2 class="text-xl font-semibold text-slate-200">Drop Set Sequence</h2>
-        <span id="dropSetSourceLabel" class="text-xs text-slate-400">Based on Hypertrophy (75%)</span>
-      </div>
-      
-      <div class="grid grid-cols-3 gap-4 text-center mt-2">
-        <div class="p-4 bg-slate-900/60 rounded-lg border border-slate-700/40">
-          <span class="text-xs text-slate-400 block mb-1">Working Set</span>
-          <span id="dsWorking" class="text-2xl font-bold text-slate-100">0 kg</span>
-        </div>
-        <div class="p-4 bg-slate-900/60 rounded-lg border border-slate-700/40 relative overflow-hidden">
-          <div class="absolute top-0 right-0 bg-emerald-500/20 text-emerald-400 text-[10px] px-1.5 py-0.5 rounded-bl-lg">-20%</div>
-          <span class="text-xs text-slate-400 block mb-1">Drop 1</span>
-          <span id="dsDrop1" class="text-2xl font-bold text-emerald-400">0 kg</span>
-        </div>
-        <div class="p-4 bg-slate-900/60 rounded-lg border border-slate-700/40 relative overflow-hidden">
-          <div class="absolute top-0 right-0 bg-emerald-500/10 text-emerald-400/70 text-[10px] px-1.5 py-0.5 rounded-bl-lg">-20%</div>
-          <span class="text-xs text-slate-400 block mb-1">Drop 2</span>
-          <span id="dsDrop2" class="text-2xl font-bold text-emerald-400/80">0 kg</span>
-        </div>
-      </div>
-    </section>
-
-  </div>
-
-  <script>
-    let activeMode = '1rm'; 
-    let activeZone = '75'; // default to Hypertrophy
-    let setCounter = 0;
-
-    function setMode(mode) {
-      activeMode = mode;
-      const btn1rm = document.getElementById('mode1rmBtn');
-      const btnReps = document.getElementById('modeRepsBtn');
-      const p1 = document.getElementById('panel1RM');
-      const pR = document.getElementById('panelReps');
-
-      if (mode === '1rm') {
-        btn1rm.className = 'flex-1 px-4 py-2 rounded-lg text-xs font-bold transition-all bg-emerald-600 text-slate-950 shadow';
-        btnReps.className = 'flex-1 px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-200';
-        p1.classList.remove('hidden');
-        pR.classList.add('hidden');
-      } else {
-        btnReps.className = 'flex-1 px-4 py-2 rounded-lg text-xs font-bold transition-all bg-emerald-600 text-slate-950 shadow';
-        btn1rm.className = 'flex-1 px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-200';
-        pR.classList.remove('hidden');
-        p1.classList.add('hidden');
-      }
-      runCalculation();
-    }
-
-    function setZone(zone) {
-      activeZone = zone;
-      const btn85 = document.getElementById('zone85Btn');
-      const btn75 = document.getElementById('zone75Btn');
-      const btn65 = document.getElementById('zone65Btn');
-
-      // Reset all to unselected
-      [btn85, btn75, btn65].forEach(btn => {
-        btn.className = 'flex-1 px-2 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-200';
-      });
-
-      // Apply selected style
-      const activeBtnClass = 'flex-1 px-2 py-1.5 rounded-lg text-xs font-bold transition-all bg-emerald-600 text-slate-950 shadow';
-      if (zone === '85') btn85.className = activeBtnClass;
-      if (zone === '75') btn75.className = activeBtnClass;
-      if (zone === '65') btn65.className = activeBtnClass;
-
-      // Update Labels
-      const labels = {
-        '85': 'Heavy Target Load',
-        '75': 'Hypertrophy Target Load',
-        '65': 'Endurance Target Load'
-      };
-      const sourceLabels = {
-        '85': 'Based on Heavy (85%)',
-        '75': 'Based on Hypertrophy (75%)',
-        '65': 'Based on Endurance (65%)'
-      };
-      
-      document.getElementById('activeZoneLabel').innerText = labels[zone];
-      document.getElementById('dropSetSourceLabel').innerText = sourceLabels[zone];
-
-      runCalculation();
-    }
-
-    function snapToInterval(weight, step) {
-      if (!step || step <= 0) return weight;
-      return Math.round(weight / step) * step;
-    }
-
-    function calculateRepsForWeight(oneRm, weight) {
-      if (weight >= oneRm) return 1;
-      const reps = Math.round(30 * ((oneRm / weight) - 1));
-      return Math.max(1, reps);
-    }
-
-    function runCalculation() {
-      let calculated1RM = 0;
-      const interval = parseFloat(document.getElementById('stackInterval').value) || 5;
-      const doSnap = document.getElementById('snapToggle').checked;
-
-      if (activeMode === '1rm') {
-        calculated1RM = parseFloat(document.getElementById('direct1RM').value) || 0;
-      } else {
-        const w = parseFloat(document.getElementById('inputWeight').value) || 0;
-        const r = parseInt(document.getElementById('inputReps').value) || 0;
-        if (w > 0 && r > 0) {
-          calculated1RM = r === 1 ? w : w * (1 + r / 30);
+        function loadStorage() {
+            const savedData = JSON.parse(localStorage.getItem('tabataApp'));
+            if (savedData) {
+                timeRemaining = savedData.timeRemaining;
+                currentRound = savedData.currentRound;
+                phase = savedData.phase;
+                if (savedData.oneRepMax) {
+                    weightInput.value = savedData.oneRepMax;
+                    calculateWeight();
+                }
+            }
+            updateUI();
         }
-      }
 
-      document.getElementById('display1RM').innerText = `1RM: ${calculated1RM.toFixed(1)} kg`;
+        function saveStorage() {
+            const dataToSave = {
+                timeRemaining,
+                currentRound,
+                phase,
+                oneRepMax: weightInput.value
+            };
+            localStorage.setItem('tabataApp', JSON.stringify(dataToSave));
+        }
 
-      if (calculated1RM <= 0) {
-        updateFocusUI(0, 0);
-        updateDropSet(0, interval, doSnap);
-        return;
-      }
+        function updateUI() {
+            timeDisplay.textContent = timeRemaining;
+            roundDisplay.textContent = currentRound;
+            phaseDisplay.textContent = phase;
+            
+            if (phase === 'Work') {
+                phaseDisplay.className = "text-xl font-medium text-green-400 uppercase tracking-widest mb-2";
+                timeDisplay.className = "text-7xl font-bold tabular-nums text-white";
+            } else if (phase === 'Rest') {
+                phaseDisplay.className = "text-xl font-medium text-red-400 uppercase tracking-widest mb-2";
+                timeDisplay.className = "text-7xl font-bold tabular-nums text-red-200";
+            } else {
+                phaseDisplay.className = "text-xl font-medium text-blue-400 uppercase tracking-widest mb-2";
+            }
+        }
 
-      // Determine active multiplier
-      const multiplier = parseInt(activeZone) / 100;
-      const rawTarget = calculated1RM * multiplier;
-      const finalTarget = doSnap ? snapToInterval(rawTarget, interval) : rawTarget;
-      
-      // Calculate specific reps for this snapped target
-      let targetReps = 0;
-      if (doSnap) {
-        targetReps = calculateRepsForWeight(calculated1RM, finalTarget);
-      } else {
-        // Fallback to standard rep targets if exact math is used
-        targetReps = activeZone === '85' ? 5 : activeZone === '75' ? 8 : 12;
-      }
+        function toggleButtons() {
+            if (isRunning) {
+                startBtn.classList.add('hidden');
+                pauseBtn.classList.remove('hidden');
+            } else {
+                startBtn.classList.remove('hidden');
+                pauseBtn.classList.add('hidden');
+            }
+        }
 
-      updateFocusUI(finalTarget, targetReps);
-      updateDropSet(finalTarget, interval, doSnap);
-    }
+        function tick() {
+            timeRemaining--;
+            
+            if (timeRemaining < 0) {
+                if (phase === 'Work') {
+                    phase = 'Rest';
+                    timeRemaining = 10;
+                } else {
+                    currentRound++;
+                    if (currentRound > maxRounds) {
+                        finishWorkout();
+                        return;
+                    }
+                    phase = 'Work';
+                    timeRemaining = 20;
+                }
+            }
+            
+            updateUI();
+            saveStorage();
+        }
 
-    function updateFocusUI(weight, reps) {
-      document.getElementById('masterTargetWeight').innerText = `${weight.toFixed(1)} kg`;
-      document.getElementById('masterTargetReps').innerText = `Target: ~${reps} reps`;
-    }
+        function finishWorkout() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            phase = 'Done!';
+            timeRemaining = 0;
+            updateUI();
+            toggleButtons();
+            startBtn.disabled = true;
+            startBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            saveStorage();
+        }
 
-    function updateDropSet(baseWeight, interval, doSnap) {
-      const rawD1 = baseWeight * 0.80;
-      const rawD2 = rawD1 * 0.80;
+        startBtn.addEventListener('click', () => {
+            if (!isRunning && phase !== 'Done!') {
+                isRunning = true;
+                timerInterval = setInterval(tick, 1000);
+                toggleButtons();
+            }
+        });
 
-      const d1 = doSnap ? snapToInterval(rawD1, interval) : rawD1;
-      const d2 = doSnap ? snapToInterval(rawD2, interval) : rawD2;
+        pauseBtn.addEventListener('click', () => {
+            isRunning = false;
+            clearInterval(timerInterval);
+            toggleButtons();
+            saveStorage();
+        });
 
-      document.getElementById('dsWorking').innerText = `${baseWeight.toFixed(1)} kg`;
-      document.getElementById('dsDrop1').innerText = `${d1.toFixed(1)} kg`;
-      document.getElementById('dsDrop2').innerText = `${d2.toFixed(1)} kg`;
-    }
-  </script>
+        resetBtn.addEventListener('click', () => {
+            isRunning = false;
+            clearInterval(timerInterval);
+            timeRemaining = 20;
+            currentRound = 1;
+            phase = 'Work';
+            
+            startBtn.disabled = false;
+            startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            
+            updateUI();
+            toggleButtons();
+            saveStorage();
+        });
+
+        function calculateWeight() {
+            const oneRm = parseFloat(weightInput.value);
+            if (oneRm > 0) {
+                const lowerBound = Math.round(oneRm * 0.5);
+                const upperBound = Math.round(oneRm * 0.6);
+                weightRangeText.textContent = `${lowerBound} - ${upperBound}`;
+                calcResult.classList.remove('hidden');
+            } else {
+                calcResult.classList.add('hidden');
+            }
+            saveStorage();
+        }
+
+        weightInput.addEventListener('input', calculateWeight);
+
+        loadStorage();
+    </script>
 </body>
 </html>
