@@ -3,208 +3,297 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tabata Workout & Weight Calculator</title>
+    <title>PT Intake Wizard</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-900 text-gray-100 font-sans min-h-screen pb-10">
+<body class="bg-slate-50 min-h-screen flex flex-col font-sans text-slate-800">
 
-    <nav class="w-full p-4 border-b border-gray-700 mb-6">
-        <a href="/" class="text-blue-400 hover:text-blue-300 flex items-center font-semibold max-w-md mx-auto">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+    <!-- Top Navigation (Non-fixed, sits in normal document flow) -->
+    <div class="w-full p-4 md:px-8">
+        <a href="#" class="inline-flex items-center gap-2 text-slate-500 hover:text-blue-600 font-medium transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+            </svg>
             Home
         </a>
-    </nav>
+    </div>
 
-    <main class="max-w-md mx-auto px-4 space-y-8">
-        
-        <section class="bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-700 text-center">
-            <h1 class="text-2xl font-bold mb-2">Tabata Timer</h1>
+    <!-- Main Wizard Wrapper -->
+    <div class="flex-1 flex items-start sm:items-center justify-center p-4 w-full">
+        <div class="bg-white max-w-lg w-full rounded-2xl shadow-xl overflow-hidden mb-12">
             
-            <div class="my-6">
-                <p id="phaseDisplay" class="text-xl font-medium text-green-400 uppercase tracking-widest mb-2">Work</p>
-                <div id="timeDisplay" class="text-7xl font-bold tabular-nums">20</div>
-                <p class="text-gray-400 mt-3 text-lg">Round <span id="roundDisplay" class="font-bold text-white">1</span> / 8</p>
+            <!-- Header -->
+            <div class="bg-blue-600 p-6 text-white text-center">
+                <h1 class="text-2xl font-bold">Client Intake Protocol</h1>
+                <p class="text-blue-100 text-sm mt-1">Clear risk. Define targets. Build the program.</p>
             </div>
 
-            <div class="flex gap-3 justify-center mt-6">
-                <button id="startBtn" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded-lg transition">
-                    Start
-                </button>
-                <button id="pauseBtn" class="flex-1 bg-yellow-600 hover:bg-yellow-500 text-white font-bold py-3 px-4 rounded-lg transition hidden">
-                    Pause
-                </button>
-                <button id="resetBtn" class="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-4 rounded-lg transition">
-                    Reset
-                </button>
+            <!-- Progress Bar -->
+            <div class="bg-slate-200 h-1.5 w-full">
+                <div id="progress-bar" class="bg-blue-500 h-1.5 transition-all duration-300 w-0"></div>
             </div>
-        </section>
 
-        <section class="bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-700">
-            <h2 class="text-xl font-bold mb-4">Tabata Weight Calculator</h2>
-            <p class="text-sm text-gray-400 mb-4">Enter your 1-Rep Max (1RM) for an exercise to find your ideal Tabata weight (50-60%).</p>
-            
-            <div class="flex flex-col gap-3">
-                <label for="weightInput" class="text-sm font-medium">Your 1-Rep Max (lbs/kg)</label>
-                <input type="number" id="weightInput" placeholder="e.g., 100" class="bg-gray-700 border border-gray-600 text-white rounded-lg p-3 focus:outline-none focus:border-blue-500">
+            <!-- Wizard Content -->
+            <form id="wizard-form" class="p-6 md:p-8">
                 
-                <div id="calcResult" class="mt-4 hidden bg-gray-900 p-4 rounded-lg border border-gray-600">
-                    <p class="text-sm text-gray-400">Target Weight Range:</p>
-                    <p id="weightRangeText" class="text-2xl font-bold text-blue-400 mt-1">--</p>
+                <!-- Step 0: Safety & Triage -->
+                <div class="wizard-step block" id="step-0">
+                    <h2 class="text-xl font-bold mb-2">Safety & Triage <span class="text-slate-400 font-normal text-sm">(1/4)</span></h2>
+                    <p class="text-slate-600 mb-6 text-sm">Pre-exercise screening (PAR-Q+) to identify physiological risk factors before training begins.</p>
+                    
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-slate-700">Has a doctor ever said you have a heart condition?</label>
+                            <div class="flex gap-4">
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="heartCondition" value="yes" class="w-4 h-4 text-blue-600 focus:ring-blue-500"> Yes</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="heartCondition" value="no" class="w-4 h-4 text-blue-600 focus:ring-blue-500"> No</label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-slate-700">Do you feel pain in your chest during physical activity?</label>
+                            <div class="flex gap-4">
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="chestPain" value="yes" class="w-4 h-4 text-blue-600 focus:ring-blue-500"> Yes</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="chestPain" value="no" class="w-4 h-4 text-blue-600 focus:ring-blue-500"> No</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Step 1: Goal Extraction -->
+                <div class="wizard-step hidden" id="step-1">
+                    <h2 class="text-xl font-bold mb-2">Target Parameters <span class="text-slate-400 font-normal text-sm">(2/4)</span></h2>
+                    <p class="text-slate-600 mb-6 text-sm">Define actionable objectives and current lifestyle constraints.</p>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Primary Objective</label>
+                            <select name="primaryGoal" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white">
+                                <option value="">Select a goal...</option>
+                                <option value="Hypertrophy">Hypertrophy & Muscle Gain</option>
+                                <option value="Strength">Absolute Strength</option>
+                                <option value="Re-composition">Body Re-composition</option>
+                                <option value="Endurance">Endurance & Conditioning</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Nutrition Baseline</label>
+                            <textarea name="nutrition" rows="3" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="e.g., Targets 400g carbs, skips breakfast, relies on takeout..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Baseline Testing -->
+                <div class="wizard-step hidden" id="step-2">
+                    <h2 class="text-xl font-bold mb-2">Baseline Metrics <span class="text-slate-400 font-normal text-sm">(3/4)</span></h2>
+                    <p class="text-slate-600 mb-6 text-sm">Record starting physical dimensions and movement mechanics.</p>
+                    
+                    <div class="space-y-4">
+                        <div class="flex gap-4">
+                            <div class="w-1/2">
+                                <label class="block text-sm font-medium mb-1">Height (cm)</label>
+                                <input type="number" name="height" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="183">
+                            </div>
+                            <div class="w-1/2">
+                                <label class="block text-sm font-medium mb-1">Weight (kg)</label>
+                                <input type="number" name="weight" step="0.1" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="87.0">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Movement Screen Notes</label>
+                            <textarea name="movementNotes" rows="2" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Any structural imbalances? Joint limitations?"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Program Mapping -->
+                <div class="wizard-step hidden" id="step-3">
+                    <h2 class="text-xl font-bold mb-2">Program Architecture <span class="text-slate-400 font-normal text-sm">(4/4)</span></h2>
+                    <p class="text-slate-600 mb-6 text-sm">Determine the training framework based on recovery capacity.</p>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Training Frequency</label>
+                            <select name="frequency" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white">
+                                <option value="">Select frequency...</option>
+                                <option value="2 Days">2 Days / Week</option>
+                                <option value="3 Days">3 Days / Week</option>
+                                <option value="4 Days">4 Days / Week</option>
+                                <option value="5 Days">5 Days / Week</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Proposed Split Structure</label>
+                            <input type="text" name="split" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="e.g., Push/Pull/Legs or High-Intensity single set">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Final Result Step -->
+                <div class="wizard-step hidden" id="step-4">
+                    <div class="text-center mb-6">
+                        <div class="bg-green-100 text-green-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">✓</div>
+                        <h2 class="text-2xl font-bold">Profile Generated</h2>
+                        <p class="text-slate-600 mt-2">The blueprint is ready.</p>
+                    </div>
+                    
+                    <div class="bg-blue-50 border border-blue-100 p-5 rounded-xl">
+                        <p id="final-summary-text" class="text-sm leading-relaxed text-blue-900 font-medium"></p>
+                    </div>
+                </div>
+
+            </form>
+
+            <!-- Navigation Buttons -->
+            <div class="bg-slate-50 p-4 border-t border-slate-200 flex justify-between items-center">
+                <button id="btn-prev" class="px-4 py-2.5 text-slate-600 font-medium hover:text-slate-900 transition-colors" onclick="prevStep()">← Back</button>
+                <div class="flex-grow"></div>
+                <button id="btn-next" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors" onclick="nextStep()">Next Step →</button>
+                <button id="btn-restart" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-6 py-2.5 rounded-lg font-medium shadow-sm hidden transition-colors border border-slate-300" onclick="restartWizard()">Reset Data</button>
             </div>
-        </section>
+        </div>
+    </div>
 
-    </main>
-
+    <!-- JavaScript Logic -->
     <script>
-        let timerInterval;
-        let isRunning = false;
-        
-        let timeRemaining = 20;
-        let currentRound = 1;
-        let phase = 'Work'; 
-        let maxRounds = 8;
+        let currentStep = 0;
+        const totalSteps = 4; // 0-3 are inputs, 4 is the summary step
+        const form = document.getElementById('wizard-form');
+        const inputs = form.querySelectorAll('input, select, textarea');
 
-        const timeDisplay = document.getElementById('timeDisplay');
-        const phaseDisplay = document.getElementById('phaseDisplay');
-        const roundDisplay = document.getElementById('roundDisplay');
-        const startBtn = document.getElementById('startBtn');
-        const pauseBtn = document.getElementById('pauseBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const weightInput = document.getElementById('weightInput');
-        const calcResult = document.getElementById('calcResult');
-        const weightRangeText = document.getElementById('weightRangeText');
+        // Load data from Local Storage immediately
+        function loadData() {
+            const savedStep = localStorage.getItem('ptIntakeStep');
+            if (savedStep) currentStep = parseInt(savedStep);
 
-        function loadStorage() {
-            const savedData = JSON.parse(localStorage.getItem('tabataApp'));
-            if (savedData) {
-                timeRemaining = savedData.timeRemaining;
-                currentRound = savedData.currentRound;
-                phase = savedData.phase;
-                if (savedData.oneRepMax) {
-                    weightInput.value = savedData.oneRepMax;
-                    calculateWeight();
+            const data = JSON.parse(localStorage.getItem('ptIntakeData')) || {};
+            inputs.forEach(input => {
+                if (data[input.name] !== undefined) {
+                    if (input.type === 'radio' || input.type === 'checkbox') {
+                        input.checked = (input.value === data[input.name]);
+                    } else {
+                        input.value = data[input.name];
+                    }
                 }
-            }
-            updateUI();
+            });
+            
+            // If they refreshed on the final screen, bump them back one step so they can regenerate
+            if (currentStep === totalSteps) currentStep = totalSteps - 1;
         }
 
-        function saveStorage() {
-            const dataToSave = {
-                timeRemaining,
-                currentRound,
-                phase,
-                oneRepMax: weightInput.value
-            };
-            localStorage.setItem('tabataApp', JSON.stringify(dataToSave));
+        // Save data to Local Storage
+        function saveData() {
+            const data = {};
+            inputs.forEach(input => {
+                if (input.type === 'radio' || input.type === 'checkbox') {
+                    if (input.checked) data[input.name] = input.value;
+                } else {
+                    data[input.name] = input.value;
+                }
+            });
+            localStorage.setItem('ptIntakeData', JSON.stringify(data));
         }
+
+        // Attach listeners to save data on every keystroke/change
+        inputs.forEach(input => input.addEventListener('input', saveData));
 
         function updateUI() {
-            timeDisplay.textContent = timeRemaining;
-            roundDisplay.textContent = currentRound;
-            phaseDisplay.textContent = phase;
-            
-            if (phase === 'Work') {
-                phaseDisplay.className = "text-xl font-medium text-green-400 uppercase tracking-widest mb-2";
-                timeDisplay.className = "text-7xl font-bold tabular-nums text-white";
-            } else if (phase === 'Rest') {
-                phaseDisplay.className = "text-xl font-medium text-red-400 uppercase tracking-widest mb-2";
-                timeDisplay.className = "text-7xl font-bold tabular-nums text-red-200";
+            // Hide all steps
+            document.querySelectorAll('.wizard-step').forEach(step => {
+                step.classList.add('hidden');
+                step.classList.remove('block');
+            });
+
+            // Show current step
+            document.getElementById(`step-${currentStep}`).classList.remove('hidden');
+            document.getElementById(`step-${currentStep}`).classList.add('block');
+
+            // Update Progress Bar
+            const progressPercentage = (currentStep / totalSteps) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercentage}%`;
+
+            // Handle Buttons
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+            const btnRestart = document.getElementById('btn-restart');
+
+            // Back button logic
+            if (currentStep === 0 || currentStep === totalSteps) {
+                btnPrev.style.visibility = 'hidden'; // Keeps layout spacing intact vs display:none
             } else {
-                phaseDisplay.className = "text-xl font-medium text-blue-400 uppercase tracking-widest mb-2";
+                btnPrev.style.visibility = 'visible';
             }
-        }
 
-        function toggleButtons() {
-            if (isRunning) {
-                startBtn.classList.add('hidden');
-                pauseBtn.classList.remove('hidden');
+            // Next / Generate / Restart button logic
+            if (currentStep === totalSteps) {
+                btnNext.classList.add('hidden');
+                btnRestart.classList.remove('hidden');
+                btnRestart.innerText = "Start Over (Clear Data)";
+                generateSummaryText();
+            } else if (currentStep === totalSteps - 1) {
+                btnNext.innerText = "Generate Profile ✓";
+                btnNext.classList.remove('hidden');
+                btnRestart.classList.add('hidden');
             } else {
-                startBtn.classList.remove('hidden');
-                pauseBtn.classList.add('hidden');
+                btnNext.innerText = "Next Step →";
+                btnNext.classList.remove('hidden');
+                btnRestart.classList.add('hidden');
+            }
+
+            // Save step state
+            localStorage.setItem('ptIntakeStep', currentStep);
+        }
+
+        function nextStep() {
+            if (currentStep < totalSteps) {
+                currentStep++;
+                updateUI();
             }
         }
 
-        function tick() {
-            timeRemaining--;
-            
-            if (timeRemaining < 0) {
-                if (phase === 'Work') {
-                    phase = 'Rest';
-                    timeRemaining = 10;
-                } else {
-                    currentRound++;
-                    if (currentRound > maxRounds) {
-                        finishWorkout();
-                        return;
-                    }
-                    phase = 'Work';
-                    timeRemaining = 20;
-                }
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateUI();
             }
+        }
+
+        function restartWizard() {
+            if (confirm("This will completely clear the client's data. Are you sure?")) {
+                localStorage.removeItem('ptIntakeData');
+                localStorage.removeItem('ptIntakeStep');
+                form.reset();
+                currentStep = 0;
+                updateUI();
+            }
+        }
+
+        function generateSummaryText() {
+            const data = JSON.parse(localStorage.getItem('ptIntakeData')) || {};
             
+            const goal = data.primaryGoal || "[Unspecified Goal]";
+            const freq = data.frequency || "[Unspecified Frequency]";
+            const split = data.split || "[Unspecified Split]";
+            const ht = data.height || "?";
+            const wt = data.weight || "?";
+            
+            // Basic logic flag for medical risk
+            const requiresClearance = (data.heartCondition === 'yes' || data.chestPain === 'yes') 
+                ? "<br><br><strong class='text-red-600'>⚠️ MEDICAL CLEARANCE REQUIRED</strong> prior to training based on PAR-Q+ responses." 
+                : "";
+
+            const summary = `<strong>Metrics:</strong> ${ht}cm / ${wt}kg<br>
+                             <strong>Target:</strong> ${goal}<br>
+                             <strong>Structure:</strong> ${freq} on a ${split} protocol.
+                             ${requiresClearance}`;
+            
+            document.getElementById('final-summary-text').innerHTML = summary;
+        }
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
             updateUI();
-            saveStorage();
-        }
-
-        function finishWorkout() {
-            clearInterval(timerInterval);
-            isRunning = false;
-            phase = 'Done!';
-            timeRemaining = 0;
-            updateUI();
-            toggleButtons();
-            startBtn.disabled = true;
-            startBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            saveStorage();
-        }
-
-        startBtn.addEventListener('click', () => {
-            if (!isRunning && phase !== 'Done!') {
-                isRunning = true;
-                timerInterval = setInterval(tick, 1000);
-                toggleButtons();
-            }
         });
-
-        pauseBtn.addEventListener('click', () => {
-            isRunning = false;
-            clearInterval(timerInterval);
-            toggleButtons();
-            saveStorage();
-        });
-
-        resetBtn.addEventListener('click', () => {
-            isRunning = false;
-            clearInterval(timerInterval);
-            timeRemaining = 20;
-            currentRound = 1;
-            phase = 'Work';
-            
-            startBtn.disabled = false;
-            startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-            
-            updateUI();
-            toggleButtons();
-            saveStorage();
-        });
-
-        function calculateWeight() {
-            const oneRm = parseFloat(weightInput.value);
-            if (oneRm > 0) {
-                const lowerBound = Math.round(oneRm * 0.5);
-                const upperBound = Math.round(oneRm * 0.6);
-                weightRangeText.textContent = `${lowerBound} - ${upperBound}`;
-                calcResult.classList.remove('hidden');
-            } else {
-                calcResult.classList.add('hidden');
-            }
-            saveStorage();
-        }
-
-        weightInput.addEventListener('input', calculateWeight);
-
-        loadStorage();
     </script>
 </body>
 </html>
