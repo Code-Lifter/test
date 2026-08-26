@@ -3,279 +3,327 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Protocol Generator</title>
+    <title>Comprehensive Client Intake Wizard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        input[type="radio"] { display: none; }
-    </style>
 </head>
-<body class="bg-slate-900 text-slate-200 font-sans min-h-screen p-6 md:p-12">
+<body class="bg-slate-50 min-h-screen flex flex-col font-sans text-slate-800">
 
-    <div class="max-w-4xl mx-auto">
-        <header class="mb-10 text-center">
-            <h1 class="text-4xl font-extrabold text-white tracking-tight mb-2">The Protocol Generator</h1>
-            <p class="text-slate-400">No math. No calculators. Just clear marching orders.</p>
-        </header>
+    <!-- Top Navigation -->
+    <div class="w-full p-4 md:px-8 max-w-3xl mx-auto">
+        <a href="#" class="inline-flex items-center gap-2 text-slate-500 hover:text-blue-600 font-medium transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+            </svg>
+            Home
+        </a>
+    </div>
 
-        <form id="protocolForm" class="space-y-10 bg-slate-800 p-8 rounded-2xl shadow-xl">
+    <!-- Main Wizard Wrapper -->
+    <div class="flex-1 flex items-start justify-center p-4 w-full">
+        <div class="bg-white max-w-2xl w-full rounded-2xl shadow-xl overflow-hidden mb-12">
             
-            <div>
-                <h2 class="text-2xl font-bold mb-2 text-white border-b border-slate-700 pb-2">1. What is the primary mission?</h2>
+            <!-- Header -->
+            <div class="bg-blue-600 p-6 text-white text-center">
+                <h1 class="text-2xl font-bold">Comprehensive Client Intake</h1>
+                <p class="text-blue-100 text-sm mt-1">Establish baselines, map lifestyle, and set targets.</p>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="bg-slate-200 h-1.5 w-full">
+                <div id="progress-bar" class="bg-blue-500 h-1.5 transition-all duration-300 w-0"></div>
+            </div>
+
+            <!-- Wizard Content -->
+            <form id="wizard-form" class="p-6 md:p-8">
                 
-                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mt-6 mb-3">The Mirror (Aesthetics)</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <label class="cursor-pointer">
-                        <input type="radio" name="goal" value="size" checked>
-                        <div class="card bg-slate-700 hover:bg-slate-600 rounded-lg p-4 text-center transition-colors border-2 border-blue-500 bg-blue-900/30">
-                            <h4 class="font-bold text-lg text-white">Get Bigger</h4>
-                            <p class="text-sm text-slate-400">Focus on muscle size</p>
+                <!-- Step 0: Baseline & Lifestyle -->
+                <div class="wizard-step block" id="step-0">
+                    <h2 class="text-xl font-bold mb-2">Baseline & Lifestyle <span class="text-slate-400 font-normal text-sm">(1/5)</span></h2>
+                    <p class="text-slate-600 mb-6 text-sm">Let's establish your physical starting point and daily habits.</p>
+                    
+                    <div class="space-y-4">
+                        <div class="flex gap-4">
+                            <div class="w-1/3">
+                                <label class="block text-sm font-medium mb-1">Age</label>
+                                <input type="number" name="age" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
+                            <div class="w-1/3">
+                                <label class="block text-sm font-medium mb-1">Height (cm)</label>
+                                <input type="number" name="height" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
+                            <div class="w-1/3">
+                                <label class="block text-sm font-medium mb-1">Weight (kg)</label>
+                                <input type="number" name="weight" step="0.1" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
                         </div>
-                    </label>
-                    <label class="cursor-pointer">
-                        <input type="radio" name="goal" value="shred">
-                        <div class="card bg-slate-700 hover:bg-slate-600 rounded-lg p-4 text-center transition-colors border-2 border-transparent">
-                            <h4 class="font-bold text-lg text-white">Lean Out</h4>
-                            <p class="text-sm text-slate-400">Strip body fat</p>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Current Activity Level</label>
+                            <input type="text" name="activity" placeholder="e.g., Sedentary desk job, lift weights 2x a week" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                         </div>
-                    </label>
-                    <label class="cursor-pointer">
-                        <input type="radio" name="goal" value="recomp">
-                        <div class="card bg-slate-700 hover:bg-slate-600 rounded-lg p-4 text-center transition-colors border-2 border-transparent">
-                            <h4 class="font-bold text-lg text-white">The Recomp</h4>
-                            <p class="text-sm text-slate-400">Burn fat & build muscle</p>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Nutrition Habits</label>
+                            <textarea name="nutrition" rows="2" placeholder="e.g., Eat mostly whole foods, tracking macros..." class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
                         </div>
-                    </label>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Sleep Quality</label>
+                            <input type="text" name="sleep" placeholder="e.g., 6 hours a night, wake up groggy" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                    </div>
                 </div>
 
-                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mt-6 mb-3">The Engine (Performance)</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <label class="cursor-pointer">
-                        <input type="radio" name="goal" value="power">
-                        <div class="card bg-slate-700 hover:bg-slate-600 rounded-lg p-4 text-center transition-colors border-2 border-transparent">
-                            <h4 class="font-bold text-lg text-white">Get Stronger</h4>
-                            <p class="text-sm text-slate-400">Focus on raw power</p>
+                <!-- Step 1: Occupation & Stress -->
+                <div class="wizard-step hidden" id="step-1">
+                    <h2 class="text-xl font-bold mb-2">Occupation & Stress <span class="text-slate-400 font-normal text-sm">(2/5)</span></h2>
+                    <p class="text-slate-600 mb-6 text-sm">Daily posture and nervous system load dictate how well you recover.</p>
+                    
+                    <div class="space-y-4">
+                        <div class="flex gap-4">
+                            <div class="w-1/2">
+                                <label class="block text-sm font-medium mb-1">Occupation</label>
+                                <input type="text" name="occupation" placeholder="e.g., Desk worker, construction" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
+                            <div class="w-1/2">
+                                <label class="block text-sm font-medium mb-1">General Stress Levels</label>
+                                <input type="text" name="stress" placeholder="e.g., High-stress job, relaxed" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
                         </div>
-                    </label>
-                    <label class="cursor-pointer">
-                        <input type="radio" name="goal" value="athlete">
-                        <div class="card bg-slate-700 hover:bg-slate-600 rounded-lg p-4 text-center transition-colors border-2 border-transparent">
-                            <h4 class="font-bold text-lg text-white">Play to Win</h4>
-                            <p class="text-sm text-slate-400">Athleticism & Speed</p>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Typical Daily Posture</label>
+                            <textarea name="posture" rows="2" placeholder="e.g., Sitting for 8 hours, standing on hard concrete..." class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
                         </div>
-                    </label>
-                    <label class="cursor-pointer">
-                        <input type="radio" name="goal" value="longevity">
-                        <div class="card bg-slate-700 hover:bg-slate-600 rounded-lg p-4 text-center transition-colors border-2 border-transparent">
-                            <h4 class="font-bold text-lg text-white">Bulletproof</h4>
-                            <p class="text-sm text-slate-400">Longevity & Joint Health</p>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Recovery & Hydration</label>
+                            <textarea name="recovery" rows="2" placeholder="e.g., Drink 2L water, meditate, drink alcohol in evenings..." class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
                         </div>
-                    </label>
+                    </div>
                 </div>
-            </div>
 
-            <div>
-                <h2 class="text-2xl font-bold mb-4 text-white border-b border-slate-700 pb-2">2. What is your experience level?</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <label class="cursor-pointer">
-                        <input type="radio" name="experience" value="beginner" checked>
-                        <div class="card bg-slate-700 hover:bg-slate-600 rounded-lg p-4 text-center transition-colors border-2 border-blue-500 bg-blue-900/30">
-                            <h3 class="font-bold text-lg text-white">Fresh Start</h3>
-                            <p class="text-sm text-slate-400">New to lifting</p>
+                <!-- Step 2: Limitations & Medical -->
+                <div class="wizard-step hidden" id="step-2">
+                    <h2 class="text-xl font-bold mb-2">Limitations & Medical <span class="text-slate-400 font-normal text-sm">(3/5)</span></h2>
+                    <p class="text-slate-600 mb-6 text-sm">Flag any biomechanical restrictions or health factors.</p>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Current Physical Issues</label>
+                            <textarea name="currentIssues" rows="2" placeholder="e.g., Tight left shoulder, right leg fatigue..." class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
                         </div>
-                    </label>
-                    <label class="cursor-pointer">
-                        <input type="radio" name="experience" value="experienced">
-                        <div class="card bg-slate-700 hover:bg-slate-600 rounded-lg p-4 text-center transition-colors border-2 border-transparent">
-                            <h3 class="font-bold text-lg text-white">Experienced</h3>
-                            <p class="text-sm text-slate-400">I know my way around</p>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Past Injuries or Surgeries</label>
+                            <input type="text" name="pastInjuries" placeholder="List any, or write 'None'" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                         </div>
-                    </label>
-                </div>
-            </div>
-
-            <div>
-                <h2 class="text-2xl font-bold mb-4 text-white border-b border-slate-700 pb-2">3. What is your hardware status?</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <label class="cursor-pointer">
-                        <input type="radio" name="age" value="under40" checked>
-                        <div class="card bg-slate-700 hover:bg-slate-600 rounded-lg p-4 text-center transition-colors border-2 border-blue-500 bg-blue-900/30">
-                            <h3 class="font-bold text-lg text-white">Under 40</h3>
-                            <p class="text-sm text-slate-400">Young & Durable</p>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Medications or Conditions</label>
+                            <input type="text" name="medications" placeholder="List any, or write 'None'" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                         </div>
-                    </label>
-                    <label class="cursor-pointer">
-                        <input type="radio" name="age" value="over40">
-                        <div class="card bg-slate-700 hover:bg-slate-600 rounded-lg p-4 text-center transition-colors border-2 border-transparent">
-                            <h3 class="font-bold text-lg text-white">Over 40</h3>
-                            <p class="text-sm text-slate-400">Smart & Recovering</p>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Tracking Hardware</label>
+                            <input type="text" name="trackingTools" placeholder="e.g., Apple Watch, Oura ring, chest strap" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                         </div>
-                    </label>
-                </div>
-            </div>
-
-            <button type="button" onclick="generatePlan()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-8 rounded-lg shadow-lg transition-all transform hover:scale-[1.01] uppercase tracking-wide text-lg">
-                Deploy My Protocol
-            </button>
-        </form>
-
-        <div id="resultContainer" class="hidden mt-12 space-y-6">
-            <h2 class="text-3xl font-bold text-white border-b border-slate-700 pb-4">Your Custom Protocol</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div class="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700">
-                    <div class="text-blue-400 text-sm font-bold uppercase tracking-wider mb-1">The Kitchen</div>
-                    <h3 id="dietTitle" class="text-xl font-bold text-white mb-3"></h3>
-                    <p id="dietText" class="text-slate-300 text-sm leading-relaxed"></p>
+                    </div>
                 </div>
 
-                <div class="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700">
-                    <div class="text-emerald-400 text-sm font-bold uppercase tracking-wider mb-1">The Floor</div>
-                    <h3 id="workoutTitle" class="text-xl font-bold text-white mb-3"></h3>
-                    <p id="workoutText" class="text-slate-300 text-sm leading-relaxed"></p>
-                    <p id="expNote" class="text-xs text-emerald-300 mt-4 italic font-semibold"></p>
+                <!-- Step 3: Goals & Targets -->
+                <div class="wizard-step hidden" id="step-3">
+                    <h2 class="text-xl font-bold mb-2">Goals & Targets <span class="text-slate-400 font-normal text-sm">(4/5)</span></h2>
+                    <p class="text-slate-600 mb-6 text-sm">Where are we going, and why does it matter?</p>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Physiological Targets</label>
+                            <input type="text" name="physioTargets" placeholder="e.g., Lower resting HR to 60 bpm, HRV to 60+" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="w-1/2">
+                                <label class="block text-sm font-medium mb-1">6-Month Goal</label>
+                                <textarea name="sixMonth" rows="2" placeholder="e.g., 5 perfect pull-ups..." class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+                            </div>
+                            <div class="w-1/2">
+                                <label class="block text-sm font-medium mb-1">12-Month Goal</label>
+                                <textarea name="twelveMonth" rows="2" placeholder="e.g., Deadlift 1.5x bodyweight..." class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Your "Why"</label>
+                            <input type="text" name="theWhy" placeholder="e.g., Want to feel less pain at work, keep up with kids" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                    </div>
                 </div>
 
-                <div class="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700">
-                    <div class="text-rose-400 text-sm font-bold uppercase tracking-wider mb-1">The Engine</div>
-                    <h3 id="cardioTitle" class="text-xl font-bold text-white mb-3"></h3>
-                    <p id="cardioText" class="text-slate-300 text-sm leading-relaxed"></p>
+                <!-- Step 4: Logistics & Preferences -->
+                <div class="wizard-step hidden" id="step-4">
+                    <h2 class="text-xl font-bold mb-2">Logistics <span class="text-slate-400 font-normal text-sm">(5/5)</span></h2>
+                    <p class="text-slate-600 mb-6 text-sm">Let's build a program you can actually stick to.</p>
+                    
+                    <div class="space-y-4">
+                        <div class="flex gap-4">
+                            <div class="w-1/2">
+                                <label class="block text-sm font-medium mb-1">Availability</label>
+                                <input type="text" name="availability" placeholder="e.g., 3 days/week, 45 mins" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
+                            <div class="w-1/2">
+                                <label class="block text-sm font-medium mb-1">Equipment Access</label>
+                                <input type="text" name="equipment" placeholder="e.g., Commercial gym, home dumbbells" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Exercise Likes & Dislikes</label>
+                            <textarea name="likesDislikes" rows="3" placeholder="e.g., Hate running, love lifting heavy, enjoy yoga..." class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700">
-                    <div class="text-purple-400 text-sm font-bold uppercase tracking-wider mb-1">The Armor</div>
-                    <h3 id="recoveryTitle" class="text-xl font-bold text-white mb-3"></h3>
-                    <p id="recoveryText" class="text-slate-300 text-sm leading-relaxed"></p>
+                <!-- Final Result Step -->
+                <div class="wizard-step hidden" id="step-5">
+                    <div class="text-center mb-6">
+                        <div class="bg-green-100 text-green-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">✓</div>
+                        <h2 class="text-2xl font-bold">Profile Compiled</h2>
+                        <p class="text-slate-600 mt-2">Data saved. Ready for programming.</p>
+                    </div>
+                    
+                    <div class="bg-slate-100 border border-slate-200 p-5 rounded-xl text-sm text-slate-700 h-64 overflow-y-auto custom-scrollbar">
+                        <div id="final-summary-text" class="space-y-3">
+                            <!-- JS fills this -->
+                        </div>
+                    </div>
                 </div>
 
-                <div class="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700">
-                    <div class="text-amber-400 text-sm font-bold uppercase tracking-wider mb-1">Daily Anchor</div>
-                    <h3 id="anchorTitle" class="text-xl font-bold text-white mb-3"></h3>
-                    <p id="anchorText" class="text-slate-300 text-sm leading-relaxed"></p>
-                </div>
+            </form>
+
+            <!-- Navigation Buttons -->
+            <div class="bg-slate-50 p-4 border-t border-slate-200 flex justify-between items-center rounded-b-2xl">
+                <button id="btn-prev" class="px-4 py-2.5 text-slate-600 font-medium hover:text-slate-900 transition-colors" onclick="prevStep()">← Back</button>
+                <div class="flex-grow"></div>
+                <button id="btn-next" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors" onclick="nextStep()">Next Step →</button>
+                <button id="btn-restart" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-6 py-2.5 rounded-lg font-medium shadow-sm hidden transition-colors border border-slate-300" onclick="restartWizard()">Reset Client Data</button>
             </div>
         </div>
     </div>
 
+    <!-- JavaScript Logic -->
     <script>
-        // UI Logic for Radio Buttons
-        document.querySelectorAll('input[type="radio"]').forEach(radio => {
-            radio.addEventListener('change', function() {
-                const groupName = this.name;
-                document.querySelectorAll(`input[name="${groupName}"]`).forEach(input => {
-                    const card = input.nextElementSibling;
-                    card.classList.remove('border-blue-500', 'bg-blue-900/30');
-                    card.classList.add('border-transparent');
-                });
-                const selectedCard = this.nextElementSibling;
-                selectedCard.classList.remove('border-transparent');
-                selectedCard.classList.add('border-blue-500', 'bg-blue-900/30');
+        let currentStep = 0;
+        const totalSteps = 5; // 0-4 are inputs, 5 is the summary step
+        const form = document.getElementById('wizard-form');
+        const inputs = form.querySelectorAll('input, select, textarea');
+
+        function loadData() {
+            const savedStep = localStorage.getItem('ptDeepIntakeStep');
+            if (savedStep) currentStep = parseInt(savedStep);
+
+            const data = JSON.parse(localStorage.getItem('ptDeepIntakeData')) || {};
+            inputs.forEach(input => {
+                if (data[input.name] !== undefined) {
+                    input.value = data[input.name];
+                }
             });
-        });
+            
+            if (currentStep === totalSteps) currentStep = totalSteps - 1;
+        }
 
-        // --- MODULAR LOGIC ENGINE ---
+        function saveData() {
+            const data = {};
+            inputs.forEach(input => {
+                data[input.name] = input.value;
+            });
+            localStorage.setItem('ptDeepIntakeData', JSON.stringify(data));
+        }
 
-        const buildDiet = (state) => {
-            const protocols = {
-                shred: { title: "The Cut", text: "Eat less than you usually do. Cut out liquid calories, reduce carbs at dinner, and stop snacking." },
-                size: { title: "The Bulk", text: "Eat more than you usually do. Add an extra meal or a shake every day. If the scale isn't moving, eat more." },
-                power: { title: "The Engine Fuel", text: "Eat in a slight caloric surplus. You need raw calories and high protein to recover from heavy neurological load." },
-                recomp: { title: "The Baseline", text: "Eat exactly at maintenance calories, but aggressively push protein to force muscle growth while tapping into fat stores for energy." },
-                athlete: { title: "Performance Macros", text: "Eat at maintenance, but heavily bias your carbohydrates around your training windows to ensure maximum explosive energy." },
-                longevity: { title: "Quality Control", text: "Focus entirely on nutrient density. Think Mediterranean: lean proteins, olive oil, high-fiber greens. Keep systemic inflammation low." }
-            };
-            return protocols[state.goal];
-        };
+        inputs.forEach(input => input.addEventListener('input', saveData));
 
-        const buildWorkout = (state) => {
-            let config = { title: "", text: "", expNote: "" };
+        function updateUI() {
+            document.querySelectorAll('.wizard-step').forEach(step => {
+                step.classList.add('hidden');
+                step.classList.remove('block');
+            });
 
-            if (state.age === "over40" && state.goal !== "longevity") {
-                config.title = "The Calibrated Load";
-                config.text = "You need structural loading for bone density, but without the joint tax. Do your multi-joint free weights (squats/presses), but cap them at 3 sets of 8-10 reps. Auto-regulate based on joint feel.";
+            document.getElementById(`step-${currentStep}`).classList.remove('hidden');
+            document.getElementById(`step-${currentStep}`).classList.add('block');
+
+            const progressPercentage = (currentStep / totalSteps) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercentage}%`;
+
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+            const btnRestart = document.getElementById('btn-restart');
+
+            if (currentStep === 0 || currentStep === totalSteps) {
+                btnPrev.style.visibility = 'hidden'; 
             } else {
-                const routines = {
-                    shred: { title: "The Metabolic Circuit", text: "Pick 4 compound exercises. Perform them as a circuit with minimal rest to keep heart rate elevated while maintaining muscle mass." },
-                    size: { title: "The 3x10 Pump", text: "Pick 4-5 exercises. Hit 3 sets of 10 reps focusing entirely on squeezing the muscle and time-under-tension. Rest 60-90 seconds." },
-                    power: { title: "The 5x5 Heavy", text: "Pick 3 big compound movements. Do 5 sets of 5 reps. Rest 3-5 minutes between sets. Add weight to the bar every single time." },
-                    recomp: { title: "The Hybrid", text: "Start with one heavy compound lift (3x5) to maintain raw strength, then move into 3 isolated machine movements (3x12) for localized hypertrophy." },
-                    athlete: { title: "The Kinetic", text: "Shift away from fixed-plane bilateral lifts. Focus heavily on unilateral, explosive work: Bulgarian split squats, medicine ball throws, and plyometrics." },
-                    longevity: { title: "The Bulletproof", text: "Heavy emphasis on mobility, stability, and time-under-tension using kettlebells and cables. Train movements, not just muscles." }
-                };
-                config.title = routines[state.goal].title;
-                config.text = routines[state.goal].text;
+                btnPrev.style.visibility = 'visible';
             }
 
-            config.expNote = state.experience === "beginner" 
-                ? "Rule #1: Master the form with light weight before you push. Don't ego lift." 
-                : "Since you know your way around, push your final working sets to 1-2 reps shy of absolute failure.";
-                
-            return config;
-        };
+            if (currentStep === totalSteps) {
+                btnNext.classList.add('hidden');
+                btnRestart.classList.remove('hidden');
+                generateSummaryText();
+            } else if (currentStep === totalSteps - 1) {
+                btnNext.innerText = "Finish & Save ✓";
+                btnNext.classList.remove('hidden');
+                btnRestart.classList.add('hidden');
+            } else {
+                btnNext.innerText = "Next Step →";
+                btnNext.classList.remove('hidden');
+                btnRestart.classList.add('hidden');
+            }
 
-        const buildCardio = (state) => {
-            if (state.goal === "power") return { title: "The Aerobic Base", text: "30 minutes of Zone 2 cardio on off days. You need an aerobic base to clear metabolic waste and recover your CNS between heavy sets." };
-            if (state.goal === "longevity") return { title: "Zone 2 Mandate", text: "Strict Zone 2 cardio (working up a sweat but able to hold a conversation) 3x a week to build extreme mitochondrial density." };
-            if (state.goal === "athlete") return { title: "Energy Systems", text: "Mix it up. One day of long steady-state for the aerobic base, one day of short, violent sprints for the anaerobic threshold." };
-            if (state.goal === "shred" && state.age === "under40") return { title: "The HIIT Burner", text: "15 minutes of hard intervals (sprints, rowing, or bike) at the very end of your workout. Empty the tank." };
-            
-            return { title: "The LISS Walk", text: "Go for a 30-minute brisk walk or incline treadmill session on your rest days. Keeps the heart healthy without draining your recovery." };
-        };
-
-        const buildRecovery = (state) => {
-            if (state.age === "over40") return { title: "The WD-40", text: "10 minutes of dynamic hip and shoulder openers before you ever touch a weight. Sleep 8 hours minimum—your tissue takes longer to repair now." };
-            if (state.goal === "power") return { title: "The CNS Coma", text: "Heavy lifting fries your nervous system. Prioritize a strict 8-hour sleep window and consider 400mg of Magnesium Glycinate before bed." };
-            if (state.goal === "athlete") return { title: "Active Release", text: "Spend 10 minutes post-workout on soft tissue work (foam rolling) and active stretching to maintain elasticity for your next session." };
-            
-            return { title: "The Primer", text: "Do 5 minutes of core activation (planks/bird-dogs) before lifting to ensure you don't blow out your lower back. Prioritize 7-8 hours of sleep." };
-        };
-
-        const buildAnchor = (state) => {
-            const anchors = {
-                shred: { title: "10k Before Dinner", text: "Hit 10,000 steps before you sit down for your evening meal. Non-negotiable." },
-                recomp: { title: "The Protein Quota", text: "Hit 1 gram of protein per pound of target body weight every day. If you miss this, the recomp fails. Non-negotiable." },
-                athlete: { title: "The Pogo Base", text: "5 minutes of continuous jump rope every single day to build lower-leg elasticity and Achilles resilience. Non-negotiable." },
-                longevity: { title: "The Dead Hang", text: "Accumulate 2 total minutes hanging from a pull-up bar every day to decompress the spine and build grip durability. Non-negotiable." }
-            };
-            // Fallback for Size/Power
-            return anchors[state.goal] || { title: "The Gallon", text: "Drink one full gallon of water every single day. Dehydrated muscle tissue does not grow. Non-negotiable." };
-        };
-
-        // --- MAIN EXECUTION ---
-        function generatePlan() {
-            const state = {
-                goal: document.querySelector('input[name="goal"]:checked').value,
-                experience: document.querySelector('input[name="experience"]:checked').value,
-                age: document.querySelector('input[name="age"]:checked').value
-            };
-
-            const diet = buildDiet(state);
-            const workout = buildWorkout(state);
-            const cardio = buildCardio(state);
-            const recovery = buildRecovery(state);
-            const anchor = buildAnchor(state);
-
-            document.getElementById('dietTitle').innerText = diet.title;
-            document.getElementById('dietText').innerText = diet.text;
-
-            document.getElementById('workoutTitle').innerText = workout.title;
-            document.getElementById('workoutText').innerText = workout.text;
-            document.getElementById('expNote').innerText = workout.expNote;
-
-            document.getElementById('cardioTitle').innerText = cardio.title;
-            document.getElementById('cardioText').innerText = cardio.text;
-
-            document.getElementById('recoveryTitle').innerText = recovery.title;
-            document.getElementById('recoveryText').innerText = recovery.text;
-
-            document.getElementById('anchorTitle').innerText = anchor.title;
-            document.getElementById('anchorText').innerText = anchor.text;
-
-            const resultDiv = document.getElementById('resultContainer');
-            resultDiv.classList.remove('hidden');
-            resultDiv.scrollIntoView({ behavior: 'smooth' });
+            localStorage.setItem('ptDeepIntakeStep', currentStep);
         }
+
+        function nextStep() {
+            if (currentStep < totalSteps) {
+                currentStep++;
+                updateUI();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateUI();
+            }
+        }
+
+        function restartWizard() {
+            if (confirm("Wipe the entire client profile? This cannot be undone.")) {
+                localStorage.removeItem('ptDeepIntakeData');
+                localStorage.removeItem('ptDeepIntakeStep');
+                form.reset();
+                currentStep = 0;
+                updateUI();
+            }
+        }
+
+        function generateSummaryText() {
+            const data = JSON.parse(localStorage.getItem('ptDeepIntakeData')) || {};
+            
+            const summaryHTML = `
+                <p><strong>Metrics:</strong> ${data.age || '--'} yrs | ${data.height || '--'} cm | ${data.weight || '--'} kg</p>
+                <p><strong>Issues/Injuries:</strong> ${data.currentIssues || 'None noted'} | ${data.pastInjuries || 'None'}</p>
+                <p><strong>Lifestyle:</strong> ${data.occupation || 'Unspecified'} | ${data.sleep || 'Unspecified sleep'}</p>
+                <hr class="border-slate-300">
+                <p><strong>The 'Why':</strong> ${data.theWhy || 'Not provided'}</p>
+                <p><strong>6-Month:</strong> ${data.sixMonth || 'Not set'}</p>
+                <p><strong>12-Month:</strong> ${data.twelveMonth || 'Not set'}</p>
+                <hr class="border-slate-300">
+                <p><strong>Logistics:</strong> ${data.availability || 'Unknown'} | ${data.equipment || 'Unknown'}</p>
+                <p><strong>Preferences:</strong> ${data.likesDislikes || 'None stated'}</p>
+            `;
+            
+            document.getElementById('final-summary-text').innerHTML = summaryHTML;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            updateUI();
+        });
     </script>
+    <style>
+        /* Small styling touch for the summary scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; rounded: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
 </body>
 </html>
