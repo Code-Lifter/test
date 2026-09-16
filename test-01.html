@@ -3,296 +3,465 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PT Intake Wizard</title>
+    <title>Strength Standards</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        html { scroll-behavior: smooth; }
+        body { -webkit-font-smoothing: antialiased; }
+        
+        /* Custom scrollbar for dark mode tables */
+        ::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #374151; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; 
+        }
+    </style>
 </head>
-<body class="bg-slate-50 min-h-screen flex flex-col font-sans text-slate-800">
+<body class="bg-gray-900 text-gray-200 font-sans leading-relaxed">
 
-    <!-- Top Navigation (Non-fixed, sits in normal document flow) -->
-    <div class="w-full p-4 md:px-8">
-        <a href="#" class="inline-flex items-center gap-2 text-slate-500 hover:text-blue-600 font-medium transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <!-- Non-fixed Home Button -->
+    <div class="max-w-5xl mx-auto px-4 pt-6">
+        <a href="/" class="inline-flex items-center text-blue-400 hover:text-blue-300 font-semibold transition-colors">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
             </svg>
             Home
         </a>
     </div>
 
-    <!-- Main Wizard Wrapper -->
-    <div class="flex-1 flex items-start sm:items-center justify-center p-4 w-full">
-        <div class="bg-white max-w-lg w-full rounded-2xl shadow-xl overflow-hidden mb-12">
+    <main class="max-w-5xl mx-auto px-4 py-8">
+        
+        <header class="mb-10">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight">What Are Strength Standards?</h1>
+            <p class="text-lg text-gray-400">Strength standards are benchmarks that help you understand where your lifting numbers fall compared to the general lifting population. They answer the question everyone asks: <strong class="text-gray-200">"How strong should I be?"</strong></p>
+        </header>
+
+        <!-- Interactive Calculator Module -->
+        <section class="bg-gray-800 rounded-xl shadow-lg border border-gray-700 p-6 mb-12">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-white mb-1">Personalize Your Standards</h2>
+                    <p class="text-sm text-gray-400">Enter your details. We'll highlight your current level in the tables.</p>
+                </div>
+                <button id="reset-btn" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-200 text-sm font-semibold rounded-lg transition-colors w-full sm:w-auto">
+                    Reset All
+                </button>
+            </div>
             
-            <!-- Header -->
-            <div class="bg-blue-600 p-6 text-white text-center">
-                <h1 class="text-2xl font-bold">Client Intake Protocol</h1>
-                <p class="text-blue-100 text-sm mt-1">Clear risk. Define targets. Build the program.</p>
+            <div class="flex flex-col sm:flex-row gap-8 mb-6 border-b border-gray-700 pb-6">
+                <!-- Gender Toggle -->
+                <div>
+                    <label class="block text-sm font-bold text-white mb-3">Gender</label>
+                    <div class="flex items-center space-x-3 mt-2">
+                        <span class="text-sm font-bold text-white transition-colors duration-200" id="label-male">Male</span>
+                        <label for="gender-toggle" class="flex items-center cursor-pointer">
+                            <div class="relative">
+                                <input type="checkbox" id="gender-toggle" class="sr-only peer">
+                                <div class="w-12 h-6 bg-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500"></div>
+                            </div>
+                        </label>
+                        <span class="text-sm font-bold text-gray-500 transition-colors duration-200" id="label-female">Female</span>
+                    </div>
+                </div>
+
+                <!-- Bodyweight Input -->
+                <div class="w-full sm:w-1/3">
+                    <label for="bw-input" class="block text-sm font-bold text-white mb-2">Bodyweight (kg)</label>
+                    <input type="number" id="bw-input" placeholder="e.g. 80" class="w-full bg-gray-700 border-gray-600 border rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                </div>
+
+                <!-- Reps Input -->
+                <div class="w-full sm:w-1/3">
+                    <label for="reps-input" class="block text-sm font-bold text-white mb-2">Target Reps</label>
+                    <input type="number" id="reps-input" value="1" min="1" max="30" class="w-full bg-gray-700 border-gray-600 border rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                </div>
             </div>
 
-            <!-- Progress Bar -->
-            <div class="bg-slate-200 h-1.5 w-full">
-                <div id="progress-bar" class="bg-blue-500 h-1.5 transition-all duration-300 w-0"></div>
+            <div>
+                <h3 class="text-sm font-bold text-white mb-3">Enter your Lifts <span class="text-gray-400 font-normal ml-1">(Based on target reps above)</span></h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1">Bench Press</label>
+                        <input type="number" data-lift="Bench Press" class="lift-input w-full bg-gray-700 border-gray-600 border rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" placeholder="kg">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1">Squat</label>
+                        <input type="number" data-lift="Squat" class="lift-input w-full bg-gray-700 border-gray-600 border rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" placeholder="kg">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1">Deadlift</label>
+                        <input type="number" data-lift="Deadlift" class="lift-input w-full bg-gray-700 border-gray-600 border rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" placeholder="kg">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1">Overhead Press</label>
+                        <input type="number" data-lift="Overhead Press" class="lift-input w-full bg-gray-700 border-gray-600 border rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" placeholder="kg">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1">Barbell Row</label>
+                        <input type="number" data-lift="Barbell Row" class="lift-input w-full bg-gray-700 border-gray-600 border rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" placeholder="kg">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1">BW Pull-ups (reps)</label>
+                        <input type="number" data-lift="BW Pull-ups (reps)" class="lift-input w-full bg-gray-700 border-gray-600 border rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" placeholder="reps">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1">Front Squat</label>
+                        <input type="number" data-lift="Front Squat" class="lift-input w-full bg-gray-700 border-gray-600 border rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" placeholder="kg">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1">Hip Thrust</label>
+                        <input type="number" data-lift="Hip Thrust" class="lift-input w-full bg-gray-700 border-gray-600 border rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" placeholder="kg">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1">Leg Press</label>
+                        <input type="number" data-lift="Leg Press" class="lift-input w-full bg-gray-700 border-gray-600 border rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" placeholder="kg">
+                    </div>
+                </div>
             </div>
+        </section>
 
-            <!-- Wizard Content -->
-            <form id="wizard-form" class="p-6 md:p-8">
+        <!-- Dynamic Tables Container -->
+        <div id="male-tables-section" class="transition-opacity duration-300">
+            <section class="mb-12">
+                <h2 class="text-2xl font-bold text-white mb-3">Male Strength Standards</h2>
+                <div class="overflow-x-auto bg-gray-800 rounded-lg shadow-lg border border-gray-700 mb-8" id="male-standards-container"></div>
                 
-                <!-- Step 0: Safety & Triage -->
-                <div class="wizard-step block" id="step-0">
-                    <h2 class="text-xl font-bold mb-2">Safety & Triage <span class="text-slate-400 font-normal text-sm">(1/4)</span></h2>
-                    <p class="text-slate-600 mb-6 text-sm">Pre-exercise screening (PAR-Q+) to identify physiological risk factors before training begins.</p>
-                    
-                    <div class="space-y-5">
-                        <div>
-                            <label class="block text-sm font-medium mb-2 text-slate-700">Has a doctor ever said you have a heart condition?</label>
-                            <div class="flex gap-4">
-                                <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="heartCondition" value="yes" class="w-4 h-4 text-blue-600 focus:ring-blue-500"> Yes</label>
-                                <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="heartCondition" value="no" class="w-4 h-4 text-blue-600 focus:ring-blue-500"> No</label>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-2 text-slate-700">Do you feel pain in your chest during physical activity?</label>
-                            <div class="flex gap-4">
-                                <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="chestPain" value="yes" class="w-4 h-4 text-blue-600 focus:ring-blue-500"> Yes</label>
-                                <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="chestPain" value="no" class="w-4 h-4 text-blue-600 focus:ring-blue-500"> No</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Step 1: Goal Extraction -->
-                <div class="wizard-step hidden" id="step-1">
-                    <h2 class="text-xl font-bold mb-2">Target Parameters <span class="text-slate-400 font-normal text-sm">(2/4)</span></h2>
-                    <p class="text-slate-600 mb-6 text-sm">Define actionable objectives and current lifestyle constraints.</p>
-                    
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Primary Objective</label>
-                            <select name="primaryGoal" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white">
-                                <option value="">Select a goal...</option>
-                                <option value="Hypertrophy">Hypertrophy & Muscle Gain</option>
-                                <option value="Strength">Absolute Strength</option>
-                                <option value="Re-composition">Body Re-composition</option>
-                                <option value="Endurance">Endurance & Conditioning</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Nutrition Baseline</label>
-                            <textarea name="nutrition" rows="3" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="e.g., Targets 400g carbs, skips breakfast, relies on takeout..."></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Step 2: Baseline Testing -->
-                <div class="wizard-step hidden" id="step-2">
-                    <h2 class="text-xl font-bold mb-2">Baseline Metrics <span class="text-slate-400 font-normal text-sm">(3/4)</span></h2>
-                    <p class="text-slate-600 mb-6 text-sm">Record starting physical dimensions and movement mechanics.</p>
-                    
-                    <div class="space-y-4">
-                        <div class="flex gap-4">
-                            <div class="w-1/2">
-                                <label class="block text-sm font-medium mb-1">Height (cm)</label>
-                                <input type="number" name="height" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="183">
-                            </div>
-                            <div class="w-1/2">
-                                <label class="block text-sm font-medium mb-1">Weight (kg)</label>
-                                <input type="number" name="weight" step="0.1" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="87.0">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Movement Screen Notes</label>
-                            <textarea name="movementNotes" rows="2" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Any structural imbalances? Joint limitations?"></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Step 3: Program Mapping -->
-                <div class="wizard-step hidden" id="step-3">
-                    <h2 class="text-xl font-bold mb-2">Program Architecture <span class="text-slate-400 font-normal text-sm">(4/4)</span></h2>
-                    <p class="text-slate-600 mb-6 text-sm">Determine the training framework based on recovery capacity.</p>
-                    
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Training Frequency</label>
-                            <select name="frequency" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white">
-                                <option value="">Select frequency...</option>
-                                <option value="2 Days">2 Days / Week</option>
-                                <option value="3 Days">3 Days / Week</option>
-                                <option value="4 Days">4 Days / Week</option>
-                                <option value="5 Days">5 Days / Week</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Proposed Split Structure</label>
-                            <input type="text" name="split" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="e.g., Push/Pull/Legs or High-Intensity single set">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Final Result Step -->
-                <div class="wizard-step hidden" id="step-4">
-                    <div class="text-center mb-6">
-                        <div class="bg-green-100 text-green-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">✓</div>
-                        <h2 class="text-2xl font-bold">Profile Generated</h2>
-                        <p class="text-slate-600 mt-2">The blueprint is ready.</p>
-                    </div>
-                    
-                    <div class="bg-blue-50 border border-blue-100 p-5 rounded-xl">
-                        <p id="final-summary-text" class="text-sm leading-relaxed text-blue-900 font-medium"></p>
-                    </div>
-                </div>
-
-            </form>
-
-            <!-- Navigation Buttons -->
-            <div class="bg-slate-50 p-4 border-t border-slate-200 flex justify-between items-center">
-                <button id="btn-prev" class="px-4 py-2.5 text-slate-600 font-medium hover:text-slate-900 transition-colors" onclick="prevStep()">← Back</button>
-                <div class="flex-grow"></div>
-                <button id="btn-next" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors" onclick="nextStep()">Next Step →</button>
-                <button id="btn-restart" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-6 py-2.5 rounded-lg font-medium shadow-sm hidden transition-colors border border-slate-300" onclick="restartWizard()">Reset Data</button>
-            </div>
+                <h3 class="text-xl font-semibold mt-6 mb-3 text-white">Male Percentiles</h3>
+                <div class="overflow-x-auto bg-gray-800 rounded-lg shadow-lg border border-gray-700 mb-8" id="male-percentiles-container"></div>
+            </section>
         </div>
-    </div>
 
-    <!-- JavaScript Logic -->
+        <div id="female-tables-section" class="hidden transition-opacity duration-300">
+            <section class="mb-12">
+                <h2 class="text-2xl font-bold text-white mb-3">Female Strength Standards</h2>
+                <div class="overflow-x-auto bg-gray-800 rounded-lg shadow-lg border border-gray-700 mb-8" id="female-standards-container"></div>
+                
+                <h3 class="text-xl font-semibold mt-6 mb-3 text-white">Female Percentiles</h3>
+                <div class="overflow-x-auto bg-gray-800 rounded-lg shadow-lg border border-gray-700 mb-8" id="female-percentiles-container"></div>
+            </section>
+        </div>
+
+        <!-- Obsidian Markdown Export Module -->
+        <section class="bg-gray-800 rounded-xl shadow-lg border border-gray-700 p-6 mb-12">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-white">Obsidian Markdown Export</h2>
+                    <p class="text-sm text-gray-400 mt-1">Copy this table directly into Obsidian or any markdown editor to track your progress.</p>
+                </div>
+                <button id="copy-obsidian-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-colors whitespace-nowrap">
+                    Copy Table
+                </button>
+            </div>
+            <textarea id="obsidian-textarea" readonly class="w-full h-48 bg-gray-900 border-gray-700 border rounded-lg p-4 text-gray-300 font-mono text-sm focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"></textarea>
+        </section>
+
+    </main>
+
     <script>
-        let currentStep = 0;
-        const totalSteps = 4; // 0-3 are inputs, 4 is the summary step
-        const form = document.getElementById('wizard-form');
-        const inputs = form.querySelectorAll('input, select, textarea');
+        // Data Structures
+        const standardsHeaders = ['Exercise', 'Beginner', 'Novice', 'Intermediate', 'Advanced', 'Elite'];
+        const maleStandards = [
+            ['Bench Press', 0.5, 0.75, 1.25, 1.75, 2],
+            ['Squat', 0.75, 1, 1.75, 2.25, 2.5],
+            ['Deadlift', 1, 1.25, 2, 2.5, 3],
+            ['Overhead Press', 0.35, 0.5, 0.75, 1, 1.2],
+            ['Barbell Row', 0.5, 0.75, 1, 1.4, 1.75],
+            ['BW Pull-ups (reps)', 1, 5, 10, 15, 20],
+            ['Front Squat', 0.6, 0.85, 1.25, 1.75, 2],
+            ['Hip Thrust', 0.75, 1.25, 1.75, 2.25, 2.75],
+            ['Leg Press', 1.5, 2, 2.5, 3.5, 4.5]
+        ];
+        
+        const femaleStandards = [
+            ['Bench Press', 0.3, 0.45, 0.75, 1.15, 1.5],
+            ['Squat', 0.5, 0.75, 1.25, 1.75, 2.25],
+            ['Deadlift', 0.65, 0.95, 1.5, 2, 2.5],
+            ['Overhead Press', 0.2, 0.3, 0.55, 0.75, 1],
+            ['Barbell Row', 0.3, 0.5, 0.7, 1, 1.3],
+            ['BW Pull-ups (reps)', 0, 1, 5, 9, 12],
+            ['Front Squat', 0.4, 0.55, 0.85, 1.25, 1.5],
+            ['Hip Thrust', 0.5, 0.85, 1.25, 1.75, 2.25],
+            ['Leg Press', 1, 1.5, 2, 2.75, 3.5]
+        ];
 
-        // Load data from Local Storage immediately
-        function loadData() {
-            const savedStep = localStorage.getItem('ptIntakeStep');
-            if (savedStep) currentStep = parseInt(savedStep);
+        const percentileHeaders = ['Lift', '10th', '25th', '50th (median)', '75th', '90th', '99th'];
+        const malePercentiles = [
+            ['Squat', 0.65, 1, 1.5, 2, 2.35, 2.75],
+            ['Bench Press', 0.5, 0.75, 1.1, 1.5, 1.85, 2.25],
+            ['Deadlift', 0.9, 1.25, 1.75, 2.25, 2.65, 3.15],
+            ['Overhead Press', 0.3, 0.5, 0.7, 0.9, 1.1, 1.35]
+        ];
 
-            const data = JSON.parse(localStorage.getItem('ptIntakeData')) || {};
-            inputs.forEach(input => {
-                if (data[input.name] !== undefined) {
-                    if (input.type === 'radio' || input.type === 'checkbox') {
-                        input.checked = (input.value === data[input.name]);
-                    } else {
-                        input.value = data[input.name];
+        const femalePercentiles = [
+            ['Squat', 0.45, 0.7, 1.05, 1.45, 1.85, 2.3],
+            ['Bench Press', 0.3, 0.45, 0.65, 0.9, 1.2, 1.6],
+            ['Deadlift', 0.6, 0.9, 1.3, 1.7, 2.1, 2.6],
+            ['Overhead Press', 0.2, 0.3, 0.45, 0.6, 0.8, 1.05]
+        ];
+
+        // Retrieve user data from DOM inputs
+        function getUserData() {
+            const bw = parseFloat(document.getElementById('bw-input').value) || null;
+            let reps = parseInt(document.getElementById('reps-input').value) || 1;
+            if (reps < 1) reps = 1;
+            
+            const isFemale = document.getElementById('gender-toggle').checked;
+            const lifts = {};
+            document.querySelectorAll('.lift-input').forEach(input => {
+                const liftName = input.getAttribute('data-lift');
+                const val = parseFloat(input.value);
+                if (!isNaN(val)) {
+                    lifts[liftName] = val;
+                }
+            });
+            return { bw, lifts, isFemale, reps };
+        }
+
+        // Table Generator with Highlighting Logic
+        function generateTableHTML(headers, data, userData) {
+            let html = `<table class="min-w-full divide-y divide-gray-700 text-sm">
+                <thead class="bg-gray-700/50">
+                    <tr>`;
+            
+            headers.forEach(header => {
+                html += `<th scope="col" class="px-4 py-3 text-left font-semibold text-gray-300 uppercase tracking-wider whitespace-nowrap">${header}</th>`;
+            });
+            
+            html += `</tr></thead><tbody class="bg-gray-800 divide-y divide-gray-700">`;
+            
+            data.forEach((row, index) => {
+                const exerciseName = row[0];
+                const userVal = userData.lifts[exerciseName];
+                const isRepsBased = exerciseName.includes('(reps)');
+                
+                let userRatio = null;
+                let achievedIndex = -1;
+
+                // Adjust multiplier using Brzycki formula for N-rep maxes (if R=1, it stays 1.0)
+                const repMod = (37 - userData.reps) / 36;
+
+                if (userVal !== undefined) {
+                    if (isRepsBased) {
+                        userRatio = userVal; 
+                        for (let i = 1; i < row.length; i++) {
+                            if (userRatio >= row[i]) achievedIndex = i;
+                        }
+                    } else if (userData.bw) {
+                        userRatio = userVal / userData.bw;
+                        for (let i = 1; i < row.length; i++) {
+                            const adjMult = row[i] * repMod;
+                            if (userRatio >= adjMult) achievedIndex = i;
+                        }
                     }
                 }
+
+                html += `<tr class="${index % 2 === 0 ? 'bg-gray-800' : 'bg-gray-700/30'} hover:bg-gray-700 transition-colors">`;
+                
+                row.forEach((cell, cellIdx) => {
+                    if (cellIdx === 0) {
+                        html += `<td class="px-4 py-3 font-medium text-white whitespace-nowrap">${cell}</td>`;
+                    } else {
+                        const isHighlighted = (cellIdx === achievedIndex);
+                        const tdClasses = isHighlighted 
+                            ? 'px-4 py-3 whitespace-nowrap bg-green-900/30 ring-2 ring-inset ring-green-500/70 relative z-10' 
+                            : 'px-4 py-3 whitespace-nowrap text-gray-300';
+
+                        let displayVal = `${cell}x BW`;
+                        
+                        if (isRepsBased) {
+                            displayVal = `
+                                <span class="${isHighlighted ? 'text-green-400 font-extrabold' : 'font-bold'}">${cell}</span> 
+                                <span class="text-xs ${isHighlighted ? 'text-green-500' : 'text-gray-400'}">reps</span>
+                            `;
+                        } else {
+                            const adjMult = cell * repMod;
+                            if (userData.bw) {
+                                const targetWeight = (adjMult * userData.bw).toFixed(1);
+                                displayVal = `
+                                    <span class="${isHighlighted ? 'text-green-400 font-extrabold' : 'font-bold text-gray-200'}">${targetWeight}</span> 
+                                    <span class="text-xs ${isHighlighted ? 'text-green-500' : 'text-gray-400'}">kg</span><br>
+                                    <span class="text-xs ${isHighlighted ? 'text-green-400/80 font-semibold' : 'text-gray-500'}">(${cell}x 1RM std)</span>
+                                `;
+                            } else {
+                                displayVal = `<span class="font-medium">${adjMult.toFixed(2)}x</span> <span class="text-xs text-gray-500">BW</span>`;
+                            }
+                        }
+                        
+                        html += `<td class="${tdClasses}">${displayVal}</td>`;
+                    }
+                });
+                html += `</tr>`;
             });
             
-            // If they refreshed on the final screen, bump them back one step so they can regenerate
-            if (currentStep === totalSteps) currentStep = totalSteps - 1;
+            html += `</tbody></table>`;
+            return html;
         }
 
-        // Save data to Local Storage
-        function saveData() {
-            const data = {};
-            inputs.forEach(input => {
-                if (input.type === 'radio' || input.type === 'checkbox') {
-                    if (input.checked) data[input.name] = input.value;
-                } else {
-                    data[input.name] = input.value;
+        // Markdown Generator
+        function updateObsidianExport(userData) {
+            let md = `| Lift | Weight | Reps | Est. 1RM | Standard Level |\n`;
+            md += `|---|---|---|---|---|\n`;
+            
+            const activeStandards = userData.isFemale ? femaleStandards : maleStandards;
+            let liftsFound = false;
+            
+            activeStandards.forEach(row => {
+                const liftName = row[0];
+                const userVal = userData.lifts[liftName];
+                
+                if (userVal !== undefined) {
+                    liftsFound = true;
+                    const isRepsBased = liftName.includes('(reps)');
+                    let oneRmEst = "-";
+                    let level = "< Beginner";
+                    let achievedIndex = 0;
+                    
+                    if (isRepsBased) {
+                        for (let i = 1; i < row.length; i++) {
+                            if (userVal >= row[i]) achievedIndex = i;
+                        }
+                    } else {
+                        // Brzycki formula 1RM estimation
+                        oneRmEst = (userVal * 36 / (37 - userData.reps)).toFixed(1) + " kg";
+                        
+                        if (userData.bw) {
+                            let userRatio = userVal / userData.bw;
+                            const repMod = (37 - userData.reps) / 36;
+                            for (let i = 1; i < row.length; i++) {
+                                let adjMult = row[i] * repMod;
+                                if (userRatio >= adjMult) achievedIndex = i;
+                            }
+                        } else {
+                            level = "BW Required";
+                        }
+                    }
+                    
+                    if (achievedIndex > 0) {
+                        level = standardsHeaders[achievedIndex]; 
+                    }
+                    
+                    const weightStr = isRepsBased ? userVal : `${userVal} kg`;
+                    const repStr = isRepsBased ? "BW" : userData.reps;
+                    
+                    md += `| **${liftName}** | ${weightStr} | ${repStr} | ${isRepsBased ? '-' : oneRmEst} | ${level} |\n`;
                 }
             });
-            localStorage.setItem('ptIntakeData', JSON.stringify(data));
+            
+            if (!liftsFound) {
+                md = `_Enter your bodyweight, reps, and lifts above to generate a markdown tracking table._`;
+            }
+            
+            document.getElementById('obsidian-textarea').value = md;
         }
 
-        // Attach listeners to save data on every keystroke/change
-        inputs.forEach(input => input.addEventListener('input', saveData));
+        // Render function
+        function renderAllTables() {
+            const userData = getUserData();
+            
+            // Generate tables
+            document.getElementById('male-standards-container').innerHTML = generateTableHTML(standardsHeaders, maleStandards, userData);
+            document.getElementById('female-standards-container').innerHTML = generateTableHTML(standardsHeaders, femaleStandards, userData);
+            document.getElementById('male-percentiles-container').innerHTML = generateTableHTML(percentileHeaders, malePercentiles, userData);
+            document.getElementById('female-percentiles-container').innerHTML = generateTableHTML(percentileHeaders, femalePercentiles, userData);
 
-        function updateUI() {
-            // Hide all steps
-            document.querySelectorAll('.wizard-step').forEach(step => {
-                step.classList.add('hidden');
-                step.classList.remove('block');
-            });
+            // Generate Markdown
+            updateObsidianExport(userData);
 
-            // Show current step
-            document.getElementById(`step-${currentStep}`).classList.remove('hidden');
-            document.getElementById(`step-${currentStep}`).classList.add('block');
+            // Handle Section Visibility
+            const isFemale = userData.isFemale;
+            document.getElementById('male-tables-section').classList.toggle('hidden', isFemale);
+            document.getElementById('female-tables-section').classList.toggle('hidden', !isFemale);
 
-            // Update Progress Bar
-            const progressPercentage = (currentStep / totalSteps) * 100;
-            document.getElementById('progress-bar').style.width = `${progressPercentage}%`;
-
-            // Handle Buttons
-            const btnPrev = document.getElementById('btn-prev');
-            const btnNext = document.getElementById('btn-next');
-            const btnRestart = document.getElementById('btn-restart');
-
-            // Back button logic
-            if (currentStep === 0 || currentStep === totalSteps) {
-                btnPrev.style.visibility = 'hidden'; // Keeps layout spacing intact vs display:none
+            // Handle Toggle Label styling for dark mode
+            const labelMale = document.getElementById('label-male');
+            const labelFemale = document.getElementById('label-female');
+            
+            if (isFemale) {
+                labelMale.classList.replace('text-white', 'text-gray-500');
+                labelFemale.classList.replace('text-gray-500', 'text-white');
             } else {
-                btnPrev.style.visibility = 'visible';
-            }
-
-            // Next / Generate / Restart button logic
-            if (currentStep === totalSteps) {
-                btnNext.classList.add('hidden');
-                btnRestart.classList.remove('hidden');
-                btnRestart.innerText = "Start Over (Clear Data)";
-                generateSummaryText();
-            } else if (currentStep === totalSteps - 1) {
-                btnNext.innerText = "Generate Profile ✓";
-                btnNext.classList.remove('hidden');
-                btnRestart.classList.add('hidden');
-            } else {
-                btnNext.innerText = "Next Step →";
-                btnNext.classList.remove('hidden');
-                btnRestart.classList.add('hidden');
-            }
-
-            // Save step state
-            localStorage.setItem('ptIntakeStep', currentStep);
-        }
-
-        function nextStep() {
-            if (currentStep < totalSteps) {
-                currentStep++;
-                updateUI();
+                labelMale.classList.replace('text-gray-500', 'text-white');
+                labelFemale.classList.replace('text-white', 'text-gray-500');
             }
         }
 
-        function prevStep() {
-            if (currentStep > 0) {
-                currentStep--;
-                updateUI();
+        // Local Storage integration
+        function loadFromStorage() {
+            try {
+                const savedData = JSON.parse(localStorage.getItem('strength_app_data'));
+                if (savedData) {
+                    if (savedData.bw) document.getElementById('bw-input').value = savedData.bw;
+                    if (savedData.reps) document.getElementById('reps-input').value = savedData.reps;
+                    if (savedData.isFemale !== undefined) document.getElementById('gender-toggle').checked = savedData.isFemale;
+                    
+                    document.querySelectorAll('.lift-input').forEach(input => {
+                        const liftName = input.getAttribute('data-lift');
+                        if (savedData.lifts && savedData.lifts[liftName]) {
+                            input.value = savedData.lifts[liftName];
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error("Error parsing local storage", e);
             }
+            renderAllTables();
         }
 
-        function restartWizard() {
-            if (confirm("This will completely clear the client's data. Are you sure?")) {
-                localStorage.removeItem('ptIntakeData');
-                localStorage.removeItem('ptIntakeStep');
-                form.reset();
-                currentStep = 0;
-                updateUI();
-            }
+        function saveToStorage() {
+            const userData = getUserData();
+            localStorage.setItem('strength_app_data', JSON.stringify(userData));
+            renderAllTables();
         }
 
-        function generateSummaryText() {
-            const data = JSON.parse(localStorage.getItem('ptIntakeData')) || {};
-            
-            const goal = data.primaryGoal || "[Unspecified Goal]";
-            const freq = data.frequency || "[Unspecified Frequency]";
-            const split = data.split || "[Unspecified Split]";
-            const ht = data.height || "?";
-            const wt = data.weight || "?";
-            
-            // Basic logic flag for medical risk
-            const requiresClearance = (data.heartCondition === 'yes' || data.chestPain === 'yes') 
-                ? "<br><br><strong class='text-red-600'>⚠️ MEDICAL CLEARANCE REQUIRED</strong> prior to training based on PAR-Q+ responses." 
-                : "";
-
-            const summary = `<strong>Metrics:</strong> ${ht}cm / ${wt}kg<br>
-                             <strong>Target:</strong> ${goal}<br>
-                             <strong>Structure:</strong> ${freq} on a ${split} protocol.
-                             ${requiresClearance}`;
-            
-            document.getElementById('final-summary-text').innerHTML = summary;
+        function resetData() {
+            localStorage.removeItem('strength_app_data');
+            document.getElementById('bw-input').value = '';
+            document.getElementById('reps-input').value = '1';
+            document.getElementById('gender-toggle').checked = false;
+            document.querySelectorAll('.lift-input').forEach(input => input.value = '');
+            renderAllTables();
         }
 
-        // Initialize App
+        // Event Listeners
         document.addEventListener('DOMContentLoaded', () => {
-            loadData();
-            updateUI();
+            loadFromStorage();
+            
+            document.getElementById('bw-input').addEventListener('input', saveToStorage);
+            document.getElementById('reps-input').addEventListener('input', saveToStorage);
+            document.getElementById('gender-toggle').addEventListener('change', saveToStorage);
+            document.querySelectorAll('.lift-input').forEach(input => {
+                input.addEventListener('input', saveToStorage);
+            });
+            
+            document.getElementById('reset-btn').addEventListener('click', resetData);
+
+            document.getElementById('copy-obsidian-btn').addEventListener('click', () => {
+                const textarea = document.getElementById('obsidian-textarea');
+                textarea.select();
+                navigator.clipboard.writeText(textarea.value).then(() => {
+                    const btn = document.getElementById('copy-obsidian-btn');
+                    const origText = btn.innerText;
+                    btn.innerText = "Copied!";
+                    btn.classList.replace('bg-blue-600', 'bg-green-600');
+                    btn.classList.replace('hover:bg-blue-500', 'hover:bg-green-500');
+                    
+                    setTimeout(() => {
+                        btn.innerText = origText;
+                        btn.classList.replace('bg-green-600', 'bg-blue-600');
+                        btn.classList.replace('hover:bg-green-500', 'hover:bg-blue-500');
+                    }, 2000);
+                });
+            });
         });
     </script>
 </body>
