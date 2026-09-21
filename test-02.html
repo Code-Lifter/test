@@ -3,327 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comprehensive Client Intake Wizard</title>
+    <title>1RM Calculator Template</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Syne:wght@400;600;700;800&family=Teko:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg: #060a10;
+        }
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'Syne', system-ui, sans-serif; 
+            background: var(--bg); 
+            color: #e2e8f0; 
+            min-height: 100vh; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .mono { font-family: 'DM Mono', 'Courier New', monospace; }
+        .brand-font { font-family: 'Teko', sans-serif; }
+
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 32px 32px;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .content { position: relative; z-index: 1; width: 100%; max-w-md; }
+    </style>
 </head>
-<body class="bg-slate-50 min-h-screen flex flex-col font-sans text-slate-800">
+<body class="selection:bg-amber-500 selection:text-slate-900">
 
-    <!-- Top Navigation -->
-    <div class="w-full p-4 md:px-8 max-w-3xl mx-auto">
-        <a href="#" class="inline-flex items-center gap-2 text-slate-500 hover:text-blue-600 font-medium transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-            </svg>
-            Home
-        </a>
-    </div>
+<div class="content max-w-md w-full">
+    
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-white text-2xl uppercase tracking-wide brand-font flex items-center gap-2">
+                <span class="text-amber-500">🛡️</span> 1 Rep Max
+            </h2>
+        </div>
 
-    <!-- Main Wizard Wrapper -->
-    <div class="flex-1 flex items-start justify-center p-4 w-full">
-        <div class="bg-white max-w-2xl w-full rounded-2xl shadow-xl overflow-hidden mb-12">
+        <div class="space-y-4">
+            <!-- PRIMARY INPUTS -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="relative">
+                    <label class="block text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Weight Lifted</label>
+                    <input type="number" id="calc-weight" oninput="calculate1RM()" placeholder="100" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-2xl font-black mono focus:border-amber-500 outline-none text-white text-center transition-colors">
+                </div>
+                <div class="relative">
+                    <label class="block text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Reps Completed</label>
+                    <input type="number" id="calc-reps" oninput="calculate1RM()" placeholder="5" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-2xl font-black mono focus:border-amber-500 outline-none text-white text-center transition-colors">
+                </div>
+            </div>
+
+            <!-- RIR INPUT -->
+            <div class="relative">
+                <label class="block text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">RIR (Reps In Reserve)</label>
+                <input type="number" id="calc-rir" oninput="calculate1RM()" placeholder="0" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xl font-bold mono focus:border-amber-500 outline-none text-white text-center transition-colors">
+            </div>
+
+            <!-- SETTINGS INPUTS -->
+            <div class="grid grid-cols-2 gap-4 pt-2 border-t border-slate-800/50">
+                <div class="relative">
+                    <label class="block text-slate-500 text-[9px] font-bold uppercase tracking-widest mb-1">Start Weight (e.g., Bar)</label>
+                    <input type="number" id="calc-start" oninput="calculate1RM()" placeholder="20" value="0" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-sm font-bold mono focus:border-amber-500 outline-none text-slate-300 text-center transition-colors">
+                </div>
+                <div class="relative">
+                    <label class="block text-slate-500 text-[9px] font-bold uppercase tracking-widest mb-1">Weight Interval</label>
+                    <input type="number" id="calc-interval" oninput="calculate1RM()" placeholder="2.5" value="1.25" step="0.25" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-sm font-bold mono focus:border-amber-500 outline-none text-slate-300 text-center transition-colors">
+                </div>
+            </div>
+
+            <!-- RESULT DISPLAY -->
+            <div class="flex flex-col items-center justify-center bg-amber-900/10 border border-amber-900/30 rounded-xl p-6 mt-4 shadow-inner">
+                <span class="text-[10px] text-amber-500 font-bold uppercase tracking-widest mb-1">Estimated 1RM</span>
+                <span id="calc-result" class="text-5xl font-black mono text-amber-400 drop-shadow-md">—</span>
+            </div>
             
-            <!-- Header -->
-            <div class="bg-blue-600 p-6 text-white text-center">
-                <h1 class="text-2xl font-bold">Comprehensive Client Intake</h1>
-                <p class="text-blue-100 text-sm mt-1">Establish baselines, map lifestyle, and set targets.</p>
-            </div>
-
-            <!-- Progress Bar -->
-            <div class="bg-slate-200 h-1.5 w-full">
-                <div id="progress-bar" class="bg-blue-500 h-1.5 transition-all duration-300 w-0"></div>
-            </div>
-
-            <!-- Wizard Content -->
-            <form id="wizard-form" class="p-6 md:p-8">
-                
-                <!-- Step 0: Baseline & Lifestyle -->
-                <div class="wizard-step block" id="step-0">
-                    <h2 class="text-xl font-bold mb-2">Baseline & Lifestyle <span class="text-slate-400 font-normal text-sm">(1/5)</span></h2>
-                    <p class="text-slate-600 mb-6 text-sm">Let's establish your physical starting point and daily habits.</p>
-                    
-                    <div class="space-y-4">
-                        <div class="flex gap-4">
-                            <div class="w-1/3">
-                                <label class="block text-sm font-medium mb-1">Age</label>
-                                <input type="number" name="age" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                            </div>
-                            <div class="w-1/3">
-                                <label class="block text-sm font-medium mb-1">Height (cm)</label>
-                                <input type="number" name="height" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                            </div>
-                            <div class="w-1/3">
-                                <label class="block text-sm font-medium mb-1">Weight (kg)</label>
-                                <input type="number" name="weight" step="0.1" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Current Activity Level</label>
-                            <input type="text" name="activity" placeholder="e.g., Sedentary desk job, lift weights 2x a week" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Nutrition Habits</label>
-                            <textarea name="nutrition" rows="2" placeholder="e.g., Eat mostly whole foods, tracking macros..." class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Sleep Quality</label>
-                            <input type="text" name="sleep" placeholder="e.g., 6 hours a night, wake up groggy" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Step 1: Occupation & Stress -->
-                <div class="wizard-step hidden" id="step-1">
-                    <h2 class="text-xl font-bold mb-2">Occupation & Stress <span class="text-slate-400 font-normal text-sm">(2/5)</span></h2>
-                    <p class="text-slate-600 mb-6 text-sm">Daily posture and nervous system load dictate how well you recover.</p>
-                    
-                    <div class="space-y-4">
-                        <div class="flex gap-4">
-                            <div class="w-1/2">
-                                <label class="block text-sm font-medium mb-1">Occupation</label>
-                                <input type="text" name="occupation" placeholder="e.g., Desk worker, construction" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                            </div>
-                            <div class="w-1/2">
-                                <label class="block text-sm font-medium mb-1">General Stress Levels</label>
-                                <input type="text" name="stress" placeholder="e.g., High-stress job, relaxed" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Typical Daily Posture</label>
-                            <textarea name="posture" rows="2" placeholder="e.g., Sitting for 8 hours, standing on hard concrete..." class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Recovery & Hydration</label>
-                            <textarea name="recovery" rows="2" placeholder="e.g., Drink 2L water, meditate, drink alcohol in evenings..." class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Step 2: Limitations & Medical -->
-                <div class="wizard-step hidden" id="step-2">
-                    <h2 class="text-xl font-bold mb-2">Limitations & Medical <span class="text-slate-400 font-normal text-sm">(3/5)</span></h2>
-                    <p class="text-slate-600 mb-6 text-sm">Flag any biomechanical restrictions or health factors.</p>
-                    
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Current Physical Issues</label>
-                            <textarea name="currentIssues" rows="2" placeholder="e.g., Tight left shoulder, right leg fatigue..." class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Past Injuries or Surgeries</label>
-                            <input type="text" name="pastInjuries" placeholder="List any, or write 'None'" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Medications or Conditions</label>
-                            <input type="text" name="medications" placeholder="List any, or write 'None'" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Tracking Hardware</label>
-                            <input type="text" name="trackingTools" placeholder="e.g., Apple Watch, Oura ring, chest strap" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Step 3: Goals & Targets -->
-                <div class="wizard-step hidden" id="step-3">
-                    <h2 class="text-xl font-bold mb-2">Goals & Targets <span class="text-slate-400 font-normal text-sm">(4/5)</span></h2>
-                    <p class="text-slate-600 mb-6 text-sm">Where are we going, and why does it matter?</p>
-                    
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Physiological Targets</label>
-                            <input type="text" name="physioTargets" placeholder="e.g., Lower resting HR to 60 bpm, HRV to 60+" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                        </div>
-                        <div class="flex gap-4">
-                            <div class="w-1/2">
-                                <label class="block text-sm font-medium mb-1">6-Month Goal</label>
-                                <textarea name="sixMonth" rows="2" placeholder="e.g., 5 perfect pull-ups..." class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
-                            </div>
-                            <div class="w-1/2">
-                                <label class="block text-sm font-medium mb-1">12-Month Goal</label>
-                                <textarea name="twelveMonth" rows="2" placeholder="e.g., Deadlift 1.5x bodyweight..." class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Your "Why"</label>
-                            <input type="text" name="theWhy" placeholder="e.g., Want to feel less pain at work, keep up with kids" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Step 4: Logistics & Preferences -->
-                <div class="wizard-step hidden" id="step-4">
-                    <h2 class="text-xl font-bold mb-2">Logistics <span class="text-slate-400 font-normal text-sm">(5/5)</span></h2>
-                    <p class="text-slate-600 mb-6 text-sm">Let's build a program you can actually stick to.</p>
-                    
-                    <div class="space-y-4">
-                        <div class="flex gap-4">
-                            <div class="w-1/2">
-                                <label class="block text-sm font-medium mb-1">Availability</label>
-                                <input type="text" name="availability" placeholder="e.g., 3 days/week, 45 mins" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                            </div>
-                            <div class="w-1/2">
-                                <label class="block text-sm font-medium mb-1">Equipment Access</label>
-                                <input type="text" name="equipment" placeholder="e.g., Commercial gym, home dumbbells" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Exercise Likes & Dislikes</label>
-                            <textarea name="likesDislikes" rows="3" placeholder="e.g., Hate running, love lifting heavy, enjoy yoga..." class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Final Result Step -->
-                <div class="wizard-step hidden" id="step-5">
-                    <div class="text-center mb-6">
-                        <div class="bg-green-100 text-green-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">✓</div>
-                        <h2 class="text-2xl font-bold">Profile Compiled</h2>
-                        <p class="text-slate-600 mt-2">Data saved. Ready for programming.</p>
-                    </div>
-                    
-                    <div class="bg-slate-100 border border-slate-200 p-5 rounded-xl text-sm text-slate-700 h-64 overflow-y-auto custom-scrollbar">
-                        <div id="final-summary-text" class="space-y-3">
-                            <!-- JS fills this -->
-                        </div>
-                    </div>
-                </div>
-
-            </form>
-
-            <!-- Navigation Buttons -->
-            <div class="bg-slate-50 p-4 border-t border-slate-200 flex justify-between items-center rounded-b-2xl">
-                <button id="btn-prev" class="px-4 py-2.5 text-slate-600 font-medium hover:text-slate-900 transition-colors" onclick="prevStep()">← Back</button>
-                <div class="flex-grow"></div>
-                <button id="btn-next" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors" onclick="nextStep()">Next Step →</button>
-                <button id="btn-restart" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-6 py-2.5 rounded-lg font-medium shadow-sm hidden transition-colors border border-slate-300" onclick="restartWizard()">Reset Client Data</button>
-            </div>
         </div>
     </div>
+</div>
 
-    <!-- JavaScript Logic -->
-    <script>
-        let currentStep = 0;
-        const totalSteps = 5; // 0-4 are inputs, 5 is the summary step
-        const form = document.getElementById('wizard-form');
-        const inputs = form.querySelectorAll('input, select, textarea');
+<script>
+    function calculate1RM() {
+        // 1. Get raw values
+        const weightInput = document.getElementById('calc-weight').value;
+        const repsInput = document.getElementById('calc-reps').value;
+        const rirInput = document.getElementById('calc-rir').value;
+        const startInput = document.getElementById('calc-start').value;
+        const intervalInput = document.getElementById('calc-interval').value;
 
-        function loadData() {
-            const savedStep = localStorage.getItem('ptDeepIntakeStep');
-            if (savedStep) currentStep = parseInt(savedStep);
+        // 2. Parse numbers (handling empty fields safely)
+        const weight = parseFloat(weightInput);
+        const reps = parseFloat(repsInput);
+        const rir = rirInput === '' ? 0 : parseFloat(rirInput);
+        const startWeight = startInput === '' ? 0 : parseFloat(startInput);
+        const interval = intervalInput === '' ? 1 : parseFloat(intervalInput);
 
-            const data = JSON.parse(localStorage.getItem('ptDeepIntakeData')) || {};
-            inputs.forEach(input => {
-                if (data[input.name] !== undefined) {
-                    input.value = data[input.name];
-                }
-            });
+        const resultEl = document.getElementById('calc-result');
+
+        // 3. Validation
+        if (isNaN(weight) || isNaN(reps) || weight <= 0 || reps <= 0) {
+            resultEl.innerText = '—';
+            return;
+        }
+
+        // 4. Calculate Raw 1RM (Epley Formula modified for RIR)
+        const effectiveReps = reps + rir;
+        const raw1RM = weight * (1 + (effectiveReps / 30));
+
+        // 5. Apply Rounding Math
+        let final1RM = raw1RM;
+        
+        if (interval > 0) {
+            // Find the weight to be added to the "start weight"
+            const addedWeight = Math.max(0, raw1RM - startWeight);
             
-            if (currentStep === totalSteps) currentStep = totalSteps - 1;
-        }
-
-        function saveData() {
-            const data = {};
-            inputs.forEach(input => {
-                data[input.name] = input.value;
-            });
-            localStorage.setItem('ptDeepIntakeData', JSON.stringify(data));
-        }
-
-        inputs.forEach(input => input.addEventListener('input', saveData));
-
-        function updateUI() {
-            document.querySelectorAll('.wizard-step').forEach(step => {
-                step.classList.add('hidden');
-                step.classList.remove('block');
-            });
-
-            document.getElementById(`step-${currentStep}`).classList.remove('hidden');
-            document.getElementById(`step-${currentStep}`).classList.add('block');
-
-            const progressPercentage = (currentStep / totalSteps) * 100;
-            document.getElementById('progress-bar').style.width = `${progressPercentage}%`;
-
-            const btnPrev = document.getElementById('btn-prev');
-            const btnNext = document.getElementById('btn-next');
-            const btnRestart = document.getElementById('btn-restart');
-
-            if (currentStep === 0 || currentStep === totalSteps) {
-                btnPrev.style.visibility = 'hidden'; 
-            } else {
-                btnPrev.style.visibility = 'visible';
-            }
-
-            if (currentStep === totalSteps) {
-                btnNext.classList.add('hidden');
-                btnRestart.classList.remove('hidden');
-                generateSummaryText();
-            } else if (currentStep === totalSteps - 1) {
-                btnNext.innerText = "Finish & Save ✓";
-                btnNext.classList.remove('hidden');
-                btnRestart.classList.add('hidden');
-            } else {
-                btnNext.innerText = "Next Step →";
-                btnNext.classList.remove('hidden');
-                btnRestart.classList.add('hidden');
-            }
-
-            localStorage.setItem('ptDeepIntakeStep', currentStep);
-        }
-
-        function nextStep() {
-            if (currentStep < totalSteps) {
-                currentStep++;
-                updateUI();
-            }
-        }
-
-        function prevStep() {
-            if (currentStep > 0) {
-                currentStep--;
-                updateUI();
-            }
-        }
-
-        function restartWizard() {
-            if (confirm("Wipe the entire client profile? This cannot be undone.")) {
-                localStorage.removeItem('ptDeepIntakeData');
-                localStorage.removeItem('ptDeepIntakeStep');
-                form.reset();
-                currentStep = 0;
-                updateUI();
-            }
-        }
-
-        function generateSummaryText() {
-            const data = JSON.parse(localStorage.getItem('ptDeepIntakeData')) || {};
+            // Round the added weight to the nearest interval
+            const roundedAddedWeight = Math.round(addedWeight / interval) * interval;
             
-            const summaryHTML = `
-                <p><strong>Metrics:</strong> ${data.age || '--'} yrs | ${data.height || '--'} cm | ${data.weight || '--'} kg</p>
-                <p><strong>Issues/Injuries:</strong> ${data.currentIssues || 'None noted'} | ${data.pastInjuries || 'None'}</p>
-                <p><strong>Lifestyle:</strong> ${data.occupation || 'Unspecified'} | ${data.sleep || 'Unspecified sleep'}</p>
-                <hr class="border-slate-300">
-                <p><strong>The 'Why':</strong> ${data.theWhy || 'Not provided'}</p>
-                <p><strong>6-Month:</strong> ${data.sixMonth || 'Not set'}</p>
-                <p><strong>12-Month:</strong> ${data.twelveMonth || 'Not set'}</p>
-                <hr class="border-slate-300">
-                <p><strong>Logistics:</strong> ${data.availability || 'Unknown'} | ${data.equipment || 'Unknown'}</p>
-                <p><strong>Preferences:</strong> ${data.likesDislikes || 'None stated'}</p>
-            `;
-            
-            document.getElementById('final-summary-text').innerHTML = summaryHTML;
+            // Re-add the start weight to get the final rounded 1RM
+            final1RM = roundedAddedWeight + startWeight;
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadData();
-            updateUI();
-        });
-    </script>
-    <style>
-        /* Small styling touch for the summary scrollbar */
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; rounded: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-    </style>
+        // 6. Display Result (clean up trailing .00 decimals if they exist)
+        resultEl.innerText = final1RM.toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1');
+    }
+
+    // Initialize calculation on load just in case values are pre-filled
+    calculate1RM();
+</script>
 </body>
 </html>
