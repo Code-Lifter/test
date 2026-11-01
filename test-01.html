@@ -1,1 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Room Test</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex items-start justify-center p-4">
+<div class="w-full max-w-md">
+
+  <h1 class="text-xl font-bold mb-1">Room Test</h1>
+  <p class="text-sm text-slate-400 mb-5">One device hosts, the others join with the code.</p>
+
+  <!-- LOBBY -->
+  <div id="lobby" class="space-y-4">
+    <button id="hostBtn" class="w-full bg-emerald-600 hover:bg-emerald-500 rounded-lg py-3 font-semibold">
+      Host a room (laptop)
+    </button>
+
+    <div class="flex gap-2">
+      <input id="codeInput" maxlength="4" placeholder="CODE" autocapitalize="characters" autocomplete="off"
+             class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-3 text-center tracking-[0.3em] uppercase font-mono">
+      <button id="joinBtn" class="bg-sky-600 hover:bg-sky-500 rounded-lg px-5 font-semibold">Join</button>
+    </div>
+
+    <p id="lobbyMsg" class="text-sm text-rose-400 min-h-5"></p>
+  </div>
+
+  <!-- ROOM -->
+  <div id="room" class="hidden space-y-4">
+    <div class="bg-slate-800 rounded-lg p-4">
+      <div class="text-xs uppercase tracking-wider text-slate-400">Room code</div>
+      <div id="roomCode" class="text-4xl font-mono font-bold tracking-[0.3em]">----</div>
+      <div id="status" class="text-sm text-slate-400 mt-1">connecting…</div>
+    </div>
+
+    <!-- the shared "game state" -->
+    <div class="bg-slate-800 rounded-lg p-4 text-center">
+      <div class="text-xs uppercase tracking-wider text-slate-400 mb-1">Shared score</div>
+      <div id="count" class="text-6xl font-bold mb-3">0</div>
+      <div class="flex gap-2">
+        <button data-act="dec" class="act flex-1 bg-slate-700 hover:bg-slate-600 rounded-lg py-3 text-xl">−1</button>
+        <button data-act="inc" class="act flex-1 bg-emerald-600 hover:bg-emerald-500 rounded-lg py-3 text-xl">+1</button>
+      </div>
+      <button data-act="reset" class="act w-full mt-2 bg-slate-700 hover:bg-slate-600 rounded-lg py-2 text-sm">Reset</button>
+    </div>
+
+    <div class="bg-slate-800 rounded-lg p-4">
+      <div class="text-xs uppercase tracking-wider text-slate-400 mb-2">Log</div>
+      <div id="log" class="text-xs font-mono space-y-1 text-slate-300 max-h-40 overflow-y-auto"></div>
+    </div>
+
+    <button id="leaveBtn" class="w-full border border-slate-700 rounded-lg py-2 text-sm text-slate-400">Leave</button>
+  </div>
+</div>
+
+<script>
+// ---------------------------------------------------------------
+// Everything runs peer-to-peer over WebRTC via PeerJS's free
+// signalling server. No backend of your own needed.
+// The host holds the state; joiners send actions and get state back.
+// ---------------------------------------------------------------
+
+const PREFIX = "edroom-";           // change this so your codes don't clash with anyone else's
+const ALPHA  = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+let peer = null;
+let conns = [];                      // host: all joiners. joiner: just the host.
+let isHost = false;
+let state = { count: 0 };
+
+const $ = id => document.getElementById(id);
+
+function log(msg) {
+  const el = document.createElement("div");
+  el.textContent = new Date().toLocaleTimeString() + "  " + msg;
+  $("log").prepend(el);
+}
+
+function showRoom(code) {
+  $("lobby").classList.add("hidden");
+  $("room").classList.remove("hidden");
+  $("roomCode").textContent = code;
+}
+
+function render() {
+  $("count").textContent = state.count;
+}
+
+function setStatus(t) { $("status").textContent = t; }
+
+// ---------- HOST ----------
+$("hostBtn").onclick = () => {
+  const code = Array.from({length: 4}, () => ALPHA[Math.floor(Math.random() * ALPHA.length)]).join("");
+  isHost = true;
+  showRoom(code);
+  setStatus("waiting for players…");
+
+  peer = new Peer(PREFIX + code);
+
+  peer.on("open", () => log("room open, share the code"));
+
+  peer.on("connection", conn => {
+    conns.push(conn);
+    conn.on("open", () => {
+      setStatus(conns.length + " connected");
+      log("a device joined");
+      conn.send({ type: "state", state });          // bring them up to date
+    });
+    conn.on("data", data => {
+      if (data.type === "action") {
+        apply(data.action);
+        broadcast();
+      }
+    });
+    conn.on("close", () => {
+      conns = conns.filter(c => c !== conn);
+      setStatus(conns.length ? conns.length + " connected" : "waiting for players…");
+      log("a device left");
+    });
+  });
+
+  peer.on("error", e => {
+    if (e.type === "unavailable-id") $("status").textContent = "code already in use — leave and host again";
+    log("error: " + e.type);
+  });
+};
+
+function broadcast() {
+  conns.forEach(c => c.open && c.send({ type: "state", state }));
+}
+
+// ---------- JOIN ----------
+$("joinBtn").onclick = () => {
+  const code = $("codeInput").value.trim().toUpperCase();
+  if (code.length !== 4) { $("lobbyMsg").textContent = "Enter the 4-character code."; return; }
+
+  isHost = false;
+  showRoom(code);
+  setStatus("connecting…");
+
+  peer = new Peer();
+  peer.on("open", () => {
+    const conn = peer.connect(PREFIX + code, { reliable: true });
+    conns = [conn];
+
+    conn.on("open", () => { setStatus("connected"); log("connected to host"); });
+    conn.on("data", data => {
+      if (data.type === "state") { state = data.state; render(); }
+    });
+    conn.on("close", () => setStatus("host disconnected"));
+    conn.on("error", () => setStatus("couldn't reach that room"));
+
+    setTimeout(() => { if (!conn.open) setStatus("no room with that code (or host is offline)"); }, 8000);
+  });
+  peer.on("error", e => { setStatus("error: " + e.type); log("error: " + e.type); });
+};
+
+// ---------- ACTIONS ----------
+function apply(action) {
+  if (action === "inc")   state.count++;
+  if (action === "dec")   state.count--;
+  if (action === "reset") state.count = 0;
+  render();
+  log("action: " + action);
+}
+
+document.querySelectorAll(".act").forEach(btn => {
+  btn.onclick = () => {
+    const action = btn.dataset.act;
+    if (isHost) { apply(action); broadcast(); }                     // host is the source of truth
+    else { conns[0]?.open && conns[0].send({ type: "action", action }); }
+  };
+});
+
+$("leaveBtn").onclick = () => location.reload();
+render();
+</script>
+</body>
+</html>
 
