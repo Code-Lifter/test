@@ -115,6 +115,8 @@ td.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
 .daysel button[aria-pressed="true"]{background:var(--right);border-color:var(--right);color:var(--surface)}
 ul.rules{margin:0;padding-left:18px;display:grid;gap:6px}
 .saved{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.yt{font:600 12px var(--body);color:var(--accent);text-decoration:none;white-space:nowrap;border:1px solid var(--line);border-radius:4px;padding:2px 6px}
+.yt:hover{border-color:var(--accent)}
 @media (max-width:520px){.stats{grid-template-columns:repeat(3,1fr)}.stat .n{font-size:26px}.brand{font-size:26px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -263,10 +265,11 @@ function sessionsDone(){
 const $ = s => document.querySelector(s);
 const esc = s => String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 function sideChip(x){ return x.side ? `<span class="side ${x.side}" title="${x.side==="R"?"Right side gets the extra work":"Left side gets the extra work"}">${x.side==="R"?"R+":"L+"}</span>` : ""; }
-function exRow(x, group, checked){
+function ytLink(name){ return `<a class="yt" href="https://www.youtube.com/results?search_query=${encodeURIComponent(name+' exercise how to')}" target="_blank" rel="noopener">▶ Demo</a>`; }
+    function exRow(x, group, checked){
   return `<label class="ex"><input type="checkbox" data-g="${group}" data-id="${x.id}" ${checked?"checked":""} aria-label="${esc(x.name)}">
     <span class="exbody"><span class="exline"><span class="exname">${esc(x.name)}</span>${sideChip(x)}<span class="tag">${x.t}</span></span>
-    <span class="dose">${esc(x.dose)}</span><span class="cue">${esc(x.cue)}</span></span></label>`;
+    <span class="dose">${esc(x.dose)}</span><span class="cue">${esc(x.cue)}</span> ${ytLink(x.name)}</span></label>`;
 }
 function header(){
   const t=todayStr(), w=weekOf(t), p=phaseOf(t);
@@ -364,7 +367,7 @@ function renderCalendar(){
 
 function renderProgram(){
   const exTable = list => `<div class="tablewrap"><table><thead><tr><th>Exercise</th><th>Dose</th><th>Cue</th></tr></thead><tbody>${
-    list.map(x=>`<tr><td><b>${esc(x.name)}</b> ${sideChip(x)}</td><td class="num">${esc(x.dose)}</td><td class="muted">${esc(x.cue)}</td></tr>`).join("")}</tbody></table></div>`;
+    list.map(x=>`<tr><td><b>${esc(x.name)}</b> ${sideChip(x)} ${ytLink(x.name)}</td><td class="num">${esc(x.dose)}</td><td class="muted">${esc(x.cue)}</td></tr>`).join("")}</tbody></table></div>`;
   $("#view").innerHTML = `
     <section class="card">
       <h2>What this program targets</h2>
