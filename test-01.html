@@ -1,183 +1,481 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
+<title>Realign 12</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Room Test</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
-</head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex items-start justify-center p-4">
-<div class="w-full max-w-md">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a physio prescription sheet. A sticky header with the phase and day, tabs, then cards per block. R/L laterality chips mark which side gets the extra work. */
+:root{
+  --bg:#EDF0EF; --surface:#FFFFFF; --sunk:#E2E7E5; --ink:#15211E; --muted:#5B6A66; --line:#CCD5D2;
+  --accent:#0E6655; --accent-ink:#FFFFFF; --accent-soft:#D3E9E3;
+  --right:#2357A6; --right-soft:#DCE6F5; --left:#A4600F; --left-soft:#F5E7D3;
+  --good:#1D7A46; --warn:#B7791F; --bad:#B4372B; --bad-soft:#F7DEDA;
+  --display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F1614; --surface:#17211E; --sunk:#1E2A27; --ink:#E4ECE9; --muted:#97A7A2; --line:#2C3A36;
+  --accent:#4FC2A6; --accent-ink:#06231C; --accent-soft:#173B33;
+  --right:#7FA9EE; --right-soft:#1B2B45; --left:#E3A456; --left-soft:#3A2A14;
+  --good:#5CC98A; --warn:#E3B04F; --bad:#EE7B6E; --bad-soft:#3D1D19; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1614; --surface:#17211E; --sunk:#1E2A27; --ink:#E4ECE9; --muted:#97A7A2; --line:#2C3A36;
+  --accent:#4FC2A6; --accent-ink:#06231C; --accent-soft:#173B33;
+  --right:#7FA9EE; --right-soft:#1B2B45; --left:#E3A456; --left-soft:#3A2A14;
+  --good:#5CC98A; --warn:#E3B04F; --bad:#EE7B6E; --bad-soft:#3D1D19; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.hrow{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-block:14px 8px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-weight:700;font-size:30px;letter-spacing:.02em;line-height:1;text-transform:uppercase}
+.brand span{color:var(--accent)}
+.meta{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:right}
+.meta b{color:var(--ink);font-weight:500}
+nav{display:flex;gap:4px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none}
+nav button{font:600 13px/1 var(--body);letter-spacing:.04em;text-transform:uppercase;background:none;border:1px solid transparent;color:var(--muted);padding:9px 12px;border-radius:6px;cursor:pointer;white-space:nowrap}
+nav button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+nav button:hover:not([aria-selected="true"]){border-color:var(--line);color:var(--ink)}
+main{padding-block:20px 60px;display:grid;gap:18px}
+h2{font-family:var(--display);font-weight:600;font-size:24px;letter-spacing:.02em;text-transform:uppercase;margin:0;text-wrap:balance}
+h3{font-family:var(--display);font-weight:600;font-size:19px;letter-spacing:.03em;text-transform:uppercase;margin:0}
+p{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:12px;min-width:0}
+.cardhead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.count{font-family:var(--mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{height:6px;background:var(--sunk);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.daynav{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.daynav .date{font-family:var(--display);font-size:28px;font-weight:600;line-height:1.1;flex:1;min-width:0}
+.iconbtn,.btn{font:500 14px var(--body);background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px 12px;cursor:pointer}
+.iconbtn:hover,.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,label.ex:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:600 11px/1 var(--body);letter-spacing:.06em;text-transform:uppercase;padding:5px 8px;border-radius:4px;background:var(--sunk);color:var(--muted)}
+.chip.ph{background:var(--accent-soft);color:var(--accent)}
+.chip.sess{background:var(--right-soft);color:var(--right)}
+.list{display:grid;gap:0;border-top:1px solid var(--line)}
+label.ex{display:grid;grid-template-columns:28px 1fr;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line);cursor:pointer;align-items:start}
+label.ex input{appearance:none;width:24px;height:24px;border:2px solid var(--line);border-radius:6px;margin:1px 0 0;cursor:pointer;display:grid;place-items:center;background:var(--surface)}
+label.ex input:checked{background:var(--accent);border-color:var(--accent)}
+label.ex input:checked::after{content:"";width:6px;height:11px;border:solid var(--accent-ink);border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
+label.ex:has(input:checked) .exname{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line)}
+.exbody{display:grid;gap:3px;min-width:0}
+.exline{display:flex;gap:8px;flex-wrap:wrap;align-items:baseline}
+.exname{font-weight:600}
+.dose{font-family:var(--mono);font-size:13px;color:var(--ink);font-variant-numeric:tabular-nums}
+.cue{font-size:13.5px;color:var(--muted)}
+.side{font:600 10.5px/1 var(--mono);padding:3px 5px;border-radius:3px;letter-spacing:.04em}
+.side.R{background:var(--right-soft);color:var(--right)}
+.side.L{background:var(--left-soft);color:var(--left)}
+.tag{font:500 10.5px/1 var(--mono);color:var(--muted);border:1px solid var(--line);padding:2px 5px;border-radius:3px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{font:500 13px var(--body);padding:8px 12px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.seg button[aria-pressed="true"].none{background:var(--good);border-color:var(--good);color:var(--surface)}
+.seg button[aria-pressed="true"].mild{background:var(--warn);border-color:var(--warn);color:var(--surface)}
+.seg button[aria-pressed="true"].worse{background:var(--bad);border-color:var(--bad);color:var(--surface)}
+.alert{background:var(--bad-soft);color:var(--ink);border-left:4px solid var(--bad);padding:12px 14px;border-radius:6px;font-size:14px}
+.note{background:var(--accent-soft);border-radius:8px;padding:12px 14px;font-size:14px}
+textarea,input[type=date],input[type=number],select{font:400 14px var(--body);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%}
+textarea{min-height:64px;resize:vertical}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px}
+.stat .n{font-family:var(--display);font-size:32px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums}
+.stat .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
+.cal{overflow-x:auto}
+.calgrid{display:grid;grid-template-columns:54px repeat(7,minmax(34px,1fr));gap:4px;min-width:340px}
+.calgrid .h{font:600 11px var(--mono);color:var(--muted);text-align:center;padding:4px 0}
+.calgrid .wk{font:500 11px var(--mono);color:var(--muted);display:flex;align-items:center}
+.cell{aspect-ratio:1;max-width:100%;border-radius:6px;border:1px solid var(--line);background:var(--surface);font:500 11px var(--mono);color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;padding:0;position:relative}
+.cell.sessday::after{content:"";position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:50%;background:var(--right)}
+.cell.part{background:var(--accent-soft);color:var(--ink)}
+.cell.full{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.cell.today{outline:2px solid var(--ink);outline-offset:1px}
+.cell.flag{border-color:var(--bad);border-width:2px}
+.cell.future{opacity:.55}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:12px;height:12px;border-radius:3px;display:inline-block;border:1px solid var(--line)}
+.phase{display:grid;gap:12px}
+.phasehead{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.phasehead .wks{font-family:var(--mono);font-size:12px;color:var(--accent)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 11px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.tablewrap{overflow-x:auto}
+.formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.formgrid label,.field{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+.daysel{display:flex;gap:6px;flex-wrap:wrap}
+.daysel button{font:600 13px var(--mono);width:44px;padding:8px 0;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.daysel button[aria-pressed="true"]{background:var(--right);border-color:var(--right);color:var(--surface)}
+ul.rules{margin:0;padding-left:18px;display:grid;gap:6px}
+.saved{font-family:var(--mono);font-size:11px;color:var(--muted)}
+@media (max-width:520px){.stats{grid-template-columns:repeat(3,1fr)}.stat .n{font-size:26px}.brand{font-size:26px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
 
-  <h1 class="text-xl font-bold mb-1">Room Test</h1>
-  <p class="text-sm text-slate-400 mb-5">One device hosts, the others join with the code.</p>
-
-  <!-- LOBBY -->
-  <div id="lobby" class="space-y-4">
-    <button id="hostBtn" class="w-full bg-emerald-600 hover:bg-emerald-500 rounded-lg py-3 font-semibold">
-      Host a room (laptop)
-    </button>
-
-    <div class="flex gap-2">
-      <input id="codeInput" maxlength="4" placeholder="CODE" autocapitalize="characters" autocomplete="off"
-             class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-3 text-center tracking-[0.3em] uppercase font-mono">
-      <button id="joinBtn" class="bg-sky-600 hover:bg-sky-500 rounded-lg px-5 font-semibold">Join</button>
+<header>
+  <div class="wrap">
+    <div class="hrow">
+      <div class="brand">Realign <span>12</span></div>
+      <div class="meta" id="hdrMeta"></div>
+      <div style="display:flex;gap:6px"><button class="btn" id="exportBtn">Export JSON</button><button class="btn" id="importBtn">Import JSON</button><input type="file" id="importFile" accept="application/json,.json" hidden></div>
     </div>
-
-    <p id="lobbyMsg" class="text-sm text-rose-400 min-h-5"></p>
+    <nav role="tablist" id="tabs">
+      <button role="tab" data-v="today" aria-selected="true">Today</button>
+      <button role="tab" data-v="calendar" aria-selected="false">Calendar</button>
+      <button role="tab" data-v="program" aria-selected="false">Program</button>
+      <button role="tab" data-v="checkins" aria-selected="false">Check-ins</button>
+      <button role="tab" data-v="setup" aria-selected="false">Setup</button>
+    </nav>
   </div>
-
-  <!-- ROOM -->
-  <div id="room" class="hidden space-y-4">
-    <div class="bg-slate-800 rounded-lg p-4">
-      <div class="text-xs uppercase tracking-wider text-slate-400">Room code</div>
-      <div id="roomCode" class="text-4xl font-mono font-bold tracking-[0.3em]">----</div>
-      <div id="status" class="text-sm text-slate-400 mt-1">connecting…</div>
-    </div>
-
-    <!-- the shared "game state" -->
-    <div class="bg-slate-800 rounded-lg p-4 text-center">
-      <div class="text-xs uppercase tracking-wider text-slate-400 mb-1">Shared score</div>
-      <div id="count" class="text-6xl font-bold mb-3">0</div>
-      <div class="flex gap-2">
-        <button data-act="dec" class="act flex-1 bg-slate-700 hover:bg-slate-600 rounded-lg py-3 text-xl">−1</button>
-        <button data-act="inc" class="act flex-1 bg-emerald-600 hover:bg-emerald-500 rounded-lg py-3 text-xl">+1</button>
-      </div>
-      <button data-act="reset" class="act w-full mt-2 bg-slate-700 hover:bg-slate-600 rounded-lg py-2 text-sm">Reset</button>
-    </div>
-
-    <div class="bg-slate-800 rounded-lg p-4">
-      <div class="text-xs uppercase tracking-wider text-slate-400 mb-2">Log</div>
-      <div id="log" class="text-xs font-mono space-y-1 text-slate-300 max-h-40 overflow-y-auto"></div>
-    </div>
-
-    <button id="leaveBtn" class="w-full border border-slate-700 rounded-lg py-2 text-sm text-slate-400">Leave</button>
-  </div>
-</div>
+</header>
+<main class="wrap" id="view"></main>
 
 <script>
-// ---------------------------------------------------------------
-// Everything runs peer-to-peer over WebRTC via PeerJS's free
-// signalling server. No backend of your own needed.
-// The host holds the state; joiners send actions and get state back.
-// ---------------------------------------------------------------
+/* ---------- Program content ---------- */
+const DAILY = [
+  {id:"d1",name:"Chin tucks",dose:"10 × 5 s hold",t:"Neck",cue:"Glide your head straight back, as if making a double chin. Don't nod down."},
+  {id:"d2",name:"Doorway chest stretch",dose:"3 × 20 s",t:"Chest",cue:"Elbows at 90°, just below shoulder height. Gentle stretch, slow belly breaths."},
+  {id:"d3",name:"Side-neck stretch (scalenes)",dose:"2 × 15 s",side:"L",t:"Neck",cue:"Let your right ear drop toward your right shoulder while the left shoulder sinks down. No hand pulling."},
+  {id:"d4",name:"Shoulder blade set",dose:"10 × 5 s hold",t:"Scapula",cue:"Back and down, as if holding a pencil between the blades. No shrugging."},
+  {id:"d5",name:"90/90 breathing",dose:"5 slow breaths",t:"Core",cue:"On your back, feet on a wall at 90°. Ribs down, exhale fully until you feel your deep abs."},
+  {id:"d6",name:"Short foot",dose:"R 2 × 8 × 5 s",side:"R",t:"Foot",cue:"Lift the arch without curling your toes. Keep the big toe heavy on the floor."},
+  {id:"d7",name:"Band clamshell",dose:"R 3 × 15 · L 2 × 15",side:"R",t:"Glute",cue:"Right side first. Hips stacked, don't roll back. Pause 1 s at the top."},
+  {id:"d8",name:"Single-leg glute bridge",dose:"R 3 × 10 · L 2 × 10",side:"R",t:"Glute",cue:"2 s squeeze at the top. Feel the glute, not the hamstring or lower back."},
+  {id:"d9",name:"Half-kneeling hip flexor stretch",dose:"R 2 × 30 s",side:"R",t:"Hip",cue:"Right knee down. Tuck the pelvis under and squeeze the right glute. Don't arch your back."},
+  {id:"d10",name:"Tennis ball release",dose:"60 s per area",t:"Release",cue:"Side of the rib cage, lat, and around the left shoulder blade. Keep it off the neck and spine."}
+];
+const PHASES = [
+  {n:1,name:"Wake up & control",weeks:[1,4],where:"Home with bands, or gym",
+   goal:"Get the right glute and the left shoulder blade doing their jobs. Control comes before load.",
+   session:[
+    {id:"a1",name:"Banded lateral walk",dose:"3 × 10 steps each way",t:"Glute",cue:"Band above the knees, feet pointing straight. Push the knees out against the band."},
+    {id:"a2",name:"Bodyweight split squat",dose:"3 × 8 each",side:"R",t:"Knee",cue:"Right side first. Right knee tracks over the 2nd toe. Film it from the front."},
+    {id:"a3",name:"Dead bug",dose:"3 × 8 per side",t:"Core",cue:"Lower back stays down. Exhale as you reach."},
+    {id:"a4",name:"Side plank",dose:"L 3 × 20 s · R 2 × 20 s",side:"L",t:"Core",cue:"Left side down gets the extra set. Straight line from head to heels."},
+    {id:"a5",name:"Bird dog",dose:"2 × 8 per side, 3 s hold",t:"Core",cue:"No hip hike. Keep the pelvis level, as if balancing a cup on your back."},
+    {id:"a6",name:"Band serratus punch",dose:"2 × 12 each arm",side:"L",t:"Scapula",cue:"Reach long and let the shoulder blade wrap forward. Ribs stay down."},
+    {id:"a7",name:"Wall slide",dose:"2 × 10",t:"Scapula",cue:"Forearms on the wall, slide up. Stop below any pinch or tingling."},
+    {id:"a8",name:"Band external rotation",dose:"2 × 15 each arm",t:"Cuff",cue:"Elbow pinned to your side with a towel. Light band, slow."}
+   ]},
+  {n:2,name:"Build strength",weeks:[5,8],where:"Gym",
+   goal:"Make the new patterns strong. Unilateral work starts on the right, and the left matches its reps.",
+   session:[
+    {id:"b1",name:"Hip thrust",dose:"3 × 10, 2 s squeeze",t:"Glute",cue:"Chin tucked, ribs down. Lock out with the glutes, not the lower back."},
+    {id:"b2",name:"DB Bulgarian split squat",dose:"3 × 8 each",side:"R",t:"Knee",cue:"Right first. Left matches the right's reps, never more."},
+    {id:"b3",name:"Single-leg RDL",dose:"3 × 8 each",side:"R",t:"Glute",cue:"Hips stay square to the floor. Knee soft and over the toes."},
+    {id:"b4",name:"Eccentric step-down",dose:"R 3 × 8, 3 s down",side:"R",t:"Knee",cue:"Off a low box. Right knee stays over the 2nd toe the whole way."},
+    {id:"b5",name:"Cable Pallof press",dose:"3 × 10 per side, 2 s hold",t:"Core",cue:"Resist the pull. Hips and ribs face forward."},
+    {id:"b6",name:"Side plank",dose:"L 3 × 30 s · R 2 × 30 s",side:"L",t:"Core",cue:"Add a top-leg lift once 30 s is easy."},
+    {id:"b7",name:"Cable face pull",dose:"3 × 15",t:"Scapula",cue:"Pull to the eyes, thumbs back. Blades back and down first."},
+    {id:"b8",name:"Foam roller wall slide",dose:"3 × 10",side:"L",t:"Scapula",cue:"Push into the roller and slide up. Feel the blade rotate up and around."},
+    {id:"b9",name:"Prone Y raise",dose:"2 × 10",t:"Scapula",cue:"Thumbs up, very light or no weight. Lower traps do the work."}
+   ]},
+  {n:3,name:"Load & transfer",weeks:[9,12],where:"Gym",
+   goal:"Carry the control into heavy, Blood & Guts-style lifting.",
+   session:[
+    {id:"c1",name:"Hip thrust",dose:"4 × 8, heavier",t:"Glute",cue:"Same lockout as phase 2. Add load only if the glutes stay in charge."},
+    {id:"c2",name:"Goblet squat, mini band at knees",dose:"3 × 10",t:"Knee",cue:"Knees push out into the band all the way down and up."},
+    {id:"c3",name:"Single-leg leg press",dose:"3 × 10 each",side:"R",t:"Knee",cue:"Right first. Watch the right knee. It mustn't cave at the bottom."},
+    {id:"c4",name:"Reverse lunge",dose:"3 × 8 each",side:"R",t:"Knee",cue:"Step back, drop straight down. Front knee tracks over the 2nd toe."},
+    {id:"c5",name:"Suitcase carry",dose:"3 × 30 m each hand",t:"Core",cue:"Stand tall with no lean. This trains the QL to stabilise instead of hike."},
+    {id:"c6",name:"Half-kneeling landmine press",dose:"3 × 8 each",side:"L",t:"Scapula",cue:"Safer than overhead. Let the shoulder blade rotate up as you press."},
+    {id:"c7",name:"Half-kneeling Pallof press",dose:"3 × 8 per side",t:"Core",cue:"Glute of the down knee squeezed. No rotation."},
+    {id:"c8",name:"Single-arm cable row",dose:"L 3 × 12 · R 2 × 12",side:"L",t:"Scapula",cue:"Start each rep by setting the blade, then pull. No shrug."},
+    {id:"c9",name:"Push-up plus",dose:"2 × 10",t:"Scapula",cue:"At the top, push the floor away to spread the shoulder blades."}
+   ]}
+];
+const TESTS = [
+  {id:"slsR",label:"Single-leg squat, R (knee control 1–5)",type:"score"},
+  {id:"slsL",label:"Single-leg squat, L (knee control 1–5)",type:"score"},
+  {id:"spL",label:"Side plank, left side down (s)",type:"num"},
+  {id:"spR",label:"Side plank, right side down (s)",type:"num"},
+  {id:"brR",label:"Single-leg bridge, R (reps to form fail)",type:"num"},
+  {id:"brL",label:"Single-leg bridge, L (reps to form fail)",type:"num"}
+];
+const TEST_WEEKS = [1,4,8,12];
+const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
-const PREFIX = "edroom-";           // change this so your codes don't clash with anyone else's
-const ALPHA  = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+/* ---------- Date helpers (local dates only) ---------- */
+const pad = n => String(n).padStart(2,"0");
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse = s => { const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); };
+const addDays = (s,n) => { const d=parse(s); d.setDate(d.getDate()+n); return ymd(d); };
+const diffDays = (a,b) => Math.round((parse(b)-parse(a))/86400000);
+const todayStr = () => ymd(new Date());
+const fmtLong = s => parse(s).toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"});
+const fmtShort = s => parse(s).toLocaleDateString(undefined,{day:"numeric",month:"short"});
 
-let peer = null;
-let conns = [];                      // host: all joiners. joiner: just the host.
-let isHost = false;
-let state = { count: 0 };
+/* ---------- State ---------- */
+const LS_KEY = "realign12-v1";
+function freshState(){ return {startDate: todayStr(), sessionDays:[1,3,5], log:{}, checkins:{}, tests:{}}; }
+let state = freshState();
+try { const raw = localStorage.getItem(LS_KEY); if (raw) state = Object.assign(freshState(), JSON.parse(raw)); } catch(e){}
+let view = "today";
+let selDate = todayStr();
+let saveTimer = null, saveStatus = "Saved in this browser";
 
-const $ = id => document.getElementById(id);
+function save(){
+  try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e){}
+  clearTimeout(saveTimer);
+  saveStatus = "Saved in this browser"; updateSaved();
+}
+function updateSaved(){ const el=document.getElementById("savedNote"); if (el) el.textContent = saveStatus; }
 
-function log(msg) {
-  const el = document.createElement("div");
-  el.textContent = new Date().toLocaleTimeString() + "  " + msg;
-  $("log").prepend(el);
+/* ---------- Program logic ---------- */
+function dayIndex(s){ return diffDays(state.startDate, s); }          // 0-based
+function weekOf(s){ const i=dayIndex(s); return i<0 ? 0 : Math.floor(i/7)+1; }
+function phaseOf(s){ const w=weekOf(s); if (w<1||w>12) return null; return PHASES.find(p=>w>=p.weeks[0]&&w<=p.weeks[1]); }
+function isSessionDay(s){ return !!phaseOf(s) && state.sessionDays.includes(parse(s).getDay()); }
+function entry(s){ return state.log[s] || {}; }
+function ensure(s){ if(!state.log[s]) state.log[s]={d:{},s:{}}; const e=state.log[s]; e.d=e.d||{}; e.s=e.s||{}; return e; }
+function dailyDone(s){ const e=entry(s); return DAILY.filter(x=>e.d&&e.d[x.id]).length; }
+function sessDone(s){ const p=phaseOf(s); if(!p) return 0; const e=entry(s); return p.session.filter(x=>e.s&&e.s[x.id]).length; }
+function dayStatus(s){
+  const dd=dailyDone(s), p=phaseOf(s), sd=isSessionDay(s);
+  const total = DAILY.length + (sd ? p.session.length : 0);
+  const done = dd + (sd ? sessDone(s) : 0);
+  if (done===0) return "none";
+  return done>=total ? "full" : "part";
+}
+function streak(){
+  let s=todayStr(), n=0;
+  if (dailyDone(s)<DAILY.length) s=addDays(s,-1);
+  while (dayIndex(s)>=0 && dailyDone(s)===DAILY.length){ n++; s=addDays(s,-1); }
+  return n;
+}
+function adherence(){
+  const t=todayStr(); let days=0, full=0;
+  for (let s=state.startDate; diffDays(s,t)>=0 && dayIndex(s)<84; s=addDays(s,1)){ days++; if(dayStatus(s)==="full") full++; }
+  return days ? Math.round(full/days*100) : 0;
+}
+function sessionsDone(){
+  let n=0; for (const s in state.log){ const p=phaseOf(s); if(p && isSessionDay(s) && sessDone(s)===p.session.length) n++; } return n;
 }
 
-function showRoom(code) {
-  $("lobby").classList.add("hidden");
-  $("room").classList.remove("hidden");
-  $("roomCode").textContent = code;
+/* ---------- Rendering ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function sideChip(x){ return x.side ? `<span class="side ${x.side}" title="${x.side==="R"?"Right side gets the extra work":"Left side gets the extra work"}">${x.side==="R"?"R+":"L+"}</span>` : ""; }
+function exRow(x, group, checked){
+  return `<label class="ex"><input type="checkbox" data-g="${group}" data-id="${x.id}" ${checked?"checked":""} aria-label="${esc(x.name)}">
+    <span class="exbody"><span class="exline"><span class="exname">${esc(x.name)}</span>${sideChip(x)}<span class="tag">${x.t}</span></span>
+    <span class="dose">${esc(x.dose)}</span><span class="cue">${esc(x.cue)}</span></span></label>`;
+}
+function header(){
+  const t=todayStr(), w=weekOf(t), p=phaseOf(t);
+  let txt;
+  if (dayIndex(t)<0) txt = `Starts <b>${fmtShort(state.startDate)}</b>`;
+  else if (!p) txt = `<b>Program complete</b>`;
+  else txt = `Week <b>${w}</b> of 12 · Day <b>${dayIndex(t)+1}</b><br>Phase ${p.n}: ${p.name}`;
+  $("#hdrMeta").innerHTML = txt;
 }
 
-function render() {
-  $("count").textContent = state.count;
-}
+function renderToday(){
+  const s=selDate, p=phaseOf(s), w=weekOf(s), e=entry(s), sd=isSessionDay(s), t=todayStr();
+  const dd=dailyDone(s), sdn=sessDone(s);
+  const sym=e.sym||"";
+  let html = `<div class="daynav">
+      <button class="iconbtn" id="prevDay" aria-label="Previous day">‹</button>
+      <div class="date">${s===t?"Today · ":""}${fmtLong(s)}</div>
+      <button class="iconbtn" id="nextDay" aria-label="Next day">›</button>
+      ${s!==t?`<button class="btn" id="goToday">Back to today</button>`:""}
+    </div>
+    <div class="chips">${p?`<span class="chip ph">Week ${w} · Phase ${p.n}</span>`:`<span class="chip">${dayIndex(s)<0?"Before start date":"After the 12 weeks"}</span>`}
+    ${sd?`<span class="chip sess">Corrective session day</span>`:p?`<span class="chip">Daily routine only</span>`:""}</div>`;
 
-function setStatus(t) { $("status").textContent = t; }
+  if (s===t){
+    html += `<div class="stats">
+      <div class="stat"><div class="n">${streak()}</div><div class="l">Day streak</div></div>
+      <div class="stat"><div class="n">${adherence()}%</div><div class="l">Days complete</div></div>
+      <div class="stat"><div class="n">${sessionsDone()}</div><div class="l">Sessions done</div></div></div>`;
+  }
+  if (sym==="worse"){
+    html += `<div class="alert"><b>Back off today.</b> If tingling, numbness or sharp pain got worse, drop anything that brings it on, keep only the gentle daily moves that feel fine, and book in with a physio or GP. Increasing numbness in the ring and pinky fingers needs checking.</div>`;
+  }
+  html += `<section class="card">
+      <div class="cardhead"><h2>Daily routine</h2><span class="count">${dd}/${DAILY.length} · ~12 min</span></div>
+      <div class="bar"><i style="width:${dd/DAILY.length*100}%"></i></div>
+      <p class="small muted">Every day, home or gym. Use it as your warm-up on Blood & Guts days.</p>
+      <div class="list">${DAILY.map(x=>exRow(x,"d",e.d&&e.d[x.id])).join("")}</div>
+    </section>`;
+  if (sd){
+    html += `<section class="card">
+      <div class="cardhead"><h2>Session: ${esc(p.name)}</h2><span class="count">${sdn}/${p.session.length} · ~25 min</span></div>
+      <div class="bar"><i style="width:${sdn/p.session.length*100}%"></i></div>
+      <p class="small muted">${esc(p.where)}. ${esc(p.goal)}</p>
+      <div class="list">${p.session.map(x=>exRow(x,"s",e.s&&e.s[x.id])).join("")}</div>
+    </section>`;
+  }
+  html += `<section class="card">
+      <h3>How did it feel?</h3>
+      <div class="seg" id="symSeg">
+        <button class="none" data-sym="none" aria-pressed="${sym==="none"}">No symptoms</button>
+        <button class="mild" data-sym="mild" aria-pressed="${sym==="mild"}">Mild tightness</button>
+        <button class="worse" data-sym="worse" aria-pressed="${sym==="worse"}">Tingling, numbness or pain worse</button>
+      </div>
+      <div class="field"><span>Notes for this day</span><textarea id="dayNote" placeholder="e.g. Right knee caved on the last split squat set">${esc(e.note||"")}</textarea></div>
+      <span class="saved" id="savedNote">${saveStatus}</span>
+    </section>`;
+  $("#view").innerHTML = html;
 
-// ---------- HOST ----------
-$("hostBtn").onclick = () => {
-  const code = Array.from({length: 4}, () => ALPHA[Math.floor(Math.random() * ALPHA.length)]).join("");
-  isHost = true;
-  showRoom(code);
-  setStatus("waiting for players…");
-
-  peer = new Peer(PREFIX + code);
-
-  peer.on("open", () => log("room open, share the code"));
-
-  peer.on("connection", conn => {
-    conns.push(conn);
-    conn.on("open", () => {
-      setStatus(conns.length + " connected");
-      log("a device joined");
-      conn.send({ type: "state", state });          // bring them up to date
-    });
-    conn.on("data", data => {
-      if (data.type === "action") {
-        apply(data.action);
-        broadcast();
-      }
-    });
-    conn.on("close", () => {
-      conns = conns.filter(c => c !== conn);
-      setStatus(conns.length ? conns.length + " connected" : "waiting for players…");
-      log("a device left");
-    });
+  $("#prevDay").onclick=()=>{selDate=addDays(selDate,-1);render();};
+  $("#nextDay").onclick=()=>{selDate=addDays(selDate,1);render();};
+  const gt=$("#goToday"); if(gt) gt.onclick=()=>{selDate=todayStr();render();};
+  document.querySelectorAll('label.ex input').forEach(cb=>cb.onchange=()=>{
+    const en=ensure(s); en[cb.dataset.g][cb.dataset.id]=cb.checked; save();
+    const y=window.scrollY; render(); window.scrollTo(0,y);
   });
-
-  peer.on("error", e => {
-    if (e.type === "unavailable-id") $("status").textContent = "code already in use — leave and host again";
-    log("error: " + e.type);
+  document.querySelectorAll('#symSeg button').forEach(b=>b.onclick=()=>{
+    const en=ensure(s); en.sym = en.sym===b.dataset.sym ? "" : b.dataset.sym; save();
+    const y=window.scrollY; render(); window.scrollTo(0,y);
   });
-};
-
-function broadcast() {
-  conns.forEach(c => c.open && c.send({ type: "state", state }));
+  $("#dayNote").oninput=ev=>{ ensure(s).note=ev.target.value; save(); };
 }
 
-// ---------- JOIN ----------
-$("joinBtn").onclick = () => {
-  const code = $("codeInput").value.trim().toUpperCase();
-  if (code.length !== 4) { $("lobbyMsg").textContent = "Enter the 4-character code."; return; }
-
-  isHost = false;
-  showRoom(code);
-  setStatus("connecting…");
-
-  peer = new Peer();
-  peer.on("open", () => {
-    const conn = peer.connect(PREFIX + code, { reliable: true });
-    conns = [conn];
-
-    conn.on("open", () => { setStatus("connected"); log("connected to host"); });
-    conn.on("data", data => {
-      if (data.type === "state") { state = data.state; render(); }
-    });
-    conn.on("close", () => setStatus("host disconnected"));
-    conn.on("error", () => setStatus("couldn't reach that room"));
-
-    setTimeout(() => { if (!conn.open) setStatus("no room with that code (or host is offline)"); }, 8000);
-  });
-  peer.on("error", e => { setStatus("error: " + e.type); log("error: " + e.type); });
-};
-
-// ---------- ACTIONS ----------
-function apply(action) {
-  if (action === "inc")   state.count++;
-  if (action === "dec")   state.count--;
-  if (action === "reset") state.count = 0;
-  render();
-  log("action: " + action);
+function renderCalendar(){
+  const t=todayStr();
+  const firstDow=parse(state.startDate).getDay();
+  const heads = Array.from({length:7},(_,i)=>DOW[(firstDow+i)%7]);
+  let g = `<div class="h"></div>${heads.map(h=>`<div class="h">${h}</div>`).join("")}`;
+  for (let w=0; w<12; w++){
+    const ph = PHASES.find(p=>w+1>=p.weeks[0]&&w+1<=p.weeks[1]);
+    g += `<div class="wk">W${w+1}${(w+1)===ph.weeks[0]?` · P${ph.n}`:""}</div>`;
+    for (let d=0; d<7; d++){
+      const s=addDays(state.startDate,w*7+d), st=dayStatus(s), e=entry(s);
+      const cls=["cell", st==="full"?"full":st==="part"?"part":"", isSessionDay(s)?"sessday":"", s===t?"today":"", e.sym==="worse"?"flag":"", diffDays(t,s)>0?"future":""].join(" ");
+      g += `<button class="${cls}" data-date="${s}" aria-label="${fmtLong(s)}, ${st==="full"?"complete":st==="part"?"partly done":"not done"}">${parse(s).getDate()}</button>`;
+    }
+  }
+  $("#view").innerHTML = `<section class="card">
+      <div class="cardhead"><h2>12-week calendar</h2><span class="count">${fmtShort(state.startDate)} – ${fmtShort(addDays(state.startDate,83))}</span></div>
+      <div class="legend"><span><i style="background:var(--accent)"></i>Complete</span><span><i style="background:var(--accent-soft)"></i>Partly done</span><span><i style="background:var(--surface);border-color:var(--bad);border-width:2px"></i>Symptoms worse</span><span><i style="background:var(--right);border-radius:50%;width:7px;height:7px"></i>Session day</span></div>
+      <div class="cal"><div class="calgrid">${g}</div></div>
+      <p class="small muted">Tap a day to open it and tick off what you did. You can fill in missed days afterwards.</p>
+    </section>`;
+  document.querySelectorAll(".cell").forEach(c=>c.onclick=()=>{selDate=c.dataset.date;setView("today");});
 }
 
-document.querySelectorAll(".act").forEach(btn => {
-  btn.onclick = () => {
-    const action = btn.dataset.act;
-    if (isHost) { apply(action); broadcast(); }                     // host is the source of truth
-    else { conns[0]?.open && conns[0].send({ type: "action", action }); }
-  };
-});
+function renderProgram(){
+  const exTable = list => `<div class="tablewrap"><table><thead><tr><th>Exercise</th><th>Dose</th><th>Cue</th></tr></thead><tbody>${
+    list.map(x=>`<tr><td><b>${esc(x.name)}</b> ${sideChip(x)}</td><td class="num">${esc(x.dose)}</td><td class="muted">${esc(x.cue)}</td></tr>`).join("")}</tbody></table></div>`;
+  $("#view").innerHTML = `
+    <section class="card">
+      <h2>What this program targets</h2>
+      <p>Based on your notes: an underactive right glute letting the right knee cave inward and the right foot turn out, the right hip flexors and QL doing too much, weak left oblique and anti-rotation control, and a left shoulder blade that doesn't rotate up well, with tight levator, lats and teres and some nerve-type symptoms.</p>
+      <p class="small muted"><span class="side R">R+</span> or <span class="side L">L+</span> means that side gets the extra set or goes first.</p>
+    </section>
+    <section class="card">
+      <div class="cardhead"><h2>Every day</h2><span class="count">~12 min · bands and a tennis ball</span></div>
+      ${exTable(DAILY)}
+    </section>
+    ${PHASES.map(p=>`<section class="card phase">
+      <div class="phasehead"><h2>Phase ${p.n}: ${esc(p.name)}</h2><span class="wks">WEEKS ${p.weeks[0]}–${p.weeks[1]} · ${esc(p.where.toUpperCase())}</span></div>
+      <p>${esc(p.goal)}</p>
+      ${exTable(p.session)}
+    </section>`).join("")}
+    <section class="card">
+      <h2>Fitting it around Blood & Guts</h2>
+      <ul class="rules">
+        <li>Keep training Blood & Guts. Use the daily routine as your warm-up before every session.</li>
+        <li>From week 5, don't do the corrective strength session right before leg day. Put it after an upper-body day or on a rest day so the glutes aren't fried before heavy legs.</li>
+        <li>Before each heavy leg exercise, do 2–3 light warm-up sets, right leg first on unilateral moves.</li>
+        <li>On squats and leg press, if the right knee caves at the bottom, shorten the range. Weeks 1–4: no forced reps or heavy negatives on leg movements.</li>
+        <li>On rows and pulldowns, set the left shoulder blade back and down before every rep.</li>
+        <li>Drop upright rows. Stop overhead pressing if you get tingling and swap to the landmine press.</li>
+      </ul>
+    </section>
+    <section class="card">
+      <h2>Avoid, and stop signs</h2>
+      <ul class="rules">
+        <li>Don't pull your chin to your chest with your hands.</li>
+        <li>Don't tilt your head back while turning it toward the sore side (Spurling's position).</li>
+        <li>No aggressive cross-body arm pulls or forced sleeper stretches.</li>
+        <li><b>Stop</b> anything that brings on sharp pain, burning, electric feelings or more numbness down the arm.</li>
+      </ul>
+      <div class="alert">Book a physio assessment in week 1 if you can. The finger numbness and thoracic outlet signs are worth a proper look, and they can confirm or adjust this plan. Ask for a gait and single-leg squat assessment.</div>
+    </section>`;
+}
 
-$("leaveBtn").onclick = () => location.reload();
+function renderCheckins(){
+  const t=todayStr(), curW=Math.max(1,Math.min(12,weekOf(t)));
+  let rows="";
+  for (let w=1; w<=12; w++){
+    const c=state.checkins[w]||{}, start=addDays(state.startDate,(w-1)*7);
+    let worse=0, full=0;
+    for (let d=0; d<7; d++){ const s=addDays(start,d); if(entry(s).sym==="worse") worse++; if(dayStatus(s)==="full") full++; }
+    rows += `<tr><td class="num">W${w}</td><td class="num">${fmtShort(start)}</td><td class="num">${full}/7</td><td class="num">${worse||"–"}</td><td class="num">${c.knee||"–"}</td><td class="muted">${esc(c.note||"")}</td></tr>`;
+  }
+  const c=state.checkins[curW]||{};
+  const testsHead = `<tr><th>Test</th>${TEST_WEEKS.map(w=>`<th>Wk ${w}</th>`).join("")}</tr>`;
+  const testsBody = TESTS.map(tt=>`<tr><td>${esc(tt.label)}</td>${TEST_WEEKS.map(w=>{
+    const v=(state.tests[w]||{})[tt.id]??"";
+    return `<td><input type="number" inputmode="decimal" id="t-${w}-${tt.id}" data-w="${w}" data-t="${tt.id}" value="${esc(v)}" ${tt.type==="score"?'min="1" max="5"':'min="0"'} style="width:70px"></td>`;}).join("")}</tr>`).join("");
+  $("#view").innerHTML = `
+    <section class="card">
+      <div class="cardhead"><h2>Week ${curW} check-in</h2><span class="count">Film from the front</span></div>
+      <p class="small muted">Prop your phone at knee height and film 5 bodyweight split squats on each leg. Score the right knee: 1 = caves in a lot, 5 = stays over the 2nd toe every rep.</p>
+      <div class="formgrid">
+        <label for="ckKnee">Right knee tracking (1–5)
+          <select id="ckKnee"><option value="">–</option>${[1,2,3,4,5].map(n=>`<option ${String(c.knee)===String(n)?"selected":""}>${n}</option>`).join("")}</select></label>
+      </div>
+      <div class="field"><span>What changed this week?</span><textarea id="ckNote" placeholder="e.g. Left blade felt less tight on rows">${esc(c.note||"")}</textarea></div>
+      <span class="saved" id="savedNote">${saveStatus}</span>
+    </section>
+    <section class="card">
+      <h2>Retests</h2>
+      <p class="small muted">Do these in weeks 1, 4, 8 and 12. The gap between left and right should shrink.</p>
+      <div class="tablewrap"><table><thead>${testsHead}</thead><tbody>${testsBody}</tbody></table></div>
+    </section>
+    <section class="card">
+      <h2>Weekly log</h2>
+      <div class="tablewrap"><table><thead><tr><th>Week</th><th>Starts</th><th>Full days</th><th>Flare days</th><th>Knee</th><th>Notes</th></tr></thead><tbody>${rows}</tbody></table></div>
+    </section>`;
+  const ck=()=>state.checkins[curW]||(state.checkins[curW]={});
+  $("#ckKnee").onchange=ev=>{ck().knee=ev.target.value;save();};
+  $("#ckNote").oninput=ev=>{ck().note=ev.target.value;save();};
+  document.querySelectorAll('input[data-t]').forEach(inp=>inp.oninput=()=>{
+    const w=inp.dataset.w; state.tests[w]=state.tests[w]||{}; state.tests[w][inp.dataset.t]=inp.value; save();
+  });
+}
+
+function renderSetup(){
+  $("#view").innerHTML = `
+    <section class="card">
+      <h2>Program setup</h2>
+      <div class="field"><label for="startDate">Start date (day 1)</label><input type="date" id="startDate" value="${state.startDate}"></div>
+      <p class="small muted">Ends ${fmtLong(addDays(state.startDate,83))}.</p>
+      <div class="field"><span>Corrective session days (3 recommended)</span>
+        <div class="daysel" id="daySel">${[1,2,3,4,5,6,0].map(d=>`<button data-d="${d}" aria-pressed="${state.sessionDays.includes(d)}">${DOW[d]}</button>`).join("")}</div></div>
+      <p class="small muted">Pick days that aren't right before your Blood & Guts leg day.</p>
+      <span class="saved" id="savedNote">${saveStatus}</span>
+    </section>
+    <section class="card">
+      <h3>Start over</h3>
+      <p class="small muted">Clears every tick, note and test result.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="resetBtn">Reset all progress</button><button class="btn" id="resetYes" hidden style="border-color:var(--bad);color:var(--bad)">Yes, clear everything</button></div>
+    </section>`;
+  $("#startDate").onchange=ev=>{ if(ev.target.value){ state.startDate=ev.target.value; save(); render(); } };
+  document.querySelectorAll("#daySel button").forEach(b=>b.onclick=()=>{
+    const d=Number(b.dataset.d); state.sessionDays = state.sessionDays.includes(d) ? state.sessionDays.filter(x=>x!==d) : [...state.sessionDays,d]; save(); render();
+  });
+  $("#resetBtn").onclick=()=>{$("#resetYes").hidden=false;};
+  $("#resetYes").onclick=()=>{ const sd=state.startDate; state=freshState(); state.startDate=sd; save(); render(); };
+}
+
+function render(){
+  header();
+  document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-selected", b.dataset.v===view));
+  ({today:renderToday,calendar:renderCalendar,program:renderProgram,checkins:renderCheckins,setup:renderSetup})[view]();
+}
+function setView(v){ view=v; render(); window.scrollTo(0,0); }
+document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>{ if(b.dataset.v==="today" && view!=="today") selDate=todayStr(); setView(b.dataset.v); });
 render();
-</script>
-</body>
-</html>
 
+</script>
